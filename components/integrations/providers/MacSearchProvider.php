@@ -165,6 +165,14 @@ class MacSearchProvider extends IntegrationProvider
 	 */
 	protected array $stackCache = [];
 
+	/**
+	 * @var array приметы коммутаторов, опрошенных в этом же опросе, - по их
+	 * визиткам ({@see rememberScanned()}): 'mac' => [hex base MAC => id],
+	 * 'name' => [sysName в нижнем регистре => id|0], 0 - имя у нескольких;
+	 * 'tech' => [id => Techs] - память загруженных карточек
+	 */
+	protected array $scannedIdentity = ['mac' => [], 'name' => [], 'tech' => []];
+
 	public function getTitle(): string
 	{
 		return $this->config['title'] ?? 'Порт коммутатора';
@@ -797,6 +805,10 @@ class MacSearchProvider extends IntegrationProvider
 				if (is_object($device)) break 2;
 			}
 		}
+		//сосед - один из опрошенных: он сам только что сказал, как его зовут
+		//и какой у него базовый MAC. Это факт опроса, а не запись карточки, и
+		//ставится раньше имён из инвентаризации - hostname там часто не записан
+		if (!is_object($device)) $device = $this->deviceByScan($macs, $name);
 		if (!is_object($device) && strlen($name)) $device = static::deviceByName($name);
 		if (!is_object($device) && strlen($name) && static::firstIp($name) === $name) {
 			$device = static::deviceByIp($name);
@@ -990,6 +1002,65 @@ class MacSearchProvider extends IntegrationProvider
 
 		$tech = Techs::find()->where($condition)->limit(1)->one();
 		return is_object($tech) ? $tech : null;
+	}
+
+	/**
+	 * Запомнить визитки коммутаторов этого опроса: по ним опознаются соседи.
+	 *
+	 * LLDP-сосед называет себя sysName и chassis-id (обычно base MAC моста), а
+	 * опрошенный коммутатор в том же ответе сообщает о себе ровно это. Без
+	 * такого сопоставления карта видит «неопознанного p-switch» рядом с
+	 * опрошенным ЧЕЛ-КОМ-0001, у которого sysName p-switch, - и связь не
+	 * строится, пока человек не перепишет имя в карточку руками.
+	 *
+	 * @param array $identity ключ identity ответа сервиса: [['target'=>id,
+	 *   'sysname'=>..., 'base_mac'=>...], ...]
+	 */
+	public function rememberScanned(array $identity): void
+	{
+		foreach ($identity as $card) {
+			$id = (int)($card['target'] ?? 0);
+			if (!$id) continue;
+			$mac = static::hexMac($card['base_mac'] ?? '');
+			if ($mac !== '') $this->scannedIdentity['mac'][$mac] = $id;
+			foreach (static::nameKeys((string)($card['sysname'] ?? '')) as $key) {
+				//одинаковое имя у двух опрошенных (заводское «switch») - не примета
+				$known = $this->scannedIdentity['name'][$key] ?? null;
+				$this->scannedIdentity['name'][$key] = is_null($known) || $known === $id ? $id : 0;
+			}
+		}
+	}
+
+	/** Имя как примета: целиком и без домена (LLDP печатает то так, то так), в нижнем регистре */
+	protected static function nameKeys(string $name): array
+	{
+		$name = mb_strtolower(trim($name));
+		if ($name === '') return [];
+		return array_values(array_unique([$name, explode('.', $name)[0]]));
+	}
+
+	/**
+	 * Опрошенный коммутатор по приметам соседа: точный MAC → base MAC визитки,
+	 * имя → sysName визитки (только однозначное).
+	 * @param string[] $macs hex-адреса соседа (chassis-id и из текста)
+	 */
+	protected function deviceByScan(array $macs, string $name): ?Techs
+	{
+		$id = 0;
+		foreach ($macs as $mac) {
+			$id = $this->scannedIdentity['mac'][$mac] ?? 0;
+			if ($id) break;
+		}
+		if (!$id) {
+			foreach (static::nameKeys($name) as $key) {
+				$id = $this->scannedIdentity['name'][$key] ?? 0;
+				if ($id) break;
+			}
+		}
+		if (!$id) return null;
+		//опознание идёт по каждой записи LLDP, дважды на запись - без памяти
+		//это сотни одинаковых запросов на площадку
+		return $this->scannedIdentity['tech'][$id] ??= Techs::findOne($id);
 	}
 
 	/** Устройство по имени соседа: инвентарный номер либо hostname */

@@ -4,6 +4,7 @@
  * сверки с сетью (перерисовывается целиком со слоем находок).
  */
 
+use app\components\NetworkMap;
 use app\components\widgets\page\ModelWidget;
 use app\models\Ports;
 use yii\helpers\Html;
@@ -125,7 +126,12 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 		<span style="color:#198754"><b>зелёный пунктир</b></span> — найдено сверкой, не записано;
 		<span style="color:#0d6efd"><b>синий пунктир «MAC»</b></span> — вероятный линк по таблицам MAC
 		(LLDP молчит, записывается только руками);
-		<b>серый пунктир и «?»</b> — неопознанный сосед<?php } ?>;
+		<b>серый пунктир и «?»</b> — неопознанный сосед;
+		заливка узла — итог опроса:
+		<span class="px-1" style="background:<?= NetworkMap::STATUS_FILL['ok'] ?>">сообщил соседей</span>,
+		<span class="px-1" style="background:<?= NetworkMap::STATUS_FILL['silent'] ?>">LLDP молчит</span>,
+		<span class="px-1" style="background:<?= NetworkMap::STATUS_FILL['failed'] ?>">не ответил</span>,
+		<span class="px-1" style="background:<?= NetworkMap::STATUS_FILL['none'] ?>">не опрашивался</span><?php } ?>;
 	<span class="text-danger">красная рамка</span> — связь закреплена за неработающим
 	(статус без флага «в работе»): либо снять связь, либо поправить статус
 </div>
@@ -144,7 +150,9 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 			[$peerHtml, $fields] = $peerPick($found['peer'], 'peer', $index);
 			$data = ['tech' => $found['a']->id, 'port' => $found['port'], 'do' => 'attach',
 				'device' => $found['b']->id] + $fields;
-			$unambiguous = !count($found['peer']['candidates']);
+			//находка с порта, за которым несколько соседей, - не кабель порт в
+			//порт: только по отдельной кнопке, после проверки на месте
+			$unambiguous = !count($found['peer']['candidates']) && empty($found['shared']);
 			$conflicts = array_filter([$found['conflict'], $found['conflict_remote'] ?? null]);
 			?>
 			<tr>
@@ -160,6 +168,12 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 				</td>
 				<td class="text-secondary small"><?= Html::encode($found['protocol']) ?></td>
 				<td>
+					<?php if (!empty($found['shared'])) { ?>
+						<span class="text-warning small d-block" qtip_ttip="<?= Html::encode(
+							'За этим портом видно несколько соседей сразу - между ними неучтённое звено '
+							.'(неуправляемый коммутатор). Записывайте, только если знаете, что кабель прямой') ?>">
+							через неучтённое звено?</span>
+					<?php } ?>
 					<?php foreach ($conflicts as $conflict) { ?>
 						<span class="text-warning small d-block" qtip_ttip="<?= Html::encode(
 							'На одном из портов уже записано другое соединение — запись заменит его') ?>">
@@ -258,10 +272,10 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 	<h4>Как соединены — по таблицам MAC</h4>
 	<div class="text-secondary small mb-1">
 		направление, а не звено: за портом видны адреса другого коммутатора, но между ними
-		может стоять неуправляемая коробка. Взаимно-однозначные пары (порт А видит только Б,
-		порт Б — только А) — почти наверняка прямой линк: они синим пунктиром на схеме, и
-		только у них есть кнопка записи. Остальные направления — подсказка для ручной
-		записи в форме порта, с явным указанием обоих портов
+		может стоять неуправляемая коробка. Пары, прошедшие проверку прямоты (А и Б видят
+		друг друга, и ни один третий коммутатор не виден с обеих сторон), — вероятный прямой
+		линк: они синим пунктиром на схеме, и только у них есть кнопка записи. Остальные
+		направления — подсказка для ручной записи в форме порта, с явным указанием обоих портов
 	</div>
 	<?php if (count($overlay['fdbfound'] ?? [])) { ?>
 		<table class="table table-sm table-striped w-auto">
@@ -277,7 +291,7 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 					<td><?= $device($found['a']) ?></td>
 					<td><?= Ports::$port_prefix.Html::encode($found['aport']) ?></td>
 					<td><i class="fas fa-exchange-alt text-primary"
-						qtip_ttip="Взаимно-однозначно по таблицам MAC обеих сторон"></i></td>
+						qtip_ttip="По таблицам MAC обеих сторон: видят друг друга, третьих коммутаторов между ними не видно"></i></td>
 					<td><?= Ports::$port_prefix.Html::encode($found['bport']) ?></td>
 					<td><?= $device($found['b']) ?></td>
 					<td><?= Html::button('<i class="fas fa-link text-success"></i>', [
@@ -413,20 +427,113 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 	</table>
 <?php } ?>
 
-<?php if (is_array($overlay) && count($overlay['failed'])) { ?>
-	<h4>Не ответили</h4>
-	<table class="table table-sm w-auto text-secondary">
-		<tbody>
-		<?php foreach ($overlay['failed'] as $failure) { ?>
-			<tr>
-				<td><?= isset($switches[$failure['target'] ?? 0]) ? $device($switches[$failure['target']])
-					: Html::encode($failure['host'] ?? '') ?></td>
-				<td<?= empty($failure['detail']) ? '' : ' qtip_ttip="'.Html::encode($failure['detail']).'"' ?>><?=
-					Html::encode($failure['error'] ?? 'причина не указана') ?></td>
-			</tr>
+<?php
+/* «что не удалось»: всё, что мешает карте сойтись в одно целое, - одним
+   блоком между найденным и подробной диагностикой */
+if (is_array($overlay)) {
+	$sweepReport = $overlay['sweep'] ?? null;
+	$sweepProblems = [];
+	if (is_array($sweepReport)) {
+		if (!empty($sweepReport['skipped'])) $sweepProblems[] = $sweepReport['skipped'];
+		foreach ($sweepReport['rejected'] ?? [] as $rejected) {
+			$sweepProblems[] = trim(($rejected['network'] ?? '').' — '.($rejected['error'] ?? ''), ' —');
+		}
+		if (empty($sweepReport['skipped']) && (int)($sweepReport['hosts'] ?? 0) > 0
+			&& !(int)($sweepReport['alive'] ?? 0)) {
+			$sweepProblems[] = 'не откликнулся ни один из '.(int)$sweepReport['hosts']
+				.' адресов — ICMP режется по дороге или ping на хосте сервиса не работает';
+		}
+	}
+	$parts = $overlay['parts'] ?? [];
+	$hasProblems = count($overlay['failed']) || count($overlay['silent'] ?? []) || count($sweepProblems)
+		|| count($overlay['shared'] ?? []) || count($parts);
+}
+?>
+<?php if (is_array($overlay) && $hasProblems) { ?>
+	<div class="alert alert-warning py-2 mb-3">
+		<h4>Проблемы</h4>
+
+		<?php if (count($parts)) {
+			$lonely = count($parts) === count($map->nodes); ?>
+			<h6><?= $lonely ? 'Ни один коммутатор не связан с другими'
+				: 'Не связаны с остальной сетью' ?></h6>
+			<div class="small mb-1">
+				все коммутаторы площадки, до которых дотянулся опрос, находятся в одной сети,
+				значит на карте они обязаны сойтись в одно целое. Отдельно висящий узел —
+				это незаписанная или ненайденная связь; ниже — что о нём известно
+			</div>
+			<table class="table table-sm w-auto mb-2">
+				<tbody>
+				<?php foreach ($parts as $part) { foreach ($part['nodes'] as $index => $nodeId) { ?>
+					<tr>
+						<?php if (!$index) { ?>
+							<td rowspan="<?= count($part['nodes']) ?>" class="text-secondary small"><?=
+								count($part['nodes']) > 1 ? 'связаны между собой, но не с остальными' : '' ?></td>
+						<?php } ?>
+						<td><?= $device($map->nodes[$nodeId]['members'][0]) ?><?=
+							count($map->nodes[$nodeId]['members']) > 1
+								? ' <span class="text-secondary small">+ '.(count($map->nodes[$nodeId]['members']) - 1).'</span>' : '' ?></td>
+						<td class="small"><?= implode('<br>', array_map([Html::class, 'encode'],
+							$part['reasons'][$nodeId] ?? [])) ?></td>
+					</tr>
+				<?php } } ?>
+				</tbody>
+			</table>
 		<?php } ?>
-		</tbody>
-	</table>
+
+		<?php if (count($overlay['shared'] ?? [])) { ?>
+			<h6>Неучтённое звено</h6>
+			<div class="small mb-1">
+				за одним портом видно несколько соседей сразу — кабель не может вести к обоим:
+				между ними стоит неуправляемый коммутатор (он пропускает LLDP). Находки с таких
+				портов «записать всё однозначное» не берёт
+			</div>
+			<table class="table table-sm w-auto mb-2">
+				<tbody>
+				<?php foreach ($overlay['shared'] as $shared) { ?>
+					<tr>
+						<td><?= $device($shared['a']) ?></td>
+						<td><?= Ports::$port_prefix.Html::encode($shared['port']) ?></td>
+						<td class="small"><?= Html::encode(implode(', ', $shared['neighbors'])) ?></td>
+					</tr>
+				<?php } ?>
+				</tbody>
+			</table>
+		<?php } ?>
+
+		<?php if (count($overlay['failed'])) { ?>
+			<h6>Не ответили</h6>
+			<table class="table table-sm w-auto mb-2">
+				<tbody>
+				<?php foreach ($overlay['failed'] as $failure) { ?>
+					<tr>
+						<td><?= isset($switches[$failure['target'] ?? 0]) ? $device($switches[$failure['target']])
+							: Html::encode($failure['host'] ?? '') ?></td>
+						<td<?= empty($failure['detail']) ? '' : ' qtip_ttip="'.Html::encode($failure['detail']).'"' ?>><?=
+							Html::encode($failure['error'] ?? 'причина не указана') ?></td>
+					</tr>
+				<?php } ?>
+				</tbody>
+			</table>
+		<?php } ?>
+
+		<?php if (count($overlay['silent'] ?? [])) { ?>
+			<h6>LLDP молчит</h6>
+			<div class="small mb-2">
+				ответили таблицей MAC, но не сообщили ни одного LLDP/CDP-соседа — протокол
+				обнаружения выключен (у смартов — из коробки). Включите LLDP, и связи появятся
+				сами: <?= implode(', ', array_map($device, $overlay['silent'])) ?>
+			</div>
+		<?php } ?>
+
+		<?php if (count($sweepProblems)) { ?>
+			<h6>Прогрев сети</h6>
+			<div class="small mb-2">
+				без прогрева таблицы MAC беднее, и по ним меньше связей:
+				<?= implode('<br>', array_map([Html::class, 'encode'], $sweepProblems)) ?>
+			</div>
+		<?php } ?>
+	</div>
 <?php } ?>
 
 <?php /* по каждому коммутатору: доступен ли CLI/SNMP (и почему нет) и что

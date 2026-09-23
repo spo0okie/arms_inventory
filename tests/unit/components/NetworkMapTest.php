@@ -534,9 +534,10 @@ class NetworkMapTest extends Unit
 			//порт 25 второго видит ТОЛЬКО первого
 			['target' => $one->id, 'port' => 'Gi1/0/24', 'mac' => '00:aa:bb:cc:00:02'],
 			['target' => $two->id, 'port' => '25', 'mac' => '00:aa:bb:cc:00:01'],
-			//а порт 1 второго - транзит: за ним и первый, и третий
-			['target' => $two->id, 'port' => '1', 'mac' => '00:aa:bb:cc:00:01'],
+			//а порт 1 второго - направление сразу на двоих: третий и четвёртый
+			//(у них самих таблиц нет - проверить прямоту не с чем)
 			['target' => $two->id, 'port' => '1', 'mac' => '00:aa:bb:cc:00:03'],
+			['target' => $two->id, 'port' => '1', 'mac' => '00:aa:bb:cc:00:04'],
 			//base MAC четвёртого в карточке отсутствует - опознание по визитке
 			['target' => $one->id, 'port' => 'Gi1/0/1', 'mac' => '00:aa:bb:cc:00:04'],
 		], 'identity' => [
@@ -556,7 +557,7 @@ class NetworkMapTest extends Unit
 		$pair = [$found['a']->id => $found['aport'], $found['b']->id => $found['bport']];
 		$this->assertSame(['Gi1/0/24', '25'], [$pair[$one->id], $pair[$two->id]]);
 
-		//дополнительные направления: порт 1 второго смотрит в сторону обоих,
+		//дополнительные направления: порт 1 второго смотрит в сторону двоих,
 		//а стороны двустороннего кандидата в списке НЕ повторяются
 		$byPort = [];
 		foreach ($overlay['directions'] as $direction) {
@@ -579,5 +580,126 @@ class NetworkMapTest extends Unit
 		$mermaid = $map->mermaid();
 		$this->assertStringContainsString('MAC: Gi1/0/24 — 25', $mermaid);
 		$this->assertStringContainsString('stroke:#0d6efd', $mermaid);
+	}
+
+	/**
+	 * Звезда с длинным лучом, LLDP молчит везде: ядро C, за его портом 1 цепочка
+	 * L1 → L2, за портом 2 - L3. Порт листа к ядру видит всех разом, поэтому
+	 * взаимная однозначность тут не срабатывает никогда - а проверка прямоты
+	 * (третьих с обеих сторон не видно) восстанавливает ровно дерево.
+	 */
+	public function testFdbTreeRestoredOnStar()
+	{
+		$site = $this->makeSite();
+		$c = $this->makeSwitch($site, '10.61.0.1', "1\n2", ['mac' => '00aabbdd0001']);
+		$l1 = $this->makeSwitch($site, '10.61.0.2', "23\n24", ['mac' => '00aabbdd0002']);
+		$l2 = $this->makeSwitch($site, '10.61.0.3', '24', ['mac' => '00aabbdd0003']);
+		$l3 = $this->makeSwitch($site, '10.61.0.4', '24', ['mac' => '00aabbdd0004']);
+
+		$rows = [];
+		$see = function (Techs $from, string $port, array $whom) use (&$rows) {
+			foreach ($whom as $tech) {
+				$rows[] = ['target' => $from->id, 'port' => $port, 'mac' => $tech->mac];
+			}
+		};
+		$see($c, '1', [$l1, $l2]);
+		$see($c, '2', [$l3]);
+		$see($l1, '24', [$c, $l3]);
+		$see($l1, '23', [$l2]);
+		$see($l2, '24', [$l1, $c, $l3]);
+		$see($l3, '24', [$c, $l1, $l2]);
+
+		$provider = new MacSearchProvider(['id' => 'macsearch', 'config' => ['url' => 'http://x', 'token' => 't']]);
+		$map = new NetworkMap($site);
+		$map->overlay(['status' => 'done', 'neighbors' => [], 'rows' => $rows, 'errors' => []], $provider);
+
+		$links = [];
+		foreach ($map->overlay['fdbfound'] as $found) {
+			$pair = [$found['a']->id.':'.$found['aport'], $found['b']->id.':'.$found['bport']];
+			sort($pair);
+			$links[] = implode('-', $pair);
+		}
+		sort($links);
+		$expected = [];
+		foreach ([[$c, '1', $l1, '24'], [$c, '2', $l3, '24'], [$l1, '23', $l2, '24']] as [$a, $ap, $b, $bp]) {
+			$pair = [$a->id.':'.$ap, $b->id.':'.$bp];
+			sort($pair);
+			$expected[] = implode('-', $pair);
+		}
+		sort($expected);
+		$this->assertSame($expected, $links, 'дерево: C-L1, C-L3, L1-L2; C-L2 и L1-L3 не прямые');
+
+		//дерево связное - «не связаны с остальными» пусто; LLDP молчит у всех
+		$this->assertSame([], $map->overlay['parts']);
+		$this->assertSame(['silent'], array_values(array_unique($map->overlay['nodeStatus'])));
+	}
+
+	/**
+	 * Сосед по LLDP - один из опрошенных, а в карточке его имени нет: он сам
+	 * сообщил sysName и base MAC в визитке, по ним и опознаём. Два соседа за
+	 * одним портом - неучтённое звено: находки помечены, «записать всё» их не
+	 * берёт. Кто так и не связался - в «не связаны» с причинами.
+	 */
+	public function testIdentityNeighborsSharedPortAndParts()
+	{
+		$site = $this->makeSite();
+		$core = $this->makeSwitch($site, '10.62.0.1', "GE1/0/21\nGE1/0/22");
+		$p = $this->makeSwitch($site, '10.62.0.2', "1\n2");
+		$j = $this->makeSwitch($site, '10.62.0.3', "1\n2");
+		$lonely = $this->makeSwitch($site, '10.62.0.4', "1\n2");
+		$dead = $this->makeSwitch($site, '10.62.0.5', "1\n2");
+
+		$provider = new MacSearchProvider(['id' => 'macsearch', 'config' => ['url' => 'http://x', 'token' => 't']]);
+		$map = new NetworkMap($site);
+		$lldp = fn(Techs $from, string $port, string $name, string $mac, string $remotePort) => [
+			'target' => $from->id, 'port' => $port, 'remote_name' => $name, 'remote_mac' => $mac,
+			'remote_port' => $remotePort, 'remote_caps' => 'bridge', 'protocol' => 'lldp'];
+		$map->overlay(['status' => 'done',
+			'neighbors' => [
+				//за GE1/0/21 ядра сразу двое: p-switch по имени, J9833A по chassis MAC
+				$lldp($core, 'GE1/0/21', 'p-switch', '9c:8e:99:b8:66:e0', '2'),
+				$lldp($core, 'GE1/0/21', 'J9833A', 'a4:5d:36:91:eb:a0', '1'),
+			],
+			'rows' => [
+				['target' => $core->id, 'port' => 'GE1/0/22', 'mac' => '00:11:22:33:44:55'],
+				['target' => $lonely->id, 'port' => '1', 'mac' => '00:11:22:33:44:66'],
+			],
+			'identity' => [
+				['target' => $p->id, 'sysname' => 'P-Switch.corp.local', 'base_mac' => '9c:8e:99:b8:66:00'],
+				['target' => $j->id, 'sysname' => 'j', 'base_mac' => 'a4:5d:36:91:eb:a0'],
+			],
+			'errors' => [['target' => $dead->id, 'host' => '10.62.0.5',
+				'error' => 'нет TCP-соединения (порт закрыт или хост недоступен)']],
+		], $provider);
+		$o = $map->overlay;
+
+		//оба опознаны по визитке: p-switch по sysName (регистр и домен не мешают),
+		//J9833A - по base MAC; неопознанных нет
+		$this->assertCount(0, $o['unknown']);
+		$found = [];
+		foreach ($o['found'] as $item) $found[$item['b']->id] = $item;
+		$this->assertArrayHasKey($p->id, $found);
+		$this->assertArrayHasKey($j->id, $found);
+		$this->assertSame('2', $found[$p->id]['peer']['name']);
+
+		//двое за одним портом - неучтённое звено
+		$this->assertCount(1, $o['shared']);
+		$this->assertSame('GE1/0/21', $o['shared'][0]['port']);
+		$this->assertTrue($found[$p->id]['shared']);
+		$this->assertStringContainsString('через звено?', $map->mermaid());
+
+		//статусы узлов и заливка
+		$this->assertSame('ok', $o['nodeStatus'][$core->id]);
+		$this->assertSame('silent', $o['nodeStatus'][$lonely->id]);
+		$this->assertSame('failed', $o['nodeStatus'][$dead->id]);
+		$this->assertStringContainsString('fill:'.NetworkMap::STATUS_FILL['failed'], $map->mermaid());
+
+		//core+p+j связаны находками; lonely и dead - отдельно, с причинами
+		$detached = [];
+		foreach ($o['parts'] as $part) foreach ($part['nodes'] as $nodeId) $detached[$nodeId] = $part['reasons'][$nodeId];
+		ksort($detached);
+		$this->assertSame([$lonely->id, $dead->id], array_keys($detached));
+		$this->assertStringContainsString('LLDP', implode(' ', $detached[$lonely->id]));
+		$this->assertStringContainsString('нет TCP', implode(' ', $detached[$dead->id]));
 	}
 }

@@ -51,6 +51,18 @@ class NetworkMap
 	/** сколько неопознанных соседей рисовать на схеме (остальные - в таблице) */
 	const UNKNOWN_ON_DIAGRAM = 12;
 
+	/**
+	 * Заливка узла по итогу опроса ({@see nodeStatuses()}): сообщил соседей /
+	 * LLDP молчит / не ответил / не опрашивался. Полупрозрачные - поверх
+	 * фона mermaid в любой теме
+	 */
+	const STATUS_FILL = [
+		'ok' => '#19875433',
+		'silent' => '#ffc10755',
+		'failed' => '#dc354544',
+		'none' => '#6c757d22',
+	];
+
 	/** @var int[] id техники => id узла */
 	protected array $nodeOf = [];
 
@@ -206,6 +218,10 @@ class NetworkMap
 	 */
 	public function overlay(array $data, MacSearchProvider $provider): void
 	{
+		//опрошенные коммутаторы сами сказали, как их зовут и какой у них base
+		//MAC - соседа, который представился так же, опознаём в них
+		$provider->rememberScanned($data['identity'] ?? []);
+
 		//таблицы MAC - второй фильтр для неопознанных соседей: за портом один
 		//адрес, он опознан в инвентаризации и это не коммутатор - значит,
 		//LLDP-сосед на этом порту не коммутатор (телефоны и точки доступа
@@ -262,6 +278,10 @@ class NetworkMap
 		}
 
 		$seenPairs = [];
+		//кто виден за каждым портом: коммутатор или неопознанный сосед.
+		//Двое за одним портом - кабель не может вести к обоим, между ними
+		//неучтённое звено (неуправляемый коммутатор, пропускающий LLDP)
+		$perPort = [];    //techId|portKey => [ключ соседа => подпись]
 		foreach ($data['neighbors'] ?? [] as $row) {
 			$local = $this->tech((int)($row['target'] ?? 0));
 			$localPort = trim((string)($row['port'] ?? ''));
@@ -312,6 +332,8 @@ class NetworkMap
 					$overlay['noise'] = ($overlay['noise'] ?? 0) + 1;
 					continue;
 				}
+				$perPort[$local->id.'|'.MacSearchProvider::portKey($localPort)]['u:'.mb_strtolower($name ?: $mac)]
+					= '? '.($name ?: $mac);
 				//одного соседа коммутатор повторяет по разу на запись таблицы -
 				//схлопываем по (порт, кто): человеку нужен факт, а не тираж
 				$key = $local->id.'|'.$localPort.'|'.mb_strtolower($name ?: $mac);
@@ -332,6 +354,8 @@ class NetworkMap
 			}
 			if (isset($this->nodeOf[$remote->id])
 				&& $this->nodeOf[$remote->id] === $this->nodeOf[$local->id]) continue;    //внутри стека
+			$perPort[$local->id.'|'.MacSearchProvider::portKey($localPort)]
+				['t:'.($this->nodeOf[$remote->id] ?? 'x'.$remote->id)] = $remote->name;
 
 			//порт соседа: лесенка от точного к косвенному, на каждом шаге -
 			//единственный кандидат. 1) имя, как его сообщил сосед; 2) как этот
@@ -421,10 +445,171 @@ class NetworkMap
 			if (is_object($tech) && !isset($overlay['answered'][$techId])) $overlay['silent'][] = $tech;
 		}
 
+		//порты с несколькими соседями: находки с них - не кабель «порт в
+		//порт», а связь через неучтённое звено. Предложение остаётся (соседа
+		//видно), но «записать всё однозначное» его не берёт
+		$overlay['shared'] = [];
+		foreach ($perPort as $key => $neighbors) {
+			if (count($neighbors) < 2) continue;
+			[$techId, $portKey] = explode('|', (string)$key, 2);
+			$tech = $this->tech((int)$techId);
+			if (!is_object($tech)) continue;
+			$resolved = MacSearchProvider::resolvePortName($tech, $portKey);
+			$overlay['shared'][$key] = ['a' => $tech, 'port' => $resolved['name'] ?? $portKey,
+				'neighbors' => array_values($neighbors)];
+		}
+		foreach ($overlay['found'] as &$found) {
+			$found['shared'] = isset($overlay['shared'][$found['a']->id.'|'.MacSearchProvider::portKey($found['port'])]);
+		}
+		unset($found);
+		$overlay['shared'] = array_values($overlay['shared']);
+
 		$this->fdbDirections($fdb, $data, $recorded, $overlay);
 
 		$overlay['unknown'] = array_values($overlay['unknown']);
 		$this->overlay = $overlay;
+		$this->overlay['nodeStatus'] = $this->nodeStatuses($data);
+		$this->overlay['parts'] = $this->detachedParts();
+	}
+
+	/**
+	 * Итог опроса по узлу - для цвета на схеме и для объяснения, почему узел
+	 * не связался: ok - сообщил соседей; silent - отдал таблицу MAC, но
+	 * соседей по LLDP/CDP нет; failed - не ответил; none - не опрашивался
+	 * (нет IP, неработающий, модель без драйвера).
+	 * @return array nodeId => статус
+	 */
+	protected function nodeStatuses(array $data): array
+	{
+		$polled = $failed = [];
+		foreach ($data['rows'] ?? [] as $row) $polled[(int)($row['target'] ?? 0)] = true;
+		foreach ($data['errors'] ?? [] as $error) $failed[(int)($error['target'] ?? 0)] = true;
+
+		$statuses = [];
+		foreach ($this->nodes as $nodeId => $node) {
+			$status = 'none';
+			foreach ($node['members'] as $member) {
+				if (isset($this->overlay['answered'][$member->id])) { $status = 'ok'; break; }
+				if (isset($polled[$member->id])) $status = 'silent';
+				elseif (isset($failed[$member->id]) && $status === 'none') $status = 'failed';
+			}
+			$statuses[$nodeId] = $status;
+		}
+		return $statuses;
+	}
+
+	/**
+	 * Связность площадки: все коммутаторы, до которых дотянулся опрос, в
+	 * одной сети - значит, на карте они обязаны сойтись в одно целое.
+	 * Висящий отдельно узел - это не «так и есть», а незаписанная или
+	 * ненайденная связь, и по каждому такому узлу объясняем, что о нём
+	 * известно.
+	 *
+	 * Связи для связности: записанные (документация), найденные по LLDP и
+	 * кандидаты по таблицам MAC. Неопознанные соседи узлы не связывают.
+	 *
+	 * @return array [['nodes' => nodeId[], 'reasons' => [nodeId => string[]]], ...]
+	 *   части, не связанные с основной (самой большой); пусто - карта целая.
+	 *   Если связей нет вовсе - каждая часть одиночка, основной нет
+	 */
+	protected function detachedParts(): array
+	{
+		if (count($this->nodes) < 2) return [];
+
+		$parent = [];
+		foreach (array_keys($this->nodes) as $nodeId) $parent[$nodeId] = $nodeId;
+		$root = function ($id) use (&$parent) {
+			while ($parent[$id] !== $id) $id = $parent[$id] = $parent[$parent[$id]];
+			return $id;
+		};
+		$join = function ($a, $b) use (&$parent, $root) {
+			if (!isset($parent[$a]) || !isset($parent[$b])) return;
+			$parent[$root($a)] = $root($b);
+		};
+		foreach ($this->edges as $edge) $join($edge['a'], $edge['b']);
+		foreach ($this->overlay['found'] as $found) {
+			$join($this->nodeOf[$found['a']->id] ?? null, $this->nodeOf[$found['b']->id] ?? null);
+		}
+		foreach ($this->overlay['fdbfound'] ?? [] as $found) {
+			$join($this->nodeOf[$found['a']->id] ?? null, $this->nodeOf[$found['b']->id] ?? null);
+		}
+
+		$parts = [];
+		foreach (array_keys($this->nodes) as $nodeId) $parts[$root($nodeId)][] = $nodeId;
+		if (count($parts) < 2) return [];
+
+		//основная часть - самая большая; если все одиночки, основной нет
+		usort($parts, fn($x, $y) => count($y) <=> count($x));
+		if (count($parts[0]) > 1) array_shift($parts);
+
+		$result = [];
+		foreach ($parts as $nodes) {
+			$reasons = [];
+			foreach ($nodes as $nodeId) $reasons[$nodeId] = $this->detachedReasons($nodeId);
+			$result[] = ['nodes' => $nodes, 'reasons' => $reasons];
+		}
+		return $result;
+	}
+
+	/**
+	 * Что известно об узле, не связанном с остальными: почему связь не
+	 * нашлась и за что зацепиться человеку.
+	 * @return string[]
+	 */
+	protected function detachedReasons(int $nodeId): array
+	{
+		$node = $this->nodes[$nodeId];
+		$members = [];
+		foreach ($node['members'] as $member) $members[$member->id] = $member;
+		$reasons = [];
+
+		if (!$node['operating']) $reasons[] = 'статус «'.$node['state'].'» — не опрашивается';
+		switch ($this->overlay['nodeStatus'][$nodeId] ?? 'none') {
+			case 'failed':
+				foreach ($this->overlay['failed'] as $failure) {
+					if (isset($members[(int)($failure['target'] ?? 0)])) {
+						$reasons[] = 'не ответил: '.($failure['error'] ?? 'причина не указана');
+					}
+				}
+				break;
+			case 'silent':
+				$reasons[] = 'LLDP/CDP-соседей не сообщил (протокол выключен?)';
+				break;
+			case 'none':
+				if ($node['operating']) $reasons[] = 'в опросе не участвовал (нет IP или модель без драйвера)';
+				break;
+		}
+
+		foreach ($this->overlay['unknown'] as $unknown) {
+			if (!isset($members[$unknown['a']->id])) continue;
+			$row = $unknown['row'];
+			$reasons[] = 'за портом '.$unknown['port'].' неопознанный сосед «'
+				.(trim((string)($row['remote_name'] ?? '')) ?: (string)($row['remote_mac'] ?? '?')).'»';
+		}
+		foreach ($this->overlay['shared'] as $shared) {
+			if (!isset($members[$shared['a']->id])) continue;
+			$reasons[] = 'за портом '.$shared['port'].' несколько соседей сразу ('
+				.implode(', ', $shared['neighbors']).') — между ними неучтённое звено';
+		}
+
+		$directions = array_filter($this->overlay['directions'] ?? [],
+			fn($direction) => isset($members[$direction['tech']->id]));
+		foreach ($directions as $direction) {
+			$reasons[] = 'по таблицам MAC за портом '.$direction['port'].' видны: '
+				.implode(', ', array_map(fn($peer) => $peer['name'], $direction['peers']))
+				.' — связь не прямая или той стороне не хватает данных';
+		}
+		//его самого видят другие: за каким их портом
+		foreach ($this->overlay['directions'] ?? [] as $direction) {
+			if (isset($members[$direction['tech']->id])) continue;
+			foreach ($direction['peers'] as $peer) {
+				if (($this->nodeOf[$peer['tech']->id] ?? null) !== $nodeId) continue;
+				$reasons[] = 'виден по таблицам MAC у '.$direction['tech']->name.' за портом '.$direction['port'];
+			}
+		}
+
+		if (!count($reasons)) $reasons[] = 'ни опрос, ни записи ничего не говорят о его связях';
+		return $reasons;
 	}
 
 	/**
@@ -432,10 +617,10 @@ class NetworkMap
 	 * коммутаторов площадки.
 	 *
 	 * Это ответ на «как они соединены», когда LLDP молчит. Направление - не
-	 * звено (между А и Б может стоять неуправляемая коробка), поэтому в
-	 * записи не предлагается. Но взаимно-однозначная пара - порт А видит
-	 * ТОЛЬКО Б, а порт Б видит ТОЛЬКО А - сильный кандидат в прямой линк:
-	 * такие рисуются на схеме пунктиром с пометкой MAC.
+	 * звено (между А и Б может стоять неуправляемая коробка), поэтому само по
+	 * себе в записи не предлагается. Пара, прошедшая проверку прямоты (А и Б
+	 * видят друг друга, и никто третий не виден с обеих сторон), - кандидат
+	 * в прямой линк: рисуется на схеме пунктиром с пометкой MAC.
 	 */
 	protected function fdbDirections(array $fdb, array $data, array $recorded, array &$overlay): void
 	{
@@ -468,7 +653,8 @@ class NetworkMap
 		}
 
 		$overlay['directions'] = [];
-		$uniquePort = [];    //myNode|peerNode -> сторона кандидата
+		$sides = [];        //techId|portKey -> сторона (tech, port, port_id)
+		$portsToward = [];  //myNode|peerNode -> [techId|portKey, ...]
 		foreach ($directions as $key => $nodes) {
 			[$techId, $portKey] = explode('|', (string)$key, 2);
 			$tech = $this->tech((int)$techId);
@@ -481,18 +667,28 @@ class NetworkMap
 			$overlay['directions'][] = ['tech' => $tech, 'port' => $port,
 				'port_id' => $resolved['id'] ?? null, 'peers' => $peers,
 				'unique' => count($nodes) === 1];
-			if (count($nodes) === 1) {
-				$uniquePort[$this->nodeOf[$tech->id].'|'.array_key_first($nodes)] =
-					['tech' => $tech, 'port' => $port, 'port_id' => $resolved['id'] ?? null];
+			$sides[$key] = ['tech' => $tech, 'port' => $port, 'port_id' => $resolved['id'] ?? null];
+			foreach (array_keys($nodes) as $peerNode) {
+				$portsToward[$this->nodeOf[$tech->id].'|'.$peerNode][] = $key;
 			}
 		}
 
+		//прямой линк (проверка прямоты Брейтбарта на уровне коммутаторов):
+		//А видит Б ровно за одним портом a, Б видит А ровно за одним портом b,
+		//и коммутаторы за a и за b не пересекаются. Если между ними стоит В,
+		//его адреса видны с обеих сторон - и пара честно отваливается. Это
+		//работает и на звезде, где порт листа к ядру видит всех разом
+		//(требование «порт видит только соседа» там не выполняется никогда)
 		$overlay['fdbfound'] = [];
-		foreach ($uniquePort as $pair => $side) {
+		foreach ($portsToward as $pair => $keys) {
 			[$a, $b] = array_map('intval', explode('|', (string)$pair));
 			if ($a >= $b) continue;    //одна пара - один кандидат
-			$back = $uniquePort[$b.'|'.$a] ?? null;
-			if (is_null($back)) continue;
+			$backKeys = $portsToward[$b.'|'.$a] ?? [];
+			//адрес виден за несколькими портами (петля, разные VLAN) - не угадываем
+			if (count($keys) !== 1 || count($backKeys) !== 1) continue;
+			if (array_intersect_key($directions[$keys[0]], $directions[$backKeys[0]])) continue;
+			$side = $sides[$keys[0]];
+			$back = $sides[$backKeys[0]];
 
 			//уже записанное или найденное по LLDP кандидатом не дублируем
 			$known = false;
@@ -632,9 +828,15 @@ class NetworkMap
 				//она должна бросаться в глаза
 				if (!$node['operating']) $label .= '<br/><small>⚠ '.$node['state'].'</small>';
 				$lines[] = '  n'.$node['id'].'["'.static::quote($label).'"]';
-				if (!$node['operating']) {
-					$lines[] = '  style n'.$node['id'].' stroke:#dc3545,stroke-width:2px,stroke-dasharray:4';
+				//заливка - итог опроса узла (легенда под схемой); полупрозрачная,
+				//чтобы читалась и в тёмной теме
+				$style = [];
+				if (is_array($this->overlay)) {
+					$fill = static::STATUS_FILL[$this->overlay['nodeStatus'][$node['id']] ?? 'none'] ?? null;
+					if ($fill) $style[] = 'fill:'.$fill;
 				}
+				if (!$node['operating']) $style[] = 'stroke:#dc3545,stroke-width:2px,stroke-dasharray:4';
+				if (count($style)) $lines[] = '  style n'.$node['id'].' '.implode(',', $style);
 			}
 			if ($placeId) $lines[] = '  end';
 		}
@@ -657,7 +859,8 @@ class NetworkMap
 
 		if (is_array($this->overlay)) {
 			foreach ($this->overlay['found'] as $found) {
-				$label = $found['port'].' — '.($found['peer']['name'] ?? $found['lldp_port']);
+				$label = $found['port'].' — '.($found['peer']['name'] ?? $found['lldp_port'])
+					.(empty($found['shared']) ? '' : ' (через звено?)');
 				$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| n'
 					.$this->nodeOf[$found['b']->id];
 				$styles[] = '  linkStyle '.$index.' stroke:#198754,stroke-width:3px';
