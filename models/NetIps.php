@@ -72,6 +72,11 @@ class NetIps extends ArmsModel
 	
 	public $linksSchema=[
 		'networks_id'=>[Networks::class],
+		'comps_ids'=>[Comps::class,'netIps_ids'],
+		'techs_ids'=>[Techs::class,'net_ips_ids'],
+		'aces_ids'=>[Aces::class,'netIps_ids'],
+		'users_ids'=>[Users::class,'netIps_ids'],
+		'dns_names_ids'=>[DnsNames::class,'net_ips_ids'],
 	];
 	
 	/**
