@@ -123,7 +123,9 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 <div class="text-secondary small mb-3">
 	<b>сплошная линия</b> — записано в инвентаризации<?php if (is_array($overlay)) { ?>
 		(<span class="text-warning">жёлтая</span> — записано, но сверка не видит);
-		<span style="color:#198754"><b>зелёный пунктир</b></span> — найдено сверкой, не записано;
+		<span style="color:#198754"><b>зелёный пунктир</b></span> — найдено сверкой, не записано
+		(по LLDP/CDP; с пометкой «STP» — по STP: сосед назван самим коммутатором, но неуправляемый
+		коммутатор между ними для STP прозрачен);
 		<span style="color:#0d6efd"><b>синий пунктир «MAC»</b></span> — вероятный линк по таблицам MAC
 		(LLDP молчит, записывается только руками);
 		<b>серый пунктир и «?»</b> — неопознанный сосед;
@@ -356,6 +358,12 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 					<?php if (!empty($row['remote_port'])) { ?>
 						<span class="text-secondary small">порт <?= Html::encode($row['remote_port']) ?></span>
 					<?php } ?>
+					<?php if (count($unknown['behind'] ?? [])) { ?>
+						<span class="text-secondary small d-block" qtip_ttip="<?= Html::encode(
+							'По таблицам MAC за этим портом видны эти коммутаторы: неопознанный сосед, '
+							.'вероятно, стоит между ними. Если его нет в инвентаризации - заведите') ?>">за ним по MAC: <?=
+							Html::encode(implode(', ', $unknown['behind'])) ?></span>
+					<?php } ?>
 					<?php if (($unknown['count'] ?? 1) > 1) { ?>
 						<span class="text-secondary small" qtip_ttip="<?= Html::encode(
 							'Столько записей об этом соседе в таблице LLDP; показана одна') ?>">×<?= (int)$unknown['count'] ?></span>
@@ -438,10 +446,24 @@ if (is_array($overlay)) {
 		foreach ($sweepReport['rejected'] ?? [] as $rejected) {
 			$sweepProblems[] = trim(($rejected['network'] ?? '').' — '.($rejected['error'] ?? ''), ' —');
 		}
+		//коммутаторы пингуются первыми: они заведомо живы (ответили по
+		//SSH/SNMP), и их молчание по ping - это ICMP, режущийся по дороге
+		$sweepTargets = $sweepReport['targets'] ?? null;
+		if (is_array($sweepTargets) && (int)($sweepTargets['hosts'] ?? 0) > 0
+			&& count($sweepTargets['silent'] ?? [])) {
+			$sweepProblems[] = 'коммутаторы ответили на ping: '.(int)$sweepTargets['alive'].' из '
+				.(int)$sweepTargets['hosts'].(!(int)$sweepTargets['alive']
+					? ' — ICMP от хоста сервиса до площадки не проходит (или ping на хосте сервиса под службой не работает), прогрев бесполезен'
+					: '').'; молчат: '.implode(', ', $sweepTargets['silent']);
+		}
 		if (empty($sweepReport['skipped']) && (int)($sweepReport['hosts'] ?? 0) > 0
 			&& !(int)($sweepReport['alive'] ?? 0)) {
 			$sweepProblems[] = 'не откликнулся ни один из '.(int)$sweepReport['hosts']
 				.' адресов — ICMP режется по дороге или ping на хосте сервиса не работает';
+		}
+		if (!empty($sweepReport['skipped_hosts'])) {
+			$sweepProblems[] = 'не успели пропинговать за отведённое время (sweep.deadline): '
+				.(int)$sweepReport['skipped_hosts'].' адресов';
 		}
 	}
 	$parts = $overlay['parts'] ?? [];
@@ -529,9 +551,49 @@ if (is_array($overlay)) {
 		<?php if (count($sweepProblems)) { ?>
 			<h6>Прогрев сети</h6>
 			<div class="small mb-2">
-				без прогрева таблицы MAC беднее, и по ним меньше связей:
+				без прогрева таблицы MAC беднее, и по ним меньше связей:<br>
 				<?= implode('<br>', array_map([Html::class, 'encode'], $sweepProblems)) ?>
 			</div>
+			<?php /* отладка: что именно пинговалось и чем ответил ping - без
+			       этого «прогрето 0» без единой ошибки не разобрать */ ?>
+			<?php if (count($sweepReport['per_network'] ?? []) || count($sweepReport['codes'] ?? [])) { ?>
+				<details class="small mb-2">
+					<summary>подробно: по подсетям и по ответам ping</summary>
+					<?php if (count($sweepReport['per_network'] ?? [])) { ?>
+						<table class="table table-sm w-auto mt-1 mb-1">
+							<thead><tr><th>подсеть</th><th>пинговали</th><th>ответили</th><th>не успели</th></tr></thead>
+							<tbody>
+							<?php foreach ($sweepReport['per_network'] as $network) { ?>
+								<tr>
+									<td><?= Html::encode($network['network'] ?? '') ?></td>
+									<td><?= (int)($network['hosts'] ?? 0) ?></td>
+									<td><?= (int)($network['alive'] ?? 0) ?></td>
+									<td><?= (int)($network['skipped'] ?? 0) ?></td>
+								</tr>
+							<?php } ?>
+							</tbody>
+						</table>
+					<?php } ?>
+					<?php if (count($sweepReport['codes'] ?? [])) { ?>
+						<table class="table table-sm w-auto mb-1">
+							<thead><tr><th>код ping</th><th>сколько</th><th>пример вывода</th></tr></thead>
+							<tbody>
+							<?php foreach ($sweepReport['codes'] as $code) { ?>
+								<tr>
+									<td><?= Html::encode((string)($code['code'] ?? '')) ?>
+										<span class="text-secondary"><?= Html::encode([
+											'0' => '(ответ)', '1' => '(нет ответа)', '2' => '(ошибка ping)',
+											'timeout' => '(ping завис)', 'error' => '(не запустился)',
+										][(string)($code['code'] ?? '')] ?? '') ?></span></td>
+									<td><?= (int)($code['count'] ?? 0) ?></td>
+									<td class="font-monospace"><?= Html::encode($code['sample'] ?? '') ?></td>
+								</tr>
+							<?php } ?>
+							</tbody>
+						</table>
+					<?php } ?>
+				</details>
+			<?php } ?>
 		<?php } ?>
 	</div>
 <?php } ?>

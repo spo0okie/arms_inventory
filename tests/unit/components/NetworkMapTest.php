@@ -702,4 +702,70 @@ class NetworkMapTest extends Unit
 		$this->assertStringContainsString('LLDP', implode(' ', $detached[$lonely->id]));
 		$this->assertStringContainsString('нет TCP', implode(' ', $detached[$dead->id]));
 	}
+
+	/**
+	 * STP: LLDP выключен, но корневой порт листа называет мост родителя (его
+	 * base MAC из визитки). Связь находится с пометкой STP, та же связь от
+	 * LLDP не дублируется; «LLDP молчит» остаётся советом, а узел - «ответил».
+	 * Неопознанный сосед, за которым по MAC видны знакомые, - с подсказкой.
+	 */
+	public function testStpNeighborsAndUnknownBehind()
+	{
+		$site = $this->makeSite();
+		$core = $this->makeSwitch($site, '10.63.0.1', "GE1/0/21\nGE1/0/22\nGE1/0/23");
+		$leaf = $this->makeSwitch($site, '10.63.0.2', "1\n2", ['mac' => '00aabbee0002']);
+		$far = $this->makeSwitch($site, '10.63.0.3', "1\n2", ['mac' => '00aabbee0003']);
+
+		$provider = new MacSearchProvider(['id' => 'macsearch', 'config' => ['url' => 'http://x', 'token' => 't']]);
+		$map = new NetworkMap($site);
+		$stp = fn(Techs $from, string $port, string $bridge, string $remotePort) => [
+			'target' => $from->id, 'port' => $port, 'remote_name' => '', 'remote_mac' => $bridge,
+			'remote_port' => $remotePort, 'remote_caps' => 'bridge', 'protocol' => 'stp'];
+		$map->overlay(['status' => 'done',
+			'neighbors' => [
+				//STP первым в ответе - LLDP-запись той же связи всё равно главнее
+				$stp($leaf, '1', '9c:8e:99:00:00:01', 'GigabitEthernet1/0/22'),
+				['target' => $core->id, 'port' => 'GE1/0/22', 'remote_name' => 'leaf-sw',
+					'remote_mac' => '00:aa:bb:ee:00:02', 'remote_port' => '1',
+					'remote_caps' => 'bridge', 'protocol' => 'lldp'],
+				//неопознанный за GE1/0/23, а за этим портом по MAC виден far
+				['target' => $core->id, 'port' => 'GE1/0/23', 'remote_name' => 'p-switch',
+					'remote_mac' => '9c:8e:99:b8:66:e0', 'remote_port' => '2',
+					'remote_caps' => 'bridge', 'protocol' => 'lldp'],
+			],
+			'rows' => [
+				['target' => $leaf->id, 'port' => '2', 'mac' => '00:11:22:33:44:55'],
+				['target' => $core->id, 'port' => 'GE1/0/23', 'mac' => '00:aa:bb:ee:00:03'],
+			],
+			'identity' => [['target' => $core->id, 'sysname' => 'core', 'base_mac' => '9c:8e:99:00:00:01']],
+			'errors' => [],
+		], $provider);
+		$o = $map->overlay;
+
+		$this->assertCount(1, $o['found'], 'связь core-leaf одна, хоть и от двух протоколов');
+		$this->assertSame('lldp', $o['found'][0]['protocol']);
+
+		//только STP: находка с пометкой, узел ответил, но совет про LLDP остаётся
+		$map2 = new NetworkMap($site);
+		$map2->overlay(['status' => 'done',
+			'neighbors' => [$stp($leaf, '1', '9c:8e:99:00:00:01', 'GE1/0/22')],
+			'rows' => [['target' => $leaf->id, 'port' => '2', 'mac' => '00:11:22:33:44:55']],
+			'identity' => [['target' => $core->id, 'sysname' => 'core', 'base_mac' => '9c:8e:99:00:00:01']],
+			'errors' => []], $provider);
+		$o2 = $map2->overlay;
+		$this->assertCount(1, $o2['found']);
+		$this->assertSame($core->id, $o2['found'][0]['b']->id);
+		$this->assertSame('GE1/0/22', $o2['found'][0]['peer']['name']);
+		$this->assertStringContainsString('(STP)', $map2->mermaid());
+		$this->assertSame('ok', $o2['nodeStatus'][$leaf->id]);
+		$this->assertSame([$leaf->id], array_map(fn($tech) => $tech->id, $o2['silent']));
+
+		//неопознанный p-switch: за ним по MAC виден far - подсказка в таблице и в причинах
+		$unknown = $o['unknown'][0];
+		$this->assertSame('p-switch', $unknown['row']['remote_name']);
+		$this->assertSame([$far->name], $unknown['behind']);
+		$reasons = [];
+		foreach ($o['parts'] as $part) foreach ($part['reasons'] as $list) $reasons = array_merge($reasons, $list);
+		$this->assertStringContainsString('стоит между ними', implode(' ', $reasons));
+	}
 }

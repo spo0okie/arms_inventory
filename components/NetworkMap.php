@@ -282,11 +282,20 @@ class NetworkMap
 		//Двое за одним портом - кабель не может вести к обоим, между ними
 		//неучтённое звено (неуправляемый коммутатор, пропускающий LLDP)
 		$perPort = [];    //techId|portKey => [ключ соседа => подпись]
-		foreach ($data['neighbors'] ?? [] as $row) {
+		$seenLinks = [];  //techId|порт>соседId - одна связь от LLDP и от STP
+		//LLDP/CDP - первыми: одну и ту же связь сообщает и STP, но у LLDP есть
+		//имя порта той стороны, а у STP - только номер (если сосед не опрошен)
+		$neighbors = $data['neighbors'] ?? [];
+		usort($neighbors, fn($x, $y) => (($x['protocol'] ?? '') === 'stp') <=> (($y['protocol'] ?? '') === 'stp'));
+		foreach ($neighbors as $row) {
 			$local = $this->tech((int)($row['target'] ?? 0));
 			$localPort = trim((string)($row['port'] ?? ''));
 			if (!is_object($local) || $localPort === '') continue;
-			$overlay['answered'][$local->id] = true;
+			//answered - ответ по LLDP/CDP (признак «протокол включён» и основа
+			//«не видно» у записанных связей); STP видит связь только с нижней
+			//стороны, и молчание верхней о ней ничего не говорит
+			if (($row['protocol'] ?? '') === 'stp') $overlay['answeredStp'][$local->id] = true;
+			else $overlay['answered'][$local->id] = true;
 
 			//телефоны и прочая ботва LLDP - не кандидаты в коммутаторы: считаем,
 			//но не показываем (счётчик в шапке, чтобы фильтр не был молчаливым)
@@ -332,11 +341,14 @@ class NetworkMap
 					$overlay['noise'] = ($overlay['noise'] ?? 0) + 1;
 					continue;
 				}
-				$perPort[$local->id.'|'.MacSearchProvider::portKey($localPort)]['u:'.mb_strtolower($name ?: $mac)]
+				//личность соседа - по MAC прежде имени: STP называет только
+				//MAC моста, LLDP - и имя, и тот же MAC; это один сосед, а не два
+				$who = MacSearchProvider::hexMac($mac) ?: mb_strtolower($name ?: $mac);
+				$perPort[$local->id.'|'.MacSearchProvider::portKey($localPort)]['u:'.$who]
 					= '? '.($name ?: $mac);
 				//одного соседа коммутатор повторяет по разу на запись таблицы -
 				//схлопываем по (порт, кто): человеку нужен факт, а не тираж
-				$key = $local->id.'|'.$localPort.'|'.mb_strtolower($name ?: $mac);
+				$key = $local->id.'|'.MacSearchProvider::portKey($localPort).'|'.$who;
 				if (isset($overlay['unknown'][$key])) {
 					$overlay['unknown'][$key]['count']++;
 					continue;
@@ -377,10 +389,17 @@ class NetworkMap
 			$localResolved = MacSearchProvider::resolvePortName($local, $localPort);
 			$localName = $localResolved['name'] ?? $localPort;
 
-			//одна связь - с двух сторон: второй раз не считаем
+			//одна связь - с двух сторон: второй раз не считаем. И из двух
+			//источников: STP-запись той же связи (порт соседа у неё может
+			//быть не определён) после LLDP-записи - повтор
 			$pair = static::pairKey($local->id, $localName, $remote->id, $resolved['name'] ?? $remotePort);
-			if (isset($seenPairs[$pair])) continue;
+			$link = $local->id.'|'.$localName.'>'.$remote->id;
+			if (isset($seenPairs[$pair]) || isset($seenLinks[$link])) continue;
 			$seenPairs[$pair] = true;
+			$seenLinks[$link] = true;
+			if (!is_null($resolved['name'])) {
+				$seenLinks[$remote->id.'|'.$resolved['name'].'>'.$local->id] = true;
+			}
 
 			//коммутатор ДРУГОЙ площадки - наблюдение, а не предложение: LLDP
 			//видит и сквозь L2-туннель между площадками, и зафиксировать такое
@@ -466,7 +485,19 @@ class NetworkMap
 
 		$this->fdbDirections($fdb, $data, $recorded, $overlay);
 
+		//за неопознанным соседом по таблицам MAC видны знакомые коммутаторы -
+		//значит, он стоит между: подсказка «кого заводить в инвентаризацию»
+		foreach ($overlay['unknown'] as &$unknown) {
+			$unknown['behind'] = $overlay['behind'][$unknown['a']->id.'|'
+				.MacSearchProvider::portKey($unknown['port'])] ?? [];
+		}
+		unset($unknown);
 		$overlay['unknown'] = array_values($overlay['unknown']);
+
+		//как представились сами опрошенные (визитка): в причинах оторванного
+		//узла - почему соседи его не узнали
+		$overlay['cards'] = [];
+		foreach ($data['identity'] ?? [] as $card) $overlay['cards'][(int)($card['target'] ?? 0)] = $card;
 		$this->overlay = $overlay;
 		$this->overlay['nodeStatus'] = $this->nodeStatuses($data);
 		$this->overlay['parts'] = $this->detachedParts();
@@ -489,7 +520,8 @@ class NetworkMap
 		foreach ($this->nodes as $nodeId => $node) {
 			$status = 'none';
 			foreach ($node['members'] as $member) {
-				if (isset($this->overlay['answered'][$member->id])) { $status = 'ok'; break; }
+				if (isset($this->overlay['answered'][$member->id])
+					|| isset($this->overlay['answeredStp'][$member->id])) { $status = 'ok'; break; }
 				if (isset($polled[$member->id])) $status = 'silent';
 				elseif (isset($failed[$member->id]) && $status === 'none') $status = 'failed';
 			}
@@ -580,11 +612,24 @@ class NetworkMap
 				break;
 		}
 
+		//чем представился сам: по этим приметам его узнают соседи. Нет визитки -
+		//узнать его можно только по записанному в карточке
+		if (in_array($this->overlay['nodeStatus'][$nodeId] ?? 'none', ['ok', 'silent'], true)) {
+			foreach ($members as $id => $member) {
+				$card = $this->overlay['cards'][$id] ?? null;
+				$reasons[] = is_array($card) && (!empty($card['sysname']) || !empty($card['base_mac']))
+					? 'представился: имя «'.($card['sysname'] ?? '').'», base MAC '.($card['base_mac'] ?? '—')
+					: 'визитки нет (SNMP не ответил или не задан community) — соседи узнают его только по карточке';
+			}
+		}
+
 		foreach ($this->overlay['unknown'] as $unknown) {
 			if (!isset($members[$unknown['a']->id])) continue;
 			$row = $unknown['row'];
 			$reasons[] = 'за портом '.$unknown['port'].' неопознанный сосед «'
-				.(trim((string)($row['remote_name'] ?? '')) ?: (string)($row['remote_mac'] ?? '?')).'»';
+				.(trim((string)($row['remote_name'] ?? '')) ?: (string)($row['remote_mac'] ?? '?')).'»'
+				.(count($unknown['behind'] ?? []) ? ', а за ним по таблицам MAC видны: '
+					.implode(', ', $unknown['behind']).' — вероятно, он стоит между ними; заведите его в инвентаризацию' : '');
 		}
 		foreach ($this->overlay['shared'] as $shared) {
 			if (!isset($members[$shared['a']->id])) continue;
@@ -604,7 +649,18 @@ class NetworkMap
 			if (isset($members[$direction['tech']->id])) continue;
 			foreach ($direction['peers'] as $peer) {
 				if (($this->nodeOf[$peer['tech']->id] ?? null) !== $nodeId) continue;
-				$reasons[] = 'виден по таблицам MAC у '.$direction['tech']->name.' за портом '.$direction['port'];
+				//на том же порту LLDP видит неопознанного - вероятно, мы за ним
+				$via = [];
+				foreach ($this->overlay['unknown'] as $unknown) {
+					if ($unknown['a']->id === $direction['tech']->id
+						&& MacSearchProvider::portKey($unknown['port']) === MacSearchProvider::portKey($direction['port'])) {
+						$via[] = '«'.(trim((string)($unknown['row']['remote_name'] ?? ''))
+							?: (string)($unknown['row']['remote_mac'] ?? '?')).'»';
+					}
+				}
+				$reasons[] = 'виден по таблицам MAC у '.$direction['tech']->name.' за портом '.$direction['port']
+					.(count($via) ? '; там же неопознанный сосед '.implode(', ', $via)
+						.' — вероятно, подключён через него, и он стоит между ними: заведите его в инвентаризацию' : '');
 			}
 		}
 
@@ -650,6 +706,12 @@ class NetworkMap
 				$nodeId = $macNode[$mac] ?? null;
 				if (!is_null($nodeId) && $nodeId !== $myNode) $directions[$key][$nodeId] = true;
 			}
+		}
+
+		//кто виден за каждым портом - и для неопознанных соседей (кто за ними)
+		$overlay['behind'] = [];
+		foreach ($directions as $key => $nodes) {
+			$overlay['behind'][$key] = array_map(fn($id) => $this->nodes[$id]['name'], array_keys($nodes));
 		}
 
 		$overlay['directions'] = [];
@@ -859,7 +921,8 @@ class NetworkMap
 
 		if (is_array($this->overlay)) {
 			foreach ($this->overlay['found'] as $found) {
-				$label = $found['port'].' — '.($found['peer']['name'] ?? $found['lldp_port'])
+				$label = $found['port'].' — '.($found['peer']['name'] ?? ($found['lldp_port'] ?: '?'))
+					.($found['protocol'] === 'stp' ? ' (STP)' : '')
 					.(empty($found['shared']) ? '' : ' (через звено?)');
 				$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| n'
 					.$this->nodeOf[$found['b']->id];
