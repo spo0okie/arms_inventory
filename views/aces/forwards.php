@@ -35,13 +35,15 @@ foreach ($models as $ace) {
 		foreach ($ip->dnsNames as $dnsName) {
 			$names[] = $this->render('/dns-names/item', ['model' => $dnsName, 'static_view' => true]);
 			$ignoreHints[]=$dnsName->fqdn;
-			$ignoreHints[]=$dnsName->name;
+			$ignoreHints[]=$dnsName->host;
 		}
 		$entries[] = ModelWidget::widget([
 			'model' => $ip,
-			'rendered_comment' => $ignoreHints,
-			'options' => ['static_view' => true]]
-		)
+			'options' => [
+				'static_view' => true,
+				'rendered_comment' => $ignoreHints,
+			]
+		])
 			. (count($names) ? ' <span class="small">(' . implode(', ', $names) . ')</span>' : '');
 	}
 	//субъект задан не адресом (сеть, ОС, сервис, текст) — показываем как есть
@@ -69,8 +71,10 @@ foreach ($models as $ace) {
 		}
 		$target = ModelWidget::widget([
 			'model' => $resource,
-			'options' => ['static_view' => true],
-			'rendered_comment' => $ignoreHints,
+			'options' => [
+				'static_view' => true,
+				'rendered_comment' => $ignoreHints,
+			],
 		])
 			.' <span class="small">(' . implode(', ', $nodes) . ')</span>';
 	} else	$target = is_object($resource)
