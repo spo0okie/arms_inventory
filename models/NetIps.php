@@ -43,7 +43,7 @@ class NetIps extends ArmsModel
 {
 	use AclsFieldTrait;
 	//private $network_cache=null;
-	
+
 	public static $title='IP адрес';
 	public static $titles='IP адреса';
 
@@ -51,12 +51,12 @@ class NetIps extends ArmsModel
 	{
 		return 'IP адреса: реестр адресов с привязкой к сетям, ОС, оборудованию и пользователям.';
 	}
-	
+
 	/**
 	 * @var PhpIP\IPv4Block
 	 */
 	public static $loopbackNet=null;
-	
+
 	/**
 	 * @var PhpIP\IPv4Block
 	 */
@@ -69,7 +69,7 @@ class NetIps extends ArmsModel
     {
         return 'net_ips';
     }
-	
+
 	public $linksSchema=[
 		'networks_id'=>[Networks::class],
 		'comps_ids'=>[Comps::class,'netIps_ids'],
@@ -78,7 +78,7 @@ class NetIps extends ArmsModel
 		'users_ids'=>[Users::class,'netIps_ids'],
 		'dns_names_ids'=>[DnsNames::class,'net_ips_ids'],
 	];
-	
+
 	/**
      * {@inheritdoc}
      */
@@ -86,14 +86,14 @@ class NetIps extends ArmsModel
     {
         return [
             [['addr', 'mask','networks_id'], 'integer'],
-			
+
             [['text_addr'], 'ip', 'ipv6' => false, 'subnet'=>null],
 			[['text_addr'], 'required'],
 			[['text_addr'], 'unique'],
 			[['comment','name'],'string']
         ];
     }
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -112,8 +112,8 @@ class NetIps extends ArmsModel
 			]
 		];
 	}
-	
-	
+
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -198,21 +198,25 @@ class NetIps extends ArmsModel
 			]
 		];
 	}
-	
+
 	/**
 	 * Name for search
-	 * @param string $ignoreHint
+	 * @param string|string[] $ignoreHint
 	 * @return string
 	 */
 	public function getSname($ignoreHint='')
 	{
 		$hint=$this->name;
-		if ($ignoreHint && strtolower($ignoreHint??'')==strtolower($hint??'')) {
-			$hint='';
+		if (!is_array($ignoreHint)) $ignoreHint=[$ignoreHint];
+		foreach ($ignoreHint as $ingore) {
+			if ($ingore && strtolower($ingore??'')==strtolower($hint??'')) {
+				$hint='';
+				break;
+			}
 		}
 		return $this->text_addr.(empty($hint)?'':(' ('.$hint.')'));
 	}
-	
+
 	/**
 	 * Network
 	 * @return Networks|ActiveQuery
@@ -221,13 +225,13 @@ class NetIps extends ArmsModel
 	{
 		return $this->hasOne(Networks::class, ['id' => 'networks_id']);
 	}
-	
+
 	public function getSegment()
 	{
 		if (is_object($this->network)) return $this->network->segment;
 		return null;
 	}
-	
+
 	/**
 	 * Network
 	 * @return Networks|array|ActiveRecord
@@ -244,8 +248,8 @@ class NetIps extends ArmsModel
 			->orderBy(['networks.mask'=>SORT_DESC])
 			->one();
 	}
-	
-	
+
+
 	/**
 	 * Возвращает привязанные ОС
 	 */
@@ -254,7 +258,7 @@ class NetIps extends ArmsModel
 		return $this->hasMany(Comps::class, ['id' => 'comps_id'])->from(['ip_comps'=>Comps::tableName()])
 			->viaTable('{{%ips_in_comps}}', ['ips_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает привязанные ОС
 	 */
@@ -263,7 +267,7 @@ class NetIps extends ArmsModel
 		return $this->hasMany(Users::class, ['id' => 'users_id'])->from(['ip_users'=>Users::tableName()])
 			->viaTable('{{%ips_in_users}}', ['ips_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает привязанное оборудование
 	 */
@@ -272,7 +276,7 @@ class NetIps extends ArmsModel
 		return $this->hasMany(Techs::class, ['id' => 'techs_id'])->from(['ip_techs'=>Techs::tableName()])
 			->viaTable('{{%ips_in_techs}}', ['ips_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает привязанное оборудование
 	 */
@@ -326,14 +330,14 @@ class NetIps extends ArmsModel
 		return $this->hasMany(DnsNames::class, ['id' => 'dns_names_id'])->from(['ip_dns_names'=>DnsNames::tableName()])
 			->viaTable('{{%dns_names_in_ips}}', ['ips_id' => 'id']);
 	}
-	
+
 	public function getPlace()
 	{
 		if (!is_object($this->network)) return null;
 		return $this->network->place;
 	}
-	
-	
+
+
 	/**
 	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
 	 * @param $comp_id
@@ -353,10 +357,10 @@ class NetIps extends ArmsModel
 				$this->save();
 			}
 		}
-		
+
 		$this->deleteIfEmpty();
 	}
-	
+
 	/**
 	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
 	 * @param $tech_id
@@ -376,10 +380,10 @@ class NetIps extends ArmsModel
 				$this->save();
 			}
 		}
-		
+
 		$this->deleteIfEmpty();
 	}
-	
+
 	/**
 	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
 	 * @param $ace_id
@@ -399,10 +403,10 @@ class NetIps extends ArmsModel
 				$this->save();
 			}
 		}
-		
+
 		$this->deleteIfEmpty();
 	}
-	
+
 	/**
 	 * Отвязать DNS-имя от этого IP и удалить IP если к нему более ничего не привязано
 	 * @param $dns_name_id
@@ -465,7 +469,7 @@ class NetIps extends ArmsModel
 			$this->delete();
 		}
 	}
-	
+
 	/**
 	 * @inheritdoc
 	 */
@@ -485,18 +489,18 @@ class NetIps extends ArmsModel
 			$this->mask=$mask;
 			$this->text_addr=$ip4->humanReadable();
 			if (!is_null($mask)) $this->text_addr.='/'.$mask;
-			
+
 			if (is_object($network=$this->findNetwork()))
 				$this->networks_id=$network->id;
 			else
 				$this->networks_id=null;
 
 			return true;
-			
+
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Ищет ID по адресу. если не находит и можно создать, то создает
 	 * @param              $addr
@@ -517,7 +521,7 @@ class NetIps extends ArmsModel
 		}
 		return $item->id;
 	}
-	
+
 	/**
 	 * Ищет ID по адресу. если не находит и можно создать, то создает
 	 * @param              $addr
@@ -539,8 +543,8 @@ class NetIps extends ArmsModel
 		}
 		return $item->id;
 	}
-	
-	
+
+
 	/**
 	 * Имея текстовый список IP возвращает ids объектов IP адресов
 	 * @param      $text
@@ -560,7 +564,7 @@ class NetIps extends ArmsModel
 		}
 		return $ids;
 	}
-	
+
 	public static function removeMask($text_addr)
 	{
 		if ($slash=strpos($text_addr,'/')) {
@@ -568,7 +572,7 @@ class NetIps extends ArmsModel
 		}
 		return $text_addr;
 	}
-	
+
 	/**
 	 * Отфильтровываем ненужные адреса из диапазонов
 	 * loopback - 127.0.0.0/8
@@ -582,19 +586,19 @@ class NetIps extends ArmsModel
 		//Если сети loopback & apipa не инициированы - инициализируем
 		if (is_null(static::$loopbackNet)) static::$loopbackNet=new PhpIP\IPv4Block('127.0.0.0/8');
 		if (is_null(static::$apipaNet)) static::$apipaNet=new PhpIP\IPv4Block('169.254.0.0/16');
-		
+
 		//проверяем вхождение
 		try {
 			$ip=new PhpIP\IPv4(static::removeMask($text_addr));
 		} /** @noinspection PhpRedundantCatchClauseInspection */ catch (Exception $e) {
 			return false;
 		}
-		
+
 		if (static::$loopbackNet->containsIP($ip)) return false;
 		if (static::$apipaNet->containsIP($ip)) return false;
 		return true;
 	}
-	
+
 	public function getArchived() {
 		//archived дергается на каждый IP в списках: сеть из общего кэша справочника
 		$network=$this->isRelationPopulated('network')?
@@ -603,7 +607,7 @@ class NetIps extends ArmsModel
 		if (is_object($network)) return $network->archived;
 		return false;
 	}
-	
+
 	/**
 	 * Фильтрует ввод "список IP по одному в строку"
 	 * удаляет некорректные значения
@@ -626,7 +630,7 @@ class NetIps extends ArmsModel
 		}
 		return '';
 	}
-	
+
 	/**
 	 * проверяет что все строки текстового атрибута $attribute это валидные IP адреса
 	 * @param $model
@@ -643,7 +647,7 @@ class NetIps extends ArmsModel
 			}
 		}
 	}
-	
+
 	public static function ipList2long(?string $list) {
 		if (is_null($list) || !strlen(trim($list))) return [];
 		$ips=explode("\n",$list);
@@ -651,7 +655,7 @@ class NetIps extends ArmsModel
 		foreach ($ips as $ip) $longs[]=ip2long($ip);
 		return $longs;
 	}
-	
+
 	/**
 	 * @return PhpIP\IPv4
 	 */
@@ -660,11 +664,11 @@ class NetIps extends ArmsModel
 		if (isset($this->attrsCache['IPv4'])) return $this->attrsCache['IPv4'];
 		return $this->attrsCache['IPv4']=PhpIP\IPv4::create($this->text_addr);
 	}
-	
+
 	public function isIn(Networks $network) {
 		return $this->IPv4()->isIn($network->IPv4Block());
 	}
-	
+
 	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null
