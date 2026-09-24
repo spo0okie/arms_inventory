@@ -31,8 +31,17 @@ foreach ($models as $ace) {
 	$entries = [];
 	foreach ($ace->netIps as $ip) {
 		$names = [];
-		foreach ($ip->dnsNames as $dnsName) $names[] = $this->render('/dns-names/item', ['model' => $dnsName, 'static_view' => true]);
-		$entries[] = ModelWidget::widget(['model' => $ip, 'options' => ['static_view' => true]])
+		$ignoreHints = [];
+		foreach ($ip->dnsNames as $dnsName) {
+			$names[] = $this->render('/dns-names/item', ['model' => $dnsName, 'static_view' => true]);
+			$ignoreHints[]=$dnsName->fqdn;
+			$ignoreHints[]=$dnsName->name;
+		}
+		$entries[] = ModelWidget::widget([
+			'model' => $ip,
+			'rendered_comment' => $ignoreHints,
+			'options' => ['static_view' => true]]
+		)
 			. (count($names) ? ' <span class="small">(' . implode(', ', $names) . ')</span>' : '');
 	}
 	//субъект задан не адресом (сеть, ОС, сервис, текст) — показываем как есть
@@ -43,16 +52,30 @@ foreach ($models as $ace) {
 	}
 
 	$resource = $ace->acl->resource ?? null;
-	$target = is_object($resource)
-		? ModelWidget::widget(['model' => $resource, 'options' => ['static_view' => true]])
-		: Html::encode((string)$resource);
 	//назначение задано адресом — показываем и узел, которому он принадлежит
 	if ($resource instanceof NetIps) {
 		$nodes = [];
-		foreach ($resource->comps as $node) $nodes[] = ModelWidget::widget(['model' => $node, 'options' => ['static_view' => true]]);
-		foreach ($resource->techs as $node) $nodes[] = ModelWidget::widget(['model' => $node, 'options' => ['static_view' => true]]);
-		if (count($nodes)) $target .= ' <span class="small">(' . implode(', ', $nodes) . ')</span>';
-	}
+		$ignoreHints = [];
+		foreach ($resource->comps as $node) {
+			$nodes[] = ModelWidget::widget(['model' => $node, 'options' => ['static_view' => true]]);
+			$ignoreHints[] = $node->fqdn;
+			$ignoreHints[] = $node->name;
+		}
+		foreach ($resource->techs as $node) {
+			$nodes[] = ModelWidget::widget(['model' => $node, 'options' => ['static_view' => true]]);
+			if ($node->fqdn) $ignoreHints[] = $node->fqdn;
+			if ($node->name) $ignoreHints[] = $node->name;
+			if ($node->num) $ignoreHints[] = $node->num;
+		}
+		$target = ModelWidget::widget([
+			'model' => $resource,
+			'options' => ['static_view' => true],
+			'rendered_comment' => $ignoreHints,
+		])
+			.' <span class="small">(' . implode(', ', $nodes) . ')</span>';
+	} else	$target = is_object($resource)
+		? ModelWidget::widget(['model' => $resource, 'options' => ['static_view' => true]])
+		: Html::encode((string)$resource);
 
 	//стрелка — ссылка на запись доступа
 	$arrow = $this->render('/aces/item', [
