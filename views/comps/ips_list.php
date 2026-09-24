@@ -5,8 +5,8 @@
  * Date: 01.03.2019
  * Time: 19:18
  */
-/* @var $this yii\web\View */
-/* @var $model app\models\Comps */
+/** @var yii\web\View $this */
+/** @var app\models\Comps $model */
 
 use app\components\ListObjectsWidget;
 use yii\helpers\Html;
@@ -49,10 +49,18 @@ if (count($activeIps) || count($ignoredIps)) {
 }
 ?>
 
-<?php /* пробросы снаружи на эту ОС и её адреса — общий вью с оборудованием и IP */ ?>
-<?= $this->render('/aces/forwards',[
+<?php /* пробросы снаружи на эту ОС и её адреса — общий вью с оборудованием и IP */
+$forwards=$this->render('/aces/forwards',[
 	'models'=>$model->forwardsIn,'owner'=>$model,'attribute'=>'forwardsIn','static_view'=>$static_view,
-]) ?>
+]);
+
+if ($forwards) { ?>
+<div class="pe-4">
+	<?= $forwards ?>
+</div>
+<?php } ?>
+
+
 
 <div class="pe-5">
 	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'mac') ?>
