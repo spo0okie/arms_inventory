@@ -1,7 +1,7 @@
 <?php
 
-/* @var $this yii\web\View */
-/* @var $model app\models\NetIps */
+/** @var yii\web\View $this */
+/** @var app\models\NetIps $model */
 
 
 use app\components\ItemObjectWidget;
