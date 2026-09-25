@@ -7,6 +7,7 @@ use app\generation\context\GenerationContext;
 use app\models\traits\AcesModelCalcFieldsTrait;
 use Yii;
 use app\helpers\ArrayHelper;
+use app\helpers\IpParamsHelper;
 use yii\helpers\Html;
 
 /**
@@ -429,7 +430,8 @@ class Aces extends ArmsModel
 	public function getHopLabel(): string
 	{
 		$subjects=[];
-		foreach ($this->subjects as $subject) $subjects[]=is_object($subject)?$subject->name:(string)$subject;
+		//sname, а не name: у адреса name — подпись резервирования (обычно пусто), сам адрес — в sname
+		foreach ($this->subjects as $subject) $subjects[]=is_object($subject)?$subject->sname:(string)$subject;
 		return ($this->name?$this->name.': ':'')
 			.implode(', ',$subjects)
 			.' → '.(is_object($this->acl)?$this->acl->sname:'?');
@@ -450,8 +452,33 @@ class Aces extends ArmsModel
 	}
 
 	/**
+	 * Сервисы, работающие на узлах: на ОС, на оборудовании и на владельцах адресов
+	 * @param int[] $comps
+	 * @param int[] $techs
+	 * @param int[] $ips
+	 * @return int[] services.id
+	 */
+	protected static function servicesOnNodesIds(array $comps, array $techs, array $ips): array
+	{
+		if (count($ips)) {
+			$comps=array_merge($comps,(new \yii\db\Query())->select('comps_id')->from('ips_in_comps')
+				->where(['ips_id'=>$ips])->column());
+			$techs=array_merge($techs,(new \yii\db\Query())->select('techs_id')->from('ips_in_techs')
+				->where(['ips_id'=>$ips])->column());
+		}
+		$ids=[];
+		if (count($comps)) $ids=array_merge($ids,(new \yii\db\Query())->select('services_id')
+			->from('comps_in_services')->where(['comps_id'=>$comps])->column());
+		if (count($techs)) $ids=array_merge($ids,(new \yii\db\Query())->select('service_id')
+			->from('techs_in_services')->where(['tech_id'=>$techs])->column());
+		return array_values(array_unique(array_map('intval',$ids)));
+	}
+
+	/**
 	 * Кандидаты в следующие хопы: записи доступа, у которых субъект — ресурс этой
 	 * записи (посредник): сам сервис-ресурс с роднёй, узлы ресурса и их адреса.
+	 * Если ресурс — узел или адрес (проброс на сервер прокси), то и сервисы, работающие
+	 * на нём, с роднёй: следующий хоп обычно описан на уровне сервисов («nginx → бэк»).
 	 * Уже выбранные хопы остаются в списке всегда.
 	 * @return array [id => подпись]
 	 */
@@ -460,13 +487,24 @@ class Aces extends ArmsModel
 		$ids=array_map('intval',(array)$this->next_aces_ids);
 		$acl=$this->acl;
 		if (is_object($acl)) {
-			$services=$comps=$ips=[];
+			$services=$comps=$techs=$ips=[];
 			if (is_object($acl->service)) $services=static::serviceFamilyIds($acl->service);
 			foreach ($acl->nodes as $node) {
 				if ($node instanceof Comps) {
 					$comps[]=(int)$node->id;
 					foreach ($node->netIps as $ip) $ips[]=(int)$ip->id;
+				} elseif ($node instanceof Techs) {
+					$techs[]=(int)$node->id;
+					foreach ($node->netIps as $ip) $ips[]=(int)$ip->id;
 				} elseif ($node instanceof NetIps) $ips[]=(int)$node->id;
+			}
+			//вверх — только от ресурса-узла: у ресурса-сервиса узлы уже его, а подъём от них
+			//добавил бы соседей по серверу (HAProxy к записи на NGINX)
+			if (!is_object($acl->service)) {
+				foreach (static::servicesOnNodesIds($comps,$techs,$ips) as $serviceId) {
+					$service=Services::findOne($serviceId);
+					if (is_object($service)) $services=array_merge($services,static::serviceFamilyIds($service));
+				}
 			}
 			foreach ([
 				['services_in_aces','services_id',$services],
@@ -482,20 +520,48 @@ class Aces extends ArmsModel
 
 	/**
 	 * Кандидаты в предыдущие хопы: записи доступа к субъектам этой записи (посреднику):
-	 * ACL на сервисы-субъекты с роднёй, на ОС-субъекты и на адреса-субъекты.
+	 * ACL на сервисы-субъекты с роднёй, на ОС-субъекты и на адреса-субъекты, а также на
+	 * серверы сервисов-субъектов (с потомками) и их адреса — туда приходит проброс.
+	 * Субъекты берутся из введённых значений (services_ids, comps_ids, текст ips), а не
+	 * из связей в БД: форма новой записи («добавить исходящий доступ» со страницы
+	 * сервиса) приходит с предзаполненным субъектом ещё до первого сохранения.
 	 * @return array [id => подпись]
 	 */
 	public function prevCandidates(): array
 	{
 		$ids=array_map('intval',(array)$this->prev_aces_ids);
-		$services=[];
-		foreach ((array)$this->services as $service) $services=array_merge($services,static::serviceFamilyIds($service));
+		$services=$own=[];
+		$subjectServices=Services::findAll(array_map('intval',(array)$this->services_ids));
+		foreach ($subjectServices as $service) {
+			$services=array_merge($services,static::serviceFamilyIds($service));
+			//узлы — только самого сервиса и потомков: серверы предков к нему отношения не имеют
+			$own[]=(int)$service->id;
+			foreach ((array)$service->getChildrenRecursive() as $child) $own[]=(int)$child->id;
+		}
 		$comps=array_map('intval',(array)$this->comps_ids);
+		$techs=[];
 		$ips=array_map('intval',(array)$this->netIps_ids);
+		//у несохранённой записи адреса-субъекты есть только текстом; ищем существующие, не создавая
+		if (!count($ips)) foreach (explode("\n",(string)$this->ips) as $addr) {
+			$addr=trim($addr);
+			if ($addr!=='' && ($ipId=NetIps::fetchByTextAddr($addr,false))) $ips[]=(int)$ipId;
+		}
+		if (count($own)) {
+			$serviceComps=(new \yii\db\Query())->select('comps_id')->from('comps_in_services')
+				->where(['services_id'=>$own])->column();
+			$techs=(new \yii\db\Query())->select('tech_id')->from('techs_in_services')
+				->where(['service_id'=>$own])->column();
+			$comps=array_merge($comps,$serviceComps);
+			if (count($serviceComps)) $ips=array_merge($ips,(new \yii\db\Query())->select('ips_id')
+				->from('ips_in_comps')->where(['comps_id'=>$serviceComps])->column());
+			if (count($techs)) $ips=array_merge($ips,(new \yii\db\Query())->select('ips_id')
+				->from('ips_in_techs')->where(['techs_id'=>$techs])->column());
+		}
 		$resource=['or'];
 		if (count($services)) $resource[]=['acls.services_id'=>$services];
-		if (count($comps)) $resource[]=['acls.comps_id'=>$comps];
-		if (count($ips)) $resource[]=['acls.ips_id'=>$ips];
+		if (count($comps)) $resource[]=['acls.comps_id'=>array_map('intval',$comps)];
+		if (count($techs)) $resource[]=['acls.techs_id'=>array_map('intval',$techs)];
+		if (count($ips)) $resource[]=['acls.ips_id'=>array_map('intval',$ips)];
 		if (count($resource)>1) {
 			$ids=array_merge($ids,(new \yii\db\Query())->select('aces.id')->from('aces')
 				->innerJoin('acls','acls.id=aces.acls_id')->where($resource)->column());
@@ -831,6 +897,33 @@ class Aces extends ArmsModel
 	{
 		$parts=preg_split('/\s*(?:->|=>|→)\s*/u',trim($params),2);
 		return [trim($parts[0]??''),trim($parts[1]??'')];
+	}
+
+	/**
+	 * Сетевые правила записи на стороне ресурса — куда соединение приходит на узле:
+	 * по каждому сетевому типу параметры записи (фолбэк — параметры типа по умолчанию),
+	 * у проброса — назначение («TCP 443->8443» → TCP 8443; без стрелки порт тот же).
+	 * @return array [access_types_id => правила IpParamsHelper::parse() (пусто — не разобрать)]
+	 */
+	public function getLandingRules(): array
+	{
+		if (isset($this->attrsCache['landingRules'])) return $this->attrsCache['landingRules'];
+		$ipParams=$this->getIpParams();
+		$result=[];
+		foreach ((array)$this->accessTypes as $type) {
+			if (!is_object($type) || !$type->is_ip) continue;
+			$params=trim((string)($ipParams[$type->id]??''));
+			if ($params==='') $params=trim((string)$type->ip_params_def);
+			[$ext,$int]=static::parseForwardParams($params);
+			$rules=IpParamsHelper::parse($ext);
+			if ($int!=='') {
+				$protocols=[];
+				foreach ($rules as $rule) $protocols=array_merge($protocols,$rule['protocols']);
+				$rules=IpParamsHelper::parse($int,array_unique($protocols));
+			}
+			$result[$type->id]=$rules;
+		}
+		return $this->attrsCache['landingRules']=$result;
 	}
 
 	/**

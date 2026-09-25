@@ -216,6 +216,24 @@ class AccessTypes extends ArmsModel
 		return static::$hierarchyCache[$id]??[];
 	}
 
+	/**
+	 * Сами типы и все их потомки по иерархии (набор «Web» → HTTP, HTTPS…)
+	 * @param int[] $ids
+	 * @return int[]
+	 */
+	public static function withDescendantsIds(array $ids): array
+	{
+		$result=[];
+		$queue=array_map('intval',$ids);
+		while (count($queue)) {
+			$id=array_shift($queue);
+			if (isset($result[$id])) continue;	//кольцо в иерархии не зациклит
+			$result[$id]=$id;
+			foreach (static::childrenIdsCached($id) as $childId) $queue[]=(int)$childId;
+		}
+		return array_values($result);
+	}
+
 	public function getFlagRecursive($flag)
 	{
 		if ($this->$flag) return true;

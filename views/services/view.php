@@ -89,7 +89,12 @@ $tabs[]=TabsWidget::asyncDynagridPropertyTab($model,'aces', $showArchived,
 );
 
 $tabs[]=TabsWidget::asyncDynagridPropertyTab($model,'acls', $showArchived,
-	filter: ['services_resource_ids'=>array_merge($parents_ids,$children_ids)],
+	filter: [
+		'services_resource_ids'=>array_merge($parents_ids,$children_ids),
+		//плюс доступы на серверы сервиса и потомков, вписывающиеся в их стандартные доступы
+		//(проброс 443 на сервер прокси — у NGINX, а не у соседнего HAProxy); узлы предков — чужие
+		'services_nodes_resource_ids'=>array_merge([$model->id],$children_ids),
+	],
 	linkClass: 'aces',
 	staticContent: Html::a('Добавить входящий доступ',[
 		//форма создания ACL групповая: ресурсы — мультиселекты *_ids

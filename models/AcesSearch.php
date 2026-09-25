@@ -19,6 +19,9 @@ class AcesSearch extends Aces
 	
 	public $services_subject_ids;
 	public $services_resource_ids;
+	//сервисы, чьи узлы/адреса считаются ресурсом, когда соединение вписывается в стандартные
+	//доступы сервиса (Services::getIncomingViaNodesAcesIds) — по ИЛИ с services_resource_ids
+	public $services_nodes_resource_ids;
 	//сегмент как субъект ACE / как ресурс ACL (вкладки доступов на странице сегмента)
 	public $segments_subject_ids;
 	public $segments_resource_ids;
@@ -43,6 +46,7 @@ class AcesSearch extends Aces
 				'name',
 				'services_subject_ids',
 				'services_resource_ids',
+				'services_nodes_resource_ids',
 				'segments_subject_ids',
 				'segments_resource_ids',
 				'ips_subject_ids',
@@ -95,9 +99,24 @@ class AcesSearch extends Aces
 		$filter->andFilterWhere([
             'id' => $this->id,
 			'services_subjects.id' => $this->services_subject_ids,
-			'services_resources.id' => $this->services_resource_ids,
             'updated_at' => $this->updated_at,
         ]);
+
+		//доступ к сервису: ACL на сам сервис и (если задано) записи на его узлы/адреса,
+		//вписывающиеся в стандартные доступы сервиса — подзапросами, по ИЛИ
+		$incoming=['or'];
+		if (!empty($this->services_resource_ids)) {
+			$incoming[]=['aces.acls_id'=>(new \yii\db\Query())->select('id')
+				->from('acls')->where(['services_id'=>$this->services_resource_ids])];
+		}
+		if (!empty($this->services_nodes_resource_ids)) {
+			$viaNodes=[];
+			foreach (Services::find()->where(['id'=>(array)$this->services_nodes_resource_ids])->all() as $service)
+				$viaNodes=array_merge($viaNodes,$service->getIncomingViaNodesAcesIds());
+			if (count($viaNodes)) $incoming[]=['aces.id'=>array_values(array_unique($viaNodes))];
+		}
+		if (count($incoming)>1) $filter->andWhere($incoming);
+		elseif (!empty($this->services_nodes_resource_ids)) $filter->andWhere('0=1');
 		
 		//сегментные фильтры — подзапросами: не зависят от того, какие связи заджойнены
 		//под видимые колонки (см. prepareSearch)

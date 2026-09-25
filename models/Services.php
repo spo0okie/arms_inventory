@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\helpers\IpParamsHelper;
 use app\models\base\ArmsModel;
 use app\modules\schedules\components\ScheduleOwnerBehavior;
 use app\modules\schedules\models\Schedules;
@@ -348,7 +349,10 @@ class Services extends ArmsModel
 					.'<br>Предзаполняют типы в формах предоставления доступа, когда ресурсом выбран этот сервис;'
 					.' в каждом конкретном доступе набор можно поменять вручную'
 					.'<br>У IP-типов можно переопределить сетевые параметры для этого сервиса'
-					.' (например HTTPS на нестандартном порту — "TCP 8140")',
+					.' (например HTTPS на нестандартном порту — "TCP 8140")'
+					.'<br>По протоколу и порту отсюда входящие доступы на серверы сервиса (например'
+					.' пробросы) попадают во вкладку входящих доступов сервиса: у сервера прокси'
+					.' проброс на 8443 увидит сервис, слушающий 8443, а не соседний на том же сервере',
 				'placeholder' => 'Выберите типы доступа',
 				'typeClass' => \app\types\LinkType::class,
 			],
@@ -1016,6 +1020,81 @@ class Services extends ArmsModel
 			}
 		}
 		return $this->attrsCache['defaultIpParams']=$params;
+	}
+
+	/**
+	 * Что сервис принимает по своим стандартным типам доступа: сетевые правила
+	 * (переопределение сервиса, иначе параметры типа; для наборов — параметры их
+	 * сетевых потомков) и id всех стандартных типов с потомками — по ним сверяются
+	 * типы, у которых портов нет.
+	 * @return array ['rules'=>правила IpParamsHelper::parse(), 'types'=>int[]]
+	 */
+	public function getDefaultAccessRules(): array
+	{
+		if (isset($this->attrsCache['defaultAccessRules'])) return $this->attrsCache['defaultAccessRules'];
+		$overrides=$this->getDefaultIpParams();
+		$rules=[];
+		$types=[];
+		foreach ((array)$this->defaultAccessTypes as $default) {
+			foreach (AccessTypes::withDescendantsIds([$default->id]) as $typeId) {
+				$types[$typeId]=$typeId;
+				$type=AccessTypes::getLoadedItem($typeId,true);
+				if (!is_object($type) || !$type->is_ip) continue;
+				//переопределение сервиса относится только к явно выбранному типу
+				$params=($typeId==$default->id && isset($overrides[$typeId]))?
+					$overrides[$typeId]:(string)$type->ip_params_def;
+				$rules=array_merge($rules,IpParamsHelper::parse($params));
+			}
+		}
+		return $this->attrsCache['defaultAccessRules']=['rules'=>$rules,'types'=>array_values($types)];
+	}
+
+	/**
+	 * Входящие доступы к сервису через его узлы: записи доступа, у которых ресурс ACL —
+	 * ОС/оборудование сервиса или их адреса, и соединение вписывается в стандартные доступы
+	 * сервиса. Так проброс на сервер прокси виден у того сервиса, что слушает этот порт
+	 * (NGINX на 443), а не у всех сервисов сервера (HAProxy на прочих TCP-портах).
+	 *
+	 * Сверка по каждому типу записи: у сетевого типа с разбираемыми параметрами — протокол
+	 * и порты на стороне ресурса ({@see Aces::getLandingRules()}, у проброса — назначение);
+	 * у прочих (не сетевой тип, параметры не разобрать) — сам тип среди стандартных
+	 * типов сервиса и их потомков. Без стандартных типов у сервиса — пусто.
+	 * @return int[] aces.id
+	 */
+	public function getIncomingViaNodesAcesIds(): array
+	{
+		$accepts=$this->getDefaultAccessRules();
+		if (!count($accepts['types'])) return [];
+
+		$compsIds=array_map('intval',ArrayHelper::getColumn($this->comps,'id'));
+		$techsIds=array_map('intval',ArrayHelper::getColumn($this->techs,'id'));
+		$ipsIds=[];
+		if (count($compsIds)) $ipsIds=array_merge($ipsIds,(new \yii\db\Query())->select('ips_id')
+			->from('ips_in_comps')->where(['comps_id'=>$compsIds])->column());
+		if (count($techsIds)) $ipsIds=array_merge($ipsIds,(new \yii\db\Query())->select('ips_id')
+			->from('ips_in_techs')->where(['techs_id'=>$techsIds])->column());
+
+		$resource=['or'];
+		if (count($compsIds)) $resource[]=['acls.comps_id'=>$compsIds];
+		if (count($techsIds)) $resource[]=['acls.techs_id'=>$techsIds];
+		if (count($ipsIds)) $resource[]=['acls.ips_id'=>array_map('intval',$ipsIds)];
+		if (count($resource)==1) return [];
+
+		$ids=[];
+		$aces=Aces::find()->innerJoin('acls','acls.id=aces.acls_id')->where($resource)
+			->with(['accessTypes'])->all();
+		foreach ($aces as $ace) {
+			/** @var Aces $ace */
+			$landing=$ace->getLandingRules();
+			foreach ((array)$ace->accessTypes as $type) {
+				$rules=$landing[$type->id]??[];
+				$fits=count($rules)&&count($accepts['rules'])?
+					IpParamsHelper::overlap($rules,$accepts['rules']):
+					in_array((int)$type->id,$accepts['types']);
+				if ($fits) {$ids[]=(int)$ace->id; break;}
+			}
+		}
+		return $ids;
 	}
 
 	public function setDefaultIpParams($value) {
