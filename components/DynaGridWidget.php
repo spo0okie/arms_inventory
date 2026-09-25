@@ -235,7 +235,11 @@ class DynaGridWidget extends DynaGrid
 							get: function (key,def) {return def},
 							set: function (key,val) {persistResizeColumn(key,val)}
 						}'),
-				'selector'=>'tr th',
+				//только видимые: скрытая CSS-ом колонка (уровни доступов, AccessLevelSwitchWidget)
+				//иначе получает ручку не на месте, а соседняя ручка тянет невидимую колонку.
+				//Таблицу в неактивной вкладке это не ломает: инициализация ждёт видимости
+				//(visibilityWaitTimeout)
+				'selector'=>'tr th:visible',
 				'visibilityWaitTimeout'=>500,
 				'debug'=>1,
 			],
@@ -343,13 +347,14 @@ JS;
 		//Расставляем ширины колонок
 		if (UiTablesCols::colWidthsExist($this->id)) {
 			//если ширина сохранена - проставляем ее
-			if ($width=UiTablesCols::fetchColWidth($this->id,$colId)) {
-				$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','style'],"width:$width%");
-			} else {
-				//иначе 7%, т.к если совсем ничего не поставить (а в этом месте у нас точно есть сохраненные столбцы)
-				//они поделят 100% ширины таблицы меж собой и эта будет с шириной 0
-				$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','style'],"width:7%");
-			}
+			//иначе 7%, т.к если совсем ничего не поставить (а в этом месте у нас точно есть сохраненные столбцы)
+			//они поделят 100% ширины таблицы меж собой и эта будет с шириной 0
+			$width=UiTablesCols::fetchColWidth($this->id,$colId) ?: 7;
+			$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','style'],"width:$width%");
+			//та же ширина — отдельным атрибутом: style плагин ширин перезаписывает замером, а
+			//переключатель уровней доступов (AccessLevelSwitchWidget) раскладывает видимые
+			//колонки именно от сохранённых ширин
+			$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','data-base-width'],$width);
 		}
 		
 		$model=$data['model']??$this->model;

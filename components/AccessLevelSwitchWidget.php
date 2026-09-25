@@ -60,6 +60,16 @@ use yii\web\View;
  * от класса на body действует на любую таблицу, появившуюся на странице в любой
  * момент, без подписок на события загрузки.
  *
+ * ШИРИНЫ КОЛОНОК (jquery.resizableColumns, проценты в style заголовков). Плагин берёт
+ * только видимые заголовки (selector `tr th:visible` в DynaGridWidget; таблицы в скрытых
+ * вкладках ждут видимости — visibilityWaitTimeout) и считает ширины один раз. После
+ * переключения уровня js() раскладывает видимые колонки от «базовых» ширин — сохранённых
+ * на сервере, их DynaGridWidget дублирует в data-base-width, т.к. style плагин
+ * перезаписывает, — нормируя их к 100%, и пересобирает заголовки/ручки плагина.
+ * Замерять раскладку нельзя: вернувшиеся колонки браузер сжимает до минимума, и замер
+ * закрепил бы их схлопнутыми. Нет сохранённых ширин — ширины снимаются, раскладывает
+ * браузер. Перетаскивание обновляет базу видимых колонок (событие column:resize:stop).
+ *
  * СОСТОЯНИЕ. Выбор (both|info|net) живёт в localStorage браузера под ключом
  * $storageKey — общий для всех страниц: это личное удобство просмотра, а не
  * состояние данных. js() при загрузке читает его и ставит класс на body.
@@ -138,6 +148,73 @@ class AccessLevelSwitchWidget extends Widget
 		if (level==='info'||level==='net') document.body.classList.add('access-level-'+level);
 		document.querySelectorAll('.access-level-btn').forEach(function(btn){
 			btn.classList.toggle('active',btn.getAttribute('data-access-level')===level);
+		});
+		resyncResizable();
+	}
+	//ширины колонок (jquery.resizableColumns, проценты в style заголовков) плагин считает при
+	//инициализации таблицы. После смены набора видимых колонок раскладку НЕ замеряем: у
+	//видимых уже стоят проценты на все 100%, и вернувшимся колонкам браузер отдаёт минимум —
+	//замер закрепил бы их схлопнутыми. Вместо этого видимые колонки получают базовые ширины
+	//(сохранённые на сервере, data-base-width от DynaGridWidget), нормированные к 100%,
+	//и только потом плагин пересобирает заголовки и ручки (setHeaders/syncHandleWidths).
+	//Плагин kartik вешается на контейнер грида (div[data-resizable-columns-id]), а не на table.
+	//Таблицы, чья инициализация ещё ждёт видимости, возьмут видимые колонки сами
+	//(selector tr th:visible), им нужна только раскладка ширин.
+	//база таблицы: {auto: ширин нет — раскладывает браузер по содержимому, w: {колонка: %}}
+	function baseWidths(\$c){
+		var base=\$c.data('armsLevelBase');
+		if (base) return base;
+		base={auto:false,w:{}};
+		fillBase(base,\$c,function(th){return parseFloat(th.getAttribute('data-base-width'));});
+		\$c.data('armsLevelBase',base);
+		//перетаскивание меняет ширины видимых колонок — переносим их в базу в её масштабе,
+		//чтобы следующее переключение уровня не откатило сделанное
+		\$c.on('column:resize:stop.armsLevel',function(){
+			if (base.auto) {
+				//до перетаскивания ширин не было: база — текущая раскладка видимых колонок
+				fillBase(base,\$c,function(th){return visibleHeaders(\$c).is(th)?parseFloat(th.style.width):NaN;});
+				return;
+			}
+			var visible=visibleHeaders(\$c), sum=0;
+			visible.each(function(){sum+=base.w[this.getAttribute('data-resizable-column-id')];});
+			visible.each(function(){
+				var w=parseFloat(this.style.width);
+				if (w>0) base.w[this.getAttribute('data-resizable-column-id')]=w*sum/100;
+			});
+		});
+		return base;
+	}
+	//ширины колонок из источника; неизвестные — средней из известных; нет ни одной — auto
+	function fillBase(base,\$c,source){
+		var known=[];
+		base.w={};
+		\$c.find('thead tr:first th[data-resizable-column-id]').each(function(){
+			var w=source(this);
+			base.w[this.getAttribute('data-resizable-column-id')]=w>0?w:null;
+			if (w>0) known.push(w);
+		});
+		base.auto=!known.length;
+		var def=known.length?known.reduce(function(a,b){return a+b;},0)/known.length:0;
+		for (var id in base.w) if (base.w[id]===null) base.w[id]=def;
+	}
+	function visibleHeaders(\$c){
+		return \$c.find('thead tr:first th[data-resizable-column-id]').filter(function(){
+			return getComputedStyle(this).display!=='none';
+		});
+	}
+	function resyncResizable(){
+		if (!window.jQuery) return;
+		jQuery('[data-resizable-columns-id]').each(function(){
+			var \$c=jQuery(this), base=baseWidths(\$c), visible=visibleHeaders(\$c), sum=0;
+			if (base.auto) visible.each(function(){this.style.width='';});
+			else visible.each(function(){sum+=base.w[this.getAttribute('data-resizable-column-id')];});
+			if (sum>0) visible.each(function(){
+				this.style.width=(base.w[this.getAttribute('data-resizable-column-id')]/sum*100).toFixed(2)+'%';
+			});
+			var rc=\$c.data('resizableColumns');
+			if (!rc || !rc.\$handleContainer) return;
+			rc.setHeaders();
+			rc.syncHandleWidths();
 		});
 	}
 	var stored='both';
