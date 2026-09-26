@@ -67,6 +67,7 @@ proxy, виджеты, кэш, RBAC, журнал) написано один р�
 | `AttributeActionsWidget` | `components/integrations/AttributeActionsWidget.php` | Действия-иконки у атрибута (SMS у телефона) |
 | `CellColumn` | `components/integrations/CellColumn.php` | Колонка интеграции в гриде (списочный режим §5 «Колонки в списках») |
 | `CellsBatch` | `components/integrations/CellsBatch.php` | Батч-наполнение ячеек: кэш + один renderCells() на страницу |
+| `ItemBadgesWidget` | `components/integrations/ItemBadgesWidget.php` | Бейджи у элемента объекта вне гридов (§5 «Бейджи у элементов») |
 | `IntegrationCellsAsset` | `components/assets/IntegrationCellsAsset.php` | JS: один POST `/integrations/cells` на (грид × провайдер × колонка) |
 | `PanelsCache` | `components/integrations/PanelsCache.php` | Файловый кэш панелей и ячеек (`runtime/integrations_cache/`) |
 | `ActionResult` | `components/integrations/ActionResult.php` | Результат действия (ok/HTML/logParams) |
@@ -138,6 +139,10 @@ proxy, виджеты, кэш, RBAC, журнал) написано один р�
   моделей одним походом во внешнюю ИС, вернуть `[id => html]`
   (вызывается только из proxy; батч обязателен — построчных фолбэков
   через `renderPanel()` ядро не делает);
+- `itemBadges($modelClass)` — бейджи у элемента объекта вне гридов
+  (§5 «Бейджи у элементов») `[badgeId => ['title','ttl']]`; **обязана быть
+  дешёвой**; наполняются тем же `renderCells()` (badgeId приходит как
+  columnId — не пересекать с id колонок);
 - `renderUnboundCell($columnId,$model)` — ячейка применимой, но не
   привязанной строки (рендерится при выводе грида, внешние вызовы
   запрещены; по умолчанию приглушённое «—»);
@@ -266,6 +271,41 @@ TTL ячейки (`cellTtl()`: колонка > конфиг `cellTtl` > 30 се
   (`view-integration-<id>` либо глобальный `view`, §6), и проверяется он
   один раз на батч, а не на строку.
 
+### Бейджи у элементов
+
+Тот же списочный режим, но вне грида: живой бейдж рядом с объектом там, где
+он рисуется элементом (item). Пример — иконка статуса VPN у IP-адреса в
+карточке ОС или сотрудника. Провайдер объявляет бейджи `itemBadges()`, а
+view элемента выводит `ItemBadgesWidget::widget(['model' => $model])` одной
+generic-строкой (сейчас — `net-ips/item.php`).
+
+- Бейдж — это ячейка (`CellsBatch::renderItemBadge()` →
+  `renderGridCell()`): только кэш, протухший — приглушённо с data-атрибутами.
+  Наполняет его тот же скрипт `IntegrationCellsAsset` одним
+  `POST /integrations/cells` на (провайдер × бейдж × класс) **со всей
+  страницы**. Proxy принимает id бейджа наравне с id колонок.
+- Отличие от ячейки грида: неприменимый или **непривязанный** объект бейджа
+  не получает. «Прочерк» у каждого адреса был бы шумом.
+- Там, где у объектов есть свои колонки интеграций (грид IP, таблица адресов
+  сети), бейдж отключают параметром view (`integration_badges => false`),
+  иначе одно и то же рисуется дважды. В `static_view` (тултипы, печать)
+  бейджей нет.
+- Бейджи приезжают и в ajax-контенте: асинхронные вкладки, подгружаемые
+  блоки. Скрипт следит за появлением новых протухших ячеек
+  (MutationObserver) и тоже собирает их пачкой.
+
+**Ручные таблицы** (не DynaGrid; сейчас это таблица адресов карточки сети)
+берут колонки через `IntegrationsRegistry::tableColumns($modelClass, $models)`,
+ячейки рисуют `CellsBatch::renderGridCell()`. Персонализации у таких таблиц
+нет, поэтому колонка видна, только если провайдер применим хотя бы к одной
+строке. Иначе у каждой сети висели бы пустые колонки чужих интеграций.
+
+**Тикающая длительность.** Элемент с `data-integration-elapsed="<unix ts
+начала>"` скрипт ядра раз в секунду переписывает как «сколько прошло»
+(`3д 4ч` / `2ч 05м` / `7м 09с`). Кэш ячеек общий и живёт ttl, поэтому в HTML
+кладут момент начала, а не готовую длительность. Готовое «5м» через минуту
+было бы враньём. Серверный начальный текст — в том же формате.
+
 ### Действие L2
 
 Кнопка (`open-in-modal-form`) → `GET /integrations/action` рендерит форму
@@ -386,6 +426,12 @@ bootstrap-модалке. Селектор модалки ядро кладёт 
 | zabbix-sync | `ZabbixSyncProvider` | L1-панель («Постановка на мониторинг»: вердикт + журнал правил; при embedded-провайдере zabbix — под вердиктом его живой блок, когда узел на мониторинге или имеет привязку hostid) | `Comps` и `Techs` | explain.php скрипта [arms.zabbix](https://github.com/spo0okie/arms_zabbix) (GET, JSON, токен) |
 | macsearch | `MacSearchProvider` | Две L1-панели: «Порт коммутатора» (где MAC объекта виден в сети), `auto => false` — открывается по клику иконки поиска рядом с адресом (`MacSearchWidget`, рендерит `MacsType`); «Что подключено к портам» в карточке самого коммутатора, `auto => 'button'` — снимает с коммутатора таблицу MAC целиком (`mode=table`) и раскладывает по портам | `Comps` и `Techs` с MAC-адресом (свои адреса + адреса привязанной ОС/АРМ); вторая панель — только оборудование с типом коммутатора и IP | сервис [arms.macsearch](https://github.com/spo0okie/arms_macsearch) (POST, JSON, токен) — опрашивает коммутаторы, ПЕРЕДАННЫЕ ему списком |
 
+Провайдеры, поставляемые **вне ARMS** (вместе со своей внешней ИС):
+
+| id (рекомендуемый) | Класс | Где живёт | Что делает |
+|----|-------|-----------|-----------|
+| openvpn | `openvpnlogserver\arms\OpenVpnProvider` | репозиторий OpenVPN LogServer, `integrations/arms/` | статус VPN-клиента по имени IP-записи `ovpn-<CN>`: иконка у IP (бейдж), колонки «Статус OpenVPN»/«Источник» в гриде IP и таблице адресов сети, панель в карточке IP |
+
 Конкретные конфиги включения — в
 [docs/help/admin/integrations/providers.md](../help/admin/integrations/providers.md).
 
@@ -444,3 +490,21 @@ item'ов** (`ZabbixProvider::classifyItem()`), а не по шаблону уз
 5. Пример конфига включения — в docblock класса и в
    [admin/providers.md](../help/admin/integrations/providers.md).
 6. Ядро, `layouts/view.php` и карточки объектов **не трогаются**.
+
+### Провайдер вне дерева ARMS
+
+Интеграцию, которая нужна не каждому инстансу, можно поставлять вместе с
+внешней ИС, а не с ARMS. Пример — OpenVPN LogServer (`integrations/arms/`
+в его репозитории). Контракт тот же, отличия только в упаковке:
+
+- своё пространство имён и свой автозагрузчик (`spl_autoload_register`).
+  Инстанс подключает его `require_once` в начале `params-local.php`.
+  Загрузчик должен быть ленивым: на этапе сборки конфига ни `@app`, ни
+  классов ARMS ещё нет;
+- view лежат рядом с провайдером: `renderView()` переопределяется через
+  `Yii::$app->view->renderFile(__DIR__.'/../views/...')` (базовый ищет в
+  `@app/components/integrations/providers/views/<id>`), `$compact` в view
+  передаётся так же;
+- тест пишется в стиле `tests/unit/components/integrations/*` и гоняется в
+  окружении ARMS копированием в `tests/unit/external/`. Этот каталог в ARMS
+  не коммитится.

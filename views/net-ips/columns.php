@@ -6,7 +6,7 @@ $renderer=$this;
 return [
 	'text_addr'=>[
 		'value'=>function($data) use ($renderer){
-			return $renderer->render('item',['model'=>$data]);
+			return $renderer->render('item',['model'=>$data,'integration_badges'=>false]);
 		}
 	],
 	'network'=>[

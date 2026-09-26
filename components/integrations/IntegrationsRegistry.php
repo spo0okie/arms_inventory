@@ -156,6 +156,44 @@ class IntegrationsRegistry
 	}
 
 	/**
+	 * Колонки интеграций для ручной таблицы (не DynaGrid): таблица адресов
+	 * в карточке сети. Персонализации там нет, поэтому колонка видна, если
+	 * провайдер применим хотя бы к одной строке таблицы (appliesTo() —
+	 * дёшево); иначе у обычной сети появлялись бы пустые колонки чужих
+	 * интеграций. Ячейки рисуются {@see CellsBatch::renderGridCell()} — тот
+	 * же кэш и батч, что в гридах.
+	 *
+	 * @param ArmsModel[] $models строки таблицы
+	 * @return array [attributeKey => ['provider','columnId','label','hint']]
+	 */
+	public static function tableColumns(string $modelClass, array $models): array
+	{
+		$columns = [];
+		foreach (static::providers() as $provider) {
+			if (!static::userCanView($provider)) continue;
+			$descriptors = $provider->gridColumns($modelClass);
+			if (!$descriptors) continue;
+			$applies = false;
+			foreach ($models as $model) {
+				if ($model instanceof ArmsModel && $provider->appliesTo($model)) {
+					$applies = true;
+					break;
+				}
+			}
+			if (!$applies) continue;
+			foreach ($descriptors as $columnId => $descriptor) {
+				$columns['integration-'.$provider->id.'-'.$columnId] = [
+					'provider' => $provider,
+					'columnId' => $columnId,
+					'label' => $descriptor['title'] ?? $provider->getTitle(),
+					'hint' => $descriptor['hint'] ?? null,
+				];
+			}
+		}
+		return $columns;
+	}
+
+	/**
 	 * Серверное выполнение действия по сырым параметрам (композиция §2.2):
 	 * строит и валидирует форму, дальше runActionForm(). RBAC здесь НЕ
 	 * проверяется — полномочия даёт право на инициирующее действие

@@ -12,6 +12,9 @@ if (!isset($static_view)) $static_view=false;
 if (!isset($icon)) $icon=false;
 if (!isset($no_class)) $no_class=false;
 if (!isset($rendered_comment)) $rendered_comment='';
+//бейджи интеграций (статус VPN у адреса): не нужны там, где у адресов свои
+//колонки интеграций - грид IP и таблица адресов карточки сети
+if (!isset($integration_badges)) $integration_badges=true;
 //если IP рисуется рядом с компом, то нам не надо в комментарии IP еще раз показывать имя компа
 //(в случае если комментарий повторяет его)
 //поэтому мы можем передать что мы уже отрисовали относительно IP чтобы не повторяться
@@ -47,4 +50,6 @@ if (!empty($model)) {
 			'noSpaces'=>true
 		]),
 	]);
+	if ($integration_badges && !$static_view)
+		echo \app\components\integrations\ItemBadgesWidget::widget(['model'=>$model]);
 }

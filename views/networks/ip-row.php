@@ -1,5 +1,6 @@
 <?php
 
+use app\components\integrations\CellsBatch;
 use yii\helpers\Html;
 
 use app\components\widgets\page\ModelWidget;
@@ -8,6 +9,9 @@ use app\components\widgets\page\ModelWidget;
 /* @var $ip app\models\NetIps */
 /* @var $i integer */
 /* @var $showEmpty boolean */
+/* @var $integrationColumns array колонки интеграций (IntegrationsRegistry::tableColumns) */
+
+if (!isset($integrationColumns)) $integrationColumns=[];
 
 $ip=$model->addr+$i;
 $addr=long2ip($ip);
@@ -63,7 +67,7 @@ $ip=$model->ipsByAddr[$model->addr+$i]??null;
 if (is_object($ip)) {
 	?>
 	<td <?= $class ?>>
-		<?= ModelWidget::widget(['model'=>$ip]) ?>
+		<?= ModelWidget::widget(['model'=>$ip,'options'=>['integration_badges'=>false]]) ?>
 	</td>
 	<td <?= $class ?>>
 		<?php
@@ -79,11 +83,15 @@ if (is_object($ip)) {
 	<td <?= $class ?>>
 		<?= Yii::$app->formatter->asNtext(strlen($ip->comment??'')?$ip->comment:$default_comment) ?>
 	</td>
+	<?php foreach ($integrationColumns as $column) { ?>
+		<td <?= $class ?>><?= CellsBatch::renderGridCell($column['provider'],$column['columnId'],$ip) ?></td>
+	<?php } ?>
 	
 <?php } else { ?>
 	<td <?= $class ?>><span class="net-ips-item"><?= Html::a($addr,['net-ips/create','return'=>'previous','NetIps[text_addr]'=>$addr]) ?></span></td>
 	<td <?= $class ?>></td>
 	<td <?= $class ?>><?= Yii::$app->formatter->asNtext($default_comment) ?></td>
+	<?php foreach ($integrationColumns as $column) { ?><td <?= $class ?>></td><?php } ?>
 <?php } ?>
 
 </tr>

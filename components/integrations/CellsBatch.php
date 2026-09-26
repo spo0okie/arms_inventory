@@ -70,6 +70,19 @@ class CellsBatch
 	}
 
 	/**
+	 * Бейдж у элемента объекта вне грида (иконка статуса у IP в карточке
+	 * ОС) — та же ячейка, что {@see renderGridCell()}, но неприменимый или
+	 * непривязанный объект не получает ничего: «прочерк» у каждого
+	 * элемента был бы шумом. Вызывает {@see ItemBadgesWidget}.
+	 */
+	public static function renderItemBadge(IntegrationProvider $provider, string $badgeId,
+		ArmsModel $model): string
+	{
+		if (!$provider->appliesTo($model) || is_null($provider->binding($model))) return '';
+		return static::renderGridCell($provider, $badgeId, $model);
+	}
+
+	/**
 	 * HTML ячеек колонки для пачки моделей одного класса.
 	 *
 	 * Неприменимые строки — пустая ячейка; применимые без привязки —

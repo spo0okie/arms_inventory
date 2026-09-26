@@ -5,6 +5,7 @@ namespace tests\unit\components\integrations;
 use app\components\integrations\CellsBatch;
 use app\components\integrations\IntegrationProvider;
 use app\components\integrations\IntegrationsRegistry;
+use app\components\integrations\ItemBadgesWidget;
 use app\components\integrations\PanelsCache;
 use app\models\base\ArmsModel;
 use app\models\Techs;
@@ -70,6 +71,14 @@ class CellsBatchTest extends Unit
 				$column = ['title' => 'Fake'];
 				if (isset($this->config['columnTtl'])) $column['ttl'] = $this->config['columnTtl'];
 				return ['status' => $column];
+			}
+
+			public function itemBadges(string $modelClass): array
+			{
+				if (!is_a($modelClass, Users::class, true)) return [];
+				$badge = ['title' => 'Fake dot'];
+				if (isset($this->config['badgeTtl'])) $badge['ttl'] = $this->config['badgeTtl'];
+				return ['dot' => $badge];
 			}
 
 			public function renderCells(string $columnId, array $models): array
@@ -269,5 +278,96 @@ class CellsBatchTest extends Unit
 			$provider->cellTtl('status', Users::class), '«обновлять всегда» для списков не предусмотрено');
 
 		$this->assertSame([], $provider->gridColumns(Techs::class), 'чужой класс — без колонок');
+	}
+
+	/** Кладёт провайдера в кэш реестра (реестр строится из params — нужен именованный класс) */
+	private function withRegistry(IntegrationProvider $provider, callable $test): void
+	{
+		$registry = new \ReflectionProperty(IntegrationsRegistry::class, 'providers');
+		$registry->setValue(null, [$provider->id => $provider]);
+		try {
+			$test();
+		} finally {
+			IntegrationsRegistry::reset();
+		}
+	}
+
+	/**
+	 * Бейдж у элемента (§5 «Бейджи у элементов»): та же протухшая ячейка,
+	 * что в гриде, но непривязанный/неприменимый объект не получает ничего —
+	 * «прочерк» у каждого элемента был бы шумом
+	 */
+	public function testRenderItemBadge()
+	{
+		$provider = $this->makeProvider();
+
+		$html = CellsBatch::renderItemBadge($provider, 'dot', $this->makeUser(11));
+		$this->assertStringContainsString('integration-cell-stale', $html);
+		$this->assertStringContainsString('data-column="dot"', $html);
+		$this->assertSame(0, $provider->calls, 'рендер элемента во внешнюю ИС не ходит');
+
+		$this->assertSame('', CellsBatch::renderItemBadge($provider, 'dot', $this->makeUser(12, null)),
+			'не привязан — без бейджа');
+		$alien = new Techs();
+		$alien->id = 13;
+		$this->assertSame('', CellsBatch::renderItemBadge($provider, 'dot', $alien), 'неприменим — без бейджа');
+	}
+
+	/** Бейдж наполняется тем же батчем, что колонка; ttl — свой или конфиг */
+	public function testBadgeBatchAndTtl()
+	{
+		$provider = $this->makeProvider(['badgeTtl' => 90]);
+		$user = $this->makeUser(14);
+		$cells = CellsBatch::render($provider, 'dot', Users::class, [$user]);
+		$this->assertSame('<b>cell-'.$user->Mobile.'</b>', $cells[14]);
+		$this->assertSame(90, $provider->cellTtl('dot', Users::class));
+
+		$provider = $this->makeProvider(['badgeTtl' => 1]);
+		$this->assertSame(IntegrationProvider::MIN_CELL_TTL, $provider->cellTtl('dot', Users::class),
+			'нижняя граница — как у колонок');
+	}
+
+	/** Виджет обходит реестр; у элемента без привязки — пусто */
+	public function testItemBadgesWidget()
+	{
+		$this->withRegistry($this->makeProvider(), function () {
+			//виджет, как и AttributeActionsWidget, не рисует несохранённые объекты
+			$this->assertSame('', ItemBadgesWidget::widget(['model' => $this->makeUser(20)]));
+
+			$user = $this->makeUser(15);
+			$user->setIsNewRecord(false);
+			$html = ItemBadgesWidget::widget(['model' => $user]);
+			$this->assertStringContainsString('integration-badge', $html);
+			$this->assertStringContainsString('data-provider="cells-fake"', $html);
+
+			$unbound = $this->makeUser(16, null);
+			$unbound->setIsNewRecord(false);
+			$this->assertSame('', ItemBadgesWidget::widget(['model' => $unbound]));
+			$alien = new Techs();
+			$alien->id = 17;
+			$alien->setIsNewRecord(false);
+			$this->assertSame('', ItemBadgesWidget::widget(['model' => $alien]), 'у класса нет бейджей');
+		});
+	}
+
+	/**
+	 * Колонки ручной таблицы (адреса в карточке сети): видны, только если
+	 * провайдер применим хотя бы к одной строке
+	 */
+	public function testTableColumns()
+	{
+		$provider = $this->makeProvider();
+		$this->withRegistry($provider, function () use ($provider) {
+			$columns = IntegrationsRegistry::tableColumns(Users::class, [$this->makeUser(18)]);
+			$this->assertArrayHasKey('integration-cells-fake-status', $columns);
+			$this->assertSame($provider, $columns['integration-cells-fake-status']['provider']);
+			$this->assertSame('status', $columns['integration-cells-fake-status']['columnId']);
+
+			$alien = new Techs();
+			$alien->id = 19;
+			$this->assertSame([], IntegrationsRegistry::tableColumns(Users::class, [$alien]),
+				'ни одна строка не применима — колонок нет');
+			$this->assertSame([], IntegrationsRegistry::tableColumns(Users::class, []));
+		});
 	}
 }

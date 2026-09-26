@@ -1,5 +1,7 @@
 <?php
 
+use app\components\assets\IntegrationCellsAsset;
+use app\components\integrations\IntegrationsRegistry;
 use app\components\ModelFieldWidget;
 use app\components\UrlParamSwitcherWidget;
 use app\models\NetIps;
@@ -9,6 +11,10 @@ use app\models\NetIps;
 
 $showEmpty= Yii::$app->request->get('showEmpty',false);
 $ipModel=new NetIps(); //для подписей колонок (label + «?» с hint атрибута)
+//колонки интеграций (статус VPN): персонализации у этой таблицы нет, поэтому
+//колонка видна, только если интеграция применима хотя бы к одному адресу сети
+$integrationColumns=IntegrationsRegistry::tableColumns(NetIps::class,$model->ipsByAddr);
+if ($integrationColumns) IntegrationCellsAsset::register($this);
 ?>
 <table class="table table-bordered table-sm table-hover net-ips">
 	<tr>
@@ -35,6 +41,11 @@ $ipModel=new NetIps(); //для подписей колонок (label + «?» �
 			]) ?>
 
 		</th>
+		<?php foreach ($integrationColumns as $column) { ?>
+			<th<?= $column['hint']?' qtip_ttip="'.\yii\helpers\Html::encode($column['hint']).'"':'' ?>>
+				<?= \yii\helpers\Html::encode($column['label']) ?>
+			</th>
+		<?php } ?>
 	</tr>
 	<?php
 		for ($i=0; $i<$model->capacity; $i++) {
@@ -43,6 +54,7 @@ $ipModel=new NetIps(); //для подписей колонок (label + «?» �
 				'model'=>$model,
 				'i'=>$i,
 				'showEmpty'=>$showEmpty,
+				'integrationColumns'=>$integrationColumns,
 			]);
 	} ?>
 </table>

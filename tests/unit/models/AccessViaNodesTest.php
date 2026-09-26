@@ -137,6 +137,30 @@ class AccessViaNodesTest extends Unit
 			'ресурс — сервер: кандидаты — все сервисы сервера, человек выбирает сам');
 	}
 
+	/** сервис на ОС + его исходящая запись; возвращает id записи */
+	private function serviceHopOnComp(int $compId): int
+	{
+		$db=Yii::$app->db;
+		$service=new Services(['name'=>'svc '.uniqid(), 'is_service'=>1]);
+		$this->assertTrue($service->save(false));
+		$db->createCommand()->insert('comps_in_services', ['comps_id'=>$compId, 'services_id'=>$service->id])->execute();
+		$db->createCommand()->insert('aces', ['acls_id'=>9201, 'name'=>'hop '.uniqid(), 'ips'=>''])->execute();
+		$aceId=(int)$db->getLastInsertID();
+		$db->createCommand()->insert('services_in_aces', ['aces_id'=>$aceId, 'services_id'=>$service->id])->execute();
+		return $aceId;
+	}
+
+	public function testJointOfForwardToAddressAndServiceOnItsNode()
+	{
+		//ACE 9101: проброс на адрес 10.0.0.2 (ip 30), адрес принадлежит ОС MSK-OVPN (20)
+		$onOwner=$this->serviceHopOnComp(20);
+		$this->assertTrue(Aces::transitJoint(Aces::findOne(9101), Aces::findOne($onOwner)),
+			'проброс на адрес → сервис на ОС этого адреса: стык сходится');
+		$elsewhere=$this->serviceHopOnComp(34);
+		$this->assertFalse(Aces::transitJoint(Aces::findOne(9101), Aces::findOne($elsewhere)),
+			'сервис на другой ОС — стык по-прежнему не сходится');
+	}
+
 	public function testJointOfForwardAndServiceHop()
 	{
 		$this->assertTrue(Aces::transitJoint(Aces::findOne(9100), Aces::findOne(9202)),

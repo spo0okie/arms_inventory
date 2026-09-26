@@ -685,8 +685,8 @@ class Aces extends ArmsModel
 	}
 
 	/** Связи, нужные рендеру маршрутов (views/aces/routes.php) */
-	const ROUTES_WITH=['acl.comp','acl.tech','acl.service','acl.ip','acl.network','accessTypes',
-		'users','comps','services','netIps','networks','segments'];
+	const ROUTES_WITH=['acl.comp.netIps','acl.tech.netIps','acl.service','acl.ip.comps','acl.ip.techs',
+		'acl.network','accessTypes','users','comps','services','netIps','networks','segments'];
 
 	/**
 	 * Маршруты через набор записей одной пачкой: [id записи => [маршрут => Aces[]]].
@@ -729,7 +729,17 @@ class Aces extends ArmsModel
 		$resource=$prev->acl->resource;
 		if (!is_object($resource)) return true;	//текстовый ресурс не проверить
 		$uuids=[$resource->uuid()=>true];
-		foreach ($prev->acl->nodes as $node) if (is_object($node)) $uuids[$node->uuid()]=true;
+		foreach ($prev->acl->nodes as $node) if (is_object($node)) {
+			$uuids[$node->uuid()]=true;
+			//адрес и его узел — одно место: проброс на 10.20.7.3 продолжается записью сервиса,
+			//работающего на ОС этого адреса (субъект — сервис, его узлы — ОС, не адрес); и наоборот
+			if ($node instanceof NetIps) {
+				foreach ($node->comps as $owner) $uuids[$owner->uuid()]=true;
+				foreach ($node->techs as $owner) $uuids[$owner->uuid()]=true;
+			} elseif ($node instanceof Comps || $node instanceof Techs) {
+				foreach ($node->netIps as $ip) $uuids[$ip->uuid()]=true;
+			}
+		}
 		foreach ($next->subjects as $subject) if (is_object($subject) && isset($uuids[$subject->uuid()])) return true;
 		foreach ($next->nodes as $node) if (is_object($node) && isset($uuids[$node->uuid()])) return true;
 		return false;

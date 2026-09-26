@@ -172,6 +172,26 @@ abstract class IntegrationProvider
 	}
 
 	/**
+	 * Бейджи у объекта там, где он рисуется элементом (item), — вне
+	 * гридов: иконка статуса у IP в карточке ОС или сотрудника. Это те же
+	 * ячейки, что и в колонках (кэш, батч renderCells(), один POST на
+	 * группу), только место другое, поэтому id бейджа приходит в
+	 * renderCells() как columnId и не должен совпадать с id колонок.
+	 * Дёшево, без внешних вызовов: вызывается при рендере каждого элемента.
+	 * Непривязанный объект бейджа не получает (renderUnboundCell() не
+	 * зовётся) — у элемента «прочерк» был бы шумом.
+	 * $modelClass — как в gridColumns().
+	 * @return array [badgeId => [
+	 *   'title' => string, // для разработчика/подсказок (опционально)
+	 *   'ttl'   => int,    // свежесть кэша, сек (см. cellTtl())
+	 * ]]
+	 */
+	public function itemBadges(string $modelClass): array
+	{
+		return [];
+	}
+
+	/**
 	 * Ячейка применимой, но не привязанной строки. Рендерится ядром при
 	 * выводе грида (внешние вызовы запрещены — как appliesTo/binding).
 	 */
@@ -274,13 +294,14 @@ abstract class IntegrationProvider
 	}
 
 	/**
-	 * TTL кэша ячейки грида, сек (колонка > конфиг cellTtl > 30),
+	 * TTL кэша ячейки грида или бейджа, сек (колонка > конфиг cellTtl > 30),
 	 * но не ниже MIN_CELL_TTL: «обновлять всегда» для списков не
 	 * предусмотрено — F5 списка не должен долбить внешнюю ИС
 	 */
 	public function cellTtl(string $columnId, string $modelClass): int
 	{
-		$descriptor = $this->gridColumns($modelClass)[$columnId] ?? [];
+		$descriptor = $this->gridColumns($modelClass)[$columnId]
+			?? $this->itemBadges($modelClass)[$columnId] ?? [];
 		$ttl = (int)($descriptor['ttl'] ?? $this->config['cellTtl'] ?? static::DEFAULT_CELL_TTL);
 		return max($ttl, static::MIN_CELL_TTL);
 	}

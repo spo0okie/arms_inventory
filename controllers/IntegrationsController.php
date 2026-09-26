@@ -116,7 +116,8 @@ class IntegrationsController extends ArmsBaseController
 	 * POST (GET-фолбэк для маршрутизации/тестов; боевой транспорт — POST,
 	 * сотня id не лезет в query string):
 	 *   provider (string) — id провайдера;
-	 *   column (string)   — id колонки (ключ gridColumns() провайдера);
+	 *   column (string)   — id колонки (ключ gridColumns() провайдера) либо
+	 *                       бейджа у элемента (ключ itemBadges());
 	 *   class (string)    — kebab-case класс объектов (comps, techs, ...);
 	 *   ids (int[])       — id строк грида с протухшим кэшем.
 	 *
@@ -139,7 +140,8 @@ class IntegrationsController extends ArmsBaseController
 
 		$class = DocsHelper::findDocClass($classId);
 		if (!$class) throw new NotFoundHttpException("Class '$classId' not found");
-		if (!isset($provider->gridColumns($class)[$column]))
+		//ячейки колонок гридов и бейджи у элементов — один механизм
+		if (!isset($provider->gridColumns($class)[$column]) && !isset($provider->itemBadges($class)[$column]))
 			throw new NotFoundHttpException("Grid column '$column' not found");
 
 		//страница грида — максимум сотни строк; кап отсекает абьюз ручными
