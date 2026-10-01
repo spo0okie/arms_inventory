@@ -64,6 +64,8 @@ JS
 
 	<?= DynaGridWidget::widget([
 		'id' => 'services-index',
+		//таблица подгружается асинхронно во вкладку страницы сервиса — настройки сохраняем туда
+		'pageUrl'=>['/services/view','id'=>$model->id],
 		'model' => new Services(),
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns.php',
