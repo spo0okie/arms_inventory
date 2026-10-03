@@ -43,6 +43,7 @@ $accessTypesItems=ArrayHelper::map($accessTypesAll,'id','name');
 $paramsValues=$model->$paramsAttribute??[];
 
 $bundleUrl=Url::to(['/access-types/access-types-form']);
+$ttipUrl=Url::to(['/access-types/ttip']);
 
 $checkName=Html::getInputName($model,$attribute).'[]';
 $paramPrefix=Html::getInputName($model,$paramsAttribute);
@@ -159,7 +160,9 @@ function addAccessTypeItem(model) {
 	\$item.find('input[type=checkbox]')
 		.attr('name',accessTypesCheckName)
 		.attr('value',model.id).attr('id',inputId).prop('checked',true);
-	\$item.find('label').attr('for',inputId).text(model.name);
+	//тултип подхватит attachAllTTips (qtip_ajax.js)
+	\$item.find('label').attr('for',inputId).text(model.name)
+		.attr('qtip_ajxhrf','{$ttipUrl}?id='+model.id);
 	//вставляем по алфавиту
 	let inserted=false;
 	jQuery('div#'+accessTypesListId+' div.access-type-item').each(function(i,el){
@@ -233,7 +236,11 @@ $picker=$form->field($model, $attribute,[
 		$inputId="picker-access-type-$value";
 		$row=Html::tag('div',
 			Html::checkbox($name,$checked,['value'=>$value,'id'=>$inputId,'class'=>'form-check-input'])
-			.Html::label(Html::encode($label),$inputId,['class'=>'form-check-label']),
+			//тултип-карточка типа доступа, как у остальных ссылок на объекты
+			.Html::label(Html::encode($label),$inputId,[
+				'class'=>'form-check-label',
+				'qtip_ajxhrf'=>Url::to(['/access-types/ttip','id'=>$value]),
+			]),
 			['class'=>'form-check']
 		);
 		//у выбранных IP-типов инпут кастомизации сетевых параметров в той же строке
