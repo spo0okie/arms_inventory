@@ -35,7 +35,7 @@ class ItemBadgesWidget extends Widget
 			if (!IntegrationsRegistry::userCanView($provider)) continue;
 			foreach (array_keys($badges) as $badgeId) {
 				$badge = CellsBatch::renderItemBadge($provider, $badgeId, $model);
-				if ($badge !== '') $html .= '<span class="integration-badge ms-1">'.$badge.'</span>';
+				if ($badge !== '') $html .= '<span class="integration-badge ms-1m me-3">'.$badge.'</span>';
 			}
 		}
 
