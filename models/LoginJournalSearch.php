@@ -13,14 +13,17 @@ use app\helpers\StringHelper;
  */
 class LoginJournalSearch extends LoginJournal
 {
+	/** значение фильтра по типу окончания, означающее «сессия открыта» */
+	const FILTER_OPEN=0;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['type'], 'integer'],
-            [['time', 'calc_time', 'comp_name', 'user_login', 'users_id', 'comps_id'], 'safe'],
+            [['type', 'end_type'], 'integer'],
+            [['time', 'calc_time', 'end_time', 'comp_name', 'user_login', 'users_id', 'comps_id'], 'safe'],
         ];
     }
 
@@ -66,6 +69,14 @@ class LoginJournalSearch extends LoginJournal
         $query->andFilterWhere(['type' => $this->type,]);
 		$query->andFilterWhere(QueryHelper::querySearchNumberOrDate('time',$this->time));
 		$query->andFilterWhere(QueryHelper::querySearchNumberOrDate('calc_time',$this->calc_time));
+		$query->andFilterWhere(QueryHelper::querySearchNumberOrDate('end_time',$this->end_time));
+		//тип окончания; особое значение фильтра — «открыта»: сессия службы без окончания
+		if ((string)$this->end_type === (string)static::FILTER_OPEN) {
+			$query->andWhere(['not',['login_journal.session_uid'=>null]])
+				->andWhere(['login_journal.end_time'=>null]);
+		} else {
+			$query->andFilterWhere(['end_type'=>$this->end_type]);
+		}
 		$query->andFilterWhere(QueryHelper::querySearchString('comp_name',$this->comp_name));
 		$query->andFilterWhere(QueryHelper::querySearchString('user_login',$this->user_login));
 		$query->andFilterWhere(QueryHelper::querySearchString('users.Ename',$this->users_id));

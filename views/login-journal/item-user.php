@@ -13,5 +13,10 @@ use app\components\widgets\page\ModelWidget;
 if (!isset($suffix)) $suffix='';
 
 
-if (is_object($model))
-	echo ModelWidget::widget(['model'=>$model->user,'options'=>['name'=>$model->userDescr.' ('.$model->age.')'.$suffix]]);
+if (!isset($static_view)) $static_view=false;
+
+if (is_object($model)) {
+	echo ModelWidget::widget(['model'=>$model->user,'options'=>['name'=>$model->userDescr]]);
+	echo $this->render('/login-journal/status',['model'=>$model,'static_view'=>$static_view]);
+	echo $suffix;
+}

@@ -178,5 +178,15 @@ return [
 	],
 	'vm_uuid'=>[
 		'value'=>function ($data) {return $data->getExternalItem(['VMWare.UUID']);},
-	]
+	],
+	//кто работает на ОС сейчас и работал недавно — то же, что блок «Входы пользователей» в карточке.
+	//Колонка по умолчанию скрыта: это запрос на каждую строку
+	'lastThreeLogins' => [
+		'value' => function ($data) use ($renderer) {
+			$items=[];
+			foreach ($data->lastThreeLogins as $logon)
+				$items[]=$renderer->render('/login-journal/item-user',['model'=>$logon,'suffix'=>'','static_view'=>true]);
+			return implode('<br />',$items);
+		},
+	],
 ];

@@ -388,9 +388,14 @@ class Comps extends ArmsModel
 			],
 			'lastThreeLogins' => [
 				'Входы',
-				'viewLabel'=>'Журнал входов',
-				'hint'=>'Журнал входов пользователей на компьютеры, заполняемый скриптами инвентаризации.<br>'
-					.'Показываются последние входы на этот скомпьютер не более 3 разных пользователей',
+				'viewLabel'=>'Входы пользователей',
+				'hint'=>'Кто работает на этом компьютере сейчас и кто работал недавно.<br>'
+					.'Показываются все открытые сессии (отметка «сейчас»); если их меньше трёх — '
+					.'добавляются последние завершённые входы других пользователей.<br>'
+					.'Открытые сессии сообщает служба инвентаризации Windows; старые скрипты '
+					.'сообщают только сам факт входа.<br>'
+					.'Отметка «неизвестно» — компьютер давно не выходит на связь, и что с сессией '
+					.'на самом деле, неизвестно; такую сессию можно закрыть вручную',
 			],
 			'lics' => [
 				'Лицензии',
@@ -839,7 +844,7 @@ class Comps extends ArmsModel
 	}
 
 	public function getLastThreeLogins() {
-		return LoginJournal::fetchUniqUsers($this->id);
+		return LoginJournal::fetchForComp($this->id);
 	}
 
 	public function getLogins() {
@@ -1176,6 +1181,11 @@ class Comps extends ArmsModel
 	public function afterSave($insert,$changedAttributes)
 	{
 		parent::afterSave($insert,$changedAttributes);
+
+		//ОС ушла в архив — сама она свои сессии уже не закроет
+		if (!$insert && array_key_exists('archived',$changedAttributes) && $this->archived) {
+			LoginJournal::closeLost($this->id,[]);
+		}
 		if ($this->rescanPerformed) {
 			//скан выполнен - все ранее запланированные задания на рескан отработаны
 			foreach ($this->softRescans as $queue) $queue->delete();

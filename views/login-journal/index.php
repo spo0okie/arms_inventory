@@ -1,6 +1,7 @@
 <?php
 
 use app\models\LoginJournal;
+use app\models\LoginJournalSearch;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -35,23 +36,33 @@ $renderer=$this;
 				return $data->local_time ? gmdate('Y-m-d H:i:s', $data->local_time) : null;
 			}],
 			'type'=>[
-				'filter'=>[
-					0 => 'CON',
-					1 => 'RDP',
-				],
+				'filter'=>LoginJournal::$types,
 				'value' => function($data) use($renderer){
-    				switch ($data->type) {
-						case 0: return 'CON';
-						case 1: return 'RDP';
-						default: return 'Unknown';
-					}
+					return LoginJournal::$types[$data->type] ?? 'Unknown';
     			}
+			],
+			'end_time',
+			'end_type'=>[
+				//первый вариант фильтра — открытые сессии: у них типа окончания ещё нет
+				'filter'=>[LoginJournalSearch::FILTER_OPEN=>'(открыта)']+LoginJournal::$endTypes,
+				'value' => function($data) use($renderer){
+					/** @var LoginJournal $data */
+					if (!$data->isOpen) return $data->endTypeName;
+					//для открытой сессии — её состояние: «сейчас» либо «неизвестно» с кнопкой закрытия
+					return $renderer->render('/login-journal/status',['model'=>$data]);
+				}
+			],
+			'flags'=>[
+				'value' => function($data) {
+					/** @var LoginJournal $data */
+					return implode(', ',$data->flagsDescr);
+				}
 			],
             'user_login',
 	        'users_id'=>[
 		        'value' => function($data) use($renderer){return $data->user?->renderItem($renderer);}
 	        ],
         ],
-		'defaultOrder'=>['comps_id','comp_name','calc_time','user_login','users_id'],
+		'defaultOrder'=>['comps_id','comp_name','calc_time','end_time','end_type','user_login','users_id'],
     ]); ?>
 </div>

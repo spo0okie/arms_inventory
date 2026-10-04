@@ -298,9 +298,14 @@ class Users extends ArmsModel implements IdentityInterface
 			],
 			'lastThreeLogins' => [
 				'Входы',
-				'viewLabel'=>'Входы в комп',
-				'hint'=>'Журнал входов пользователей на компьютеры, заполняемый скриптами инвентаризации.<br>'
-					.'Показываются последние входы этого сотрудника на 3 разных компьютера',
+				'viewLabel'=>'Входы на ПК',
+				'hint'=>'На каких компьютерах сотрудник работает сейчас и где работал недавно.<br>'
+					.'Показываются все открытые сессии (отметка «сейчас»); если их меньше трёх — '
+					.'добавляются последние завершённые входы на другие компьютеры.<br>'
+					.'Открытые сессии сообщает служба инвентаризации Windows; старые скрипты '
+					.'сообщают только сам факт входа.<br>'
+					.'Отметка «неизвестно» — компьютер давно не выходит на связь, и что с сессией '
+					.'на самом деле, неизвестно',
 			],
 			'lics'=>[
 				'Лицензии',
@@ -1000,7 +1005,7 @@ class Users extends ArmsModel implements IdentityInterface
 	}
 
 	public function getLastThreeLogins() {
-		return LoginJournal::fetchUniqComps($this->id);
+		return LoginJournal::fetchForUser($this->id);
 	}
 
 	public function getLastLoginComp() {

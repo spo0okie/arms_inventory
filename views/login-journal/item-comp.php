@@ -12,10 +12,14 @@ use app\components\widgets\page\ModelWidget;
 
 if (!isset($suffix)) $suffix='';
 
+if (!isset($static_view)) $static_view=false;
+
 if (is_object($model)) {
-	$name=$model->compName.' ('.$model->age.')'.$suffix;
+	$name=$model->compName;
 	if (is_object($model->comp))
 		echo ModelWidget::widget(['model'=>$model->comp,'options'=>['name'=>$name]]);
 	else
 		echo $name;
+	echo $this->render('/login-journal/status',['model'=>$model,'static_view'=>$static_view]);
+	echo $suffix;
 }

@@ -127,7 +127,7 @@ if (!isset($static_view)) $static_view=false;
 		<?= ModelFieldWidget::renderFieldTitle($model,'lastThreeLogins') ?>
 		<p class="mb-3">
 		 <?php foreach ($lastLogins as $logon)
-			echo $this->render('/login-journal/item-comp',['model'=>$logon,'suffix'=>' <br />']); ?>
+			echo $this->render('/login-journal/item-comp',['model'=>$logon,'suffix'=>' <br />','static_view'=>$static_view]); ?>
 		</p>
 	<?php }	?>
 

@@ -66,6 +66,16 @@ return [
 			}
 		}
 	],
+	//где сотрудник работает сейчас и работал недавно — то же, что блок «Входы на ПК» в карточке.
+	//Колонка по умолчанию скрыта: это запрос на каждую строку
+	'lastThreeLogins'=>[
+		'value' => function($data) use($renderer){
+			$items=[];
+			foreach ($data->lastThreeLogins as $logon)
+				$items[]=$renderer->render('/login-journal/item-comp',['model'=>$logon,'suffix'=>'','static_view'=>true]);
+			return implode('<br />',$items);
+		}
+	],
 	'Mobile'=>[
 		'value' => function($data) {
 			$tokens = [];

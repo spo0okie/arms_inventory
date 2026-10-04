@@ -33,6 +33,9 @@ use yii\db\Query;
  * @property int $flags Флаги достоверности времени (битовая маска FLAG_*)
  * @property string $closed_by Кто закрыл сессию вручную
  * @property bool $isOpen Сессия открыта (есть ключ сессии и нет окончания)
+ * @property bool $isStale Сессия открыта, но ОС давно не выходит на связь: состояние сессии неизвестно
+ * @property string $endTypeName Тип окончания текстом
+ * @property string[] $flagsDescr Отметки о неточном времени текстом
  *
  * @property Users $user
  * @property Comps $comp
@@ -88,10 +91,24 @@ class LoginJournal extends ArmsModel
 		self::END_MANUAL=>'MANUAL',
 	];
 
+	public static $types=[0=>'CON',1=>'RDP'];
+
+	/**
+	 * Сколько секунд ОС может молчать (не обновлять свою запись), прежде чем её открытые
+	 * сессии считаются неизвестными. Служба шлёт heartbeat раз в 5 минут — три пропущенных подряд.
+	 */
+	public static $silentAfter=900;
+
 	//флаги достоверности времени (биты поля flags)
 	const FLAG_START_ESTIMATED=1;	//начало — оценка (служба не видела вход)
 	const FLAG_END_ESTIMATED=2;		//окончание — оценка (последний heartbeat службы)
 	const FLAG_TIME_UNCONFIRMED=4;	//часы клиента в момент событий не подтверждены
+
+	public static $flagNames=[
+		self::FLAG_START_ESTIMATED=>'начало — оценка',
+		self::FLAG_END_ESTIMATED=>'окончание — оценка',
+		self::FLAG_TIME_UNCONFIRMED=>'время не подтверждено',
+	];
 
 	/**
      * {@inheritdoc}
@@ -276,12 +293,81 @@ class LoginJournal extends ArmsModel
 	 */
 	public function getAge()
 	{
-		$age=time()-strtotime($this->time);
+		return static::ageText(time()-static::utcToTime($this->calc_time ?: $this->time));
+	}
+
+	/**
+	 * Отметка времени из БД в unix-время. Время в БД — UTC (соединение открывается с
+	 * time_zone='+00:00'), а strtotime() без указания зоны читал бы строку в часовом поясе
+	 * приложения и ошибался на его смещение.
+	 */
+	public static function utcToTime($dbTime): int
+	{
+		return (int)strtotime($dbTime.' UTC');
+	}
+
+	/**
+	 * Интервал в секундах — коротким текстом (сек/мин/ч/д/мес)
+	 */
+	public static function ageText(int $age): string
+	{
+		if ($age<0) $age=0;
 		if ($age<60) return $age.'сек';
 		if ($age/60<60) return floor($age/60).'мин';
 		if ($age/3600<24) return floor($age/3600).'ч';
 		if ($age/86400<50) return floor($age/86400).'д';
 		return floor($age/86400/30).'мес';
+	}
+
+	/**
+	 * Сессия числится открытой, но ОС давно не выходит на связь (выключена, вне сети,
+	 * служба не работает): что с сессией на самом деле — неизвестно. Такую сессию
+	 * можно закрыть вручную.
+	 */
+	public function getIsStale(): bool
+	{
+		if (!$this->isOpen) return false;
+		$comp=$this->comp;
+		//ОС не опознана — подтверждать открытость сессии некому
+		if (!is_object($comp) || !strlen((string)$comp->updated_at)) return true;
+		return $comp->secondsSinceUpdate > static::$silentAfter;
+	}
+
+	public function getEndTypeName(): string
+	{
+		if (empty($this->end_type)) return '';
+		return static::$endTypes[$this->end_type] ?? (string)$this->end_type;
+	}
+
+	/**
+	 * @return string[] выставленные флаги достоверности времени текстом
+	 */
+	public function getFlagsDescr(): array
+	{
+		$result=[];
+		foreach (static::$flagNames as $bit=>$name) {
+			if ((int)$this->flags & $bit) $result[]=$name;
+		}
+		return $result;
+	}
+
+	/**
+	 * Закрывает сессию вручную. Только для сессий, о которых ОС больше не сообщает
+	 * ({@see getIsStale()}): живую сессию служба закроет сама, а закрытую вручную — тут же
+	 * открыла бы заново. Если ОС потом вернётся и сообщит реальное окончание, оно
+	 * перезапишет ручное ({@see applySessionPush()}).
+	 *
+	 * @param string $login кто закрывает
+	 * @return bool сессия закрыта
+	 */
+	public function closeManually(string $login): bool
+	{
+		if (!$this->isStale) return false;
+		return (bool)$this->updateAttributes([
+			'end_time'=>gmdate('Y-m-d H:i:s'),
+			'end_type'=>static::END_MANUAL,
+			'closed_by'=>$login,
+		]);
 	}
 
 
@@ -444,6 +530,67 @@ class LoginJournal extends ArmsModel
 			'end_time'=>gmdate('Y-m-d H:i:s'),
 			'end_type'=>static::END_LOST,
 		],$condition);
+	}
+
+	/**
+	 * Входы для карточки ОС: все открытые сессии на ней, а если их меньше $min —
+	 * добавляются последние завершённые входы других пользователей (по одному на
+	 * пользователя), пока не наберётся $min.
+	 * Завершённые — это и закрытые сессии, и записи старых скриптов (без окончания).
+	 * @param int $compId
+	 * @param int $min
+	 * @return static[]
+	 */
+	public static function fetchForComp(int $compId, int $min=3): array
+	{
+		return static::fetchOpenAndRecent('comps_id', $compId, 'users_id', $min);
+	}
+
+	/**
+	 * Входы для карточки сотрудника: все его открытые сессии, а если их меньше $min —
+	 * добавляются последние завершённые входы на другие ОС (по одному на ОС).
+	 * @param int $userId
+	 * @param int $min
+	 * @return static[]
+	 */
+	public static function fetchForUser(int $userId, int $min=3): array
+	{
+		return static::fetchOpenAndRecent('users_id', $userId, 'comps_id', $min);
+	}
+
+	/**
+	 * @param string $ownerAttr чьи входы показываем (comps_id | users_id)
+	 * @param int    $ownerId
+	 * @param string $otherAttr вторая сторона входа: по ней завершённые входы берутся без повторов
+	 * @param int    $min
+	 * @return static[]
+	 */
+	protected static function fetchOpenAndRecent(string $ownerAttr, int $ownerId, string $otherAttr, int $min): array
+	{
+		$open=static::findOpen()
+			->andWhere([$ownerAttr=>$ownerId])
+			->orderBy(['calc_time'=>SORT_DESC,'id'=>SORT_DESC])
+			->all();
+		if (count($open)>=$min) return $open;
+
+		//с кем (где) сессия открыта сейчас — того в завершённых не повторяем
+		$shown=[];
+		foreach ($open as $rec) if ($rec->$otherAttr) $shown[]=$rec->$otherAttr;
+
+		$ids=(new Query())
+			->select(['id'=>'MAX(id)'])
+			->from(static::tableName())
+			->where([$ownerAttr=>$ownerId])
+			->andWhere(['not',[$otherAttr=>null]])
+			->andWhere(['or',['session_uid'=>null],['not',['end_time'=>null]]])
+			->andFilterWhere(['not in',$otherAttr,$shown])
+			->groupBy($otherAttr)
+			->orderBy(['MAX(id)'=>SORT_DESC])
+			->limit($min-count($open))
+			->column();
+		if (!count($ids)) return $open;
+
+		return array_merge($open, static::find()->where(['id'=>$ids])->orderBy(['id'=>SORT_DESC])->all());
 	}
 
 	/**
