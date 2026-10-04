@@ -27,6 +27,12 @@ use yii\db\Query;
  * @property string $compFqdn FQDN компа
  * @property int $local_time Время компьютера на момент обновления
  * @property int $type Тип входа
+ * @property string $session_uid Ключ сессии (GUID службы инвентаризации); пусто у записей старых скриптов
+ * @property string $end_time Время окончания сессии (скорректированное)
+ * @property int $end_type Тип окончания сессии (END_*)
+ * @property int $flags Флаги достоверности времени (битовая маска FLAG_*)
+ * @property string $closed_by Кто закрыл сессию вручную
+ * @property bool $isOpen Сессия открыта (есть ключ сессии и нет окончания)
  *
  * @property Users $user
  * @property Comps $comp
@@ -54,6 +60,40 @@ class LoginJournal extends ArmsModel
 	public static $maxTimeShift=5;
 
 	/**
+	 * Расхождение часов клиента и сервера (сек), начиная с которого отметки клиента
+	 * сдвигаются на это расхождение. Меньшее расхождение не трогаем: в него входит
+	 * время доставки запроса, от запроса к запросу оно плавает.
+	 */
+	public static $maxClockSkew=90;
+
+	//типы окончания сессии: 1..99 сообщает служба, 100+ ставит сервер
+	const END_LOGOFF=1;				//штатный выход
+	const END_SHUTDOWN=2;			//штатное завершение работы ОС
+	const END_SERVICE_STOPPED=3;	//сессия исчезла, пока служба была штатно остановлена
+	const END_SERVICE_CRASH=4;		//сессия исчезла, пока служба лежала после сбоя
+	const END_SYSTEM_STOP=5;		//ОС остановилась нештатно (питание, BSOD)
+	const END_LOST=100;				//закрыта сервером: сессии нет в слепке хоста
+	const END_MANUAL=101;			//закрыта вручную из интерфейса
+
+	/** типы окончания, которые ставит сервер: это догадка, данные службы их перезаписывают */
+	const SERVER_END_TYPES=[self::END_LOST,self::END_MANUAL];
+
+	public static $endTypes=[
+		self::END_LOGOFF=>'LOGOFF',
+		self::END_SHUTDOWN=>'SHUTDOWN',
+		self::END_SERVICE_STOPPED=>'SERVICE_STOPPED',
+		self::END_SERVICE_CRASH=>'SERVICE_CRASH',
+		self::END_SYSTEM_STOP=>'SYSTEM_STOP',
+		self::END_LOST=>'LOST',
+		self::END_MANUAL=>'MANUAL',
+	];
+
+	//флаги достоверности времени (биты поля flags)
+	const FLAG_START_ESTIMATED=1;	//начало — оценка (служба не видела вход)
+	const FLAG_END_ESTIMATED=2;		//окончание — оценка (последний heartbeat службы)
+	const FLAG_TIME_UNCONFIRMED=4;	//часы клиента в момент событий не подтверждены
+
+	/**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -67,10 +107,12 @@ class LoginJournal extends ArmsModel
     public function rules()
     {
         return [
-			[['time','local_time','created_at'],'safe'],
+			[['time','local_time','created_at','end_time'],'safe'],
             [['comp_name', 'user_login'], 'required'],
-            [['users_id','comps_id','type','local_time'], 'integer'],
-            [['comp_name', 'user_login'], 'string', 'max' => 128],
+            [['users_id','comps_id','type','local_time','end_type','flags'], 'integer'],
+            [['comp_name', 'user_login', 'closed_by'], 'string', 'max' => 128],
+			[['session_uid'], 'string', 'max' => 36],
+			[['session_uid'], 'unique'],
             [['users_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['users_id' => 'id']],
             [['comps_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comps::class, 'targetAttribute' => ['comps_id' => 'id']],
         ];
@@ -131,6 +173,44 @@ class LoginJournal extends ArmsModel
 				'hint'=>'Как выполнен вход: CON — локальный вход с консоли (за самим компьютером), '
 					.'RDP — подключение к удалённому рабочему столу',
 				'searchHint' => 'Выберите нужный вариант из списка чтобы отфильтровать',
+			],
+			'session_uid' => [
+				'Ключ сессии',
+				'hint'=>'Идентификатор сессии, присвоенный службой инвентаризации Windows.<br>'
+					.'У записей старых скриптов пуст: о них известен только факт входа',
+				'type'=>'string',
+			],
+			'end_time' => [
+				'Время выхода',
+				'hint'=>'Когда сессия завершилась (в часах сервера). Пусто — сессия ещё открыта '
+					.'либо запись пришла от старого скрипта, который окончание не сообщает',
+				'type'=>'datetime',
+				'typeClass'=>DatetimeType::class,
+			],
+			'end_type' => [
+				'Тип выхода',
+				'hint'=>'Как завершилась сессия:<br>'
+					.'LOGOFF — пользователь вышел;<br>'
+					.'SHUTDOWN — ОС завершила работу штатно;<br>'
+					.'SERVICE_STOPPED / SERVICE_CRASH — сессия закончилась, пока служба инвентаризации '
+					.'была остановлена / лежала после сбоя;<br>'
+					.'SYSTEM_STOP — ОС остановилась нештатно (питание, сбой);<br>'
+					.'LOST — закрыта сервером: ОС сообщила список сессий, и этой в нём нет;<br>'
+					.'MANUAL — закрыта вручную',
+				'searchHint' => 'Выберите нужный вариант из списка чтобы отфильтровать',
+			],
+			'flags' => [
+				'Достоверность времени',
+				'hint'=>'Отметки о том, что время в записи неточное:<br>'
+					.'начало — оценка (служба не видела сам вход);<br>'
+					.'окончание — оценка (взято время последней отметки службы);<br>'
+					.'время не подтверждено (часы компьютера могли быть сбиты)',
+				'typeClass' => \app\types\IntegerType::class,
+			],
+			'closed_by' => [
+				'Закрыл вручную',
+				'hint'=>'Логин сотрудника, закрывшего сессию вручную',
+				'type'=>'string',
 			],
             'user_login' => [
 				'Логин',
@@ -217,12 +297,8 @@ class LoginJournal extends ArmsModel
 
 		// Корректировка calc_time (кроме silentSave)
 		if (!$this->doNotChangeAuthor && is_numeric($this->time)) {
-			if ($this->local_time && abs(time() - $this->local_time) > 90) {
-				// У клиента сильно сбито время: добавляем смещение времени на разницу между сервером и клиентом
-				$this->calc_time = gmdate('Y-m-d H:i:s',$this->time + (time()-$this->local_time));
-			} else  {
-				$this->calc_time = gmdate('Y-m-d H:i:s', $this->time);
-			}
+			// У клиента сильно сбито время: добавляем смещение времени на разницу между сервером и клиентом
+			$this->calc_time = gmdate('Y-m-d H:i:s', $this->correctClientTime((int)$this->time));
 
 			if (strtotime($this->calc_time) > time() + static::$maxTimeShift) {
 				$this->addError('calc_time', 'Unable to add logon event in future');
@@ -231,6 +307,16 @@ class LoginJournal extends ArmsModel
 
 			// В любом случае преобразуем time → datetime
 			$this->time = gmdate('Y-m-d H:i:s', $this->time);
+		}
+
+		// Окончание сессии приходит в часах клиента — та же корректировка, что у calc_time
+		if (!$this->doNotChangeAuthor && is_numeric($this->end_time)) {
+			$end = $this->correctClientTime((int)$this->end_time);
+			if ($end > time() + static::$maxTimeShift) {
+				$this->addError('end_time', 'Unable to end session in future');
+				return false;
+			}
+			$this->end_time = gmdate('Y-m-d H:i:s', $end);
 		}
 
 		if (!isset($this->comps_id)) {
@@ -251,6 +337,113 @@ class LoginJournal extends ArmsModel
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Переводит отметку времени клиента (unix) в часы сервера: если часы клиента
+	 * на момент отправки (local_time) расходятся с серверными больше допуска —
+	 * сдвигает отметку на это расхождение.
+	 */
+	public function correctClientTime(int $time): int
+	{
+		if ($this->local_time && abs(time() - $this->local_time) > static::$maxClockSkew) {
+			return $time + (time() - (int)$this->local_time);
+		}
+		return $time;
+	}
+
+	/**
+	 * Сессия открыта: о ней сообщила служба (есть ключ) и окончания ещё нет.
+	 * Записи старых скриптов (без ключа) открытыми не бывают: об их окончании ничего не известно.
+	 */
+	public function getIsOpen(): bool
+	{
+		return !empty($this->session_uid) && empty($this->end_time);
+	}
+
+	/**
+	 * Запрос открытых сессий
+	 * @return ActiveQuery
+	 */
+	public static function findOpen()
+	{
+		return static::find()
+			->where(['not',['session_uid'=>null]])
+			->andWhere(['end_time'=>null]);
+	}
+
+	/**
+	 * @param string $uid
+	 * @return static|null
+	 */
+	public static function findBySessionUid(string $uid)
+	{
+		return static::findOne(['session_uid'=>$uid]);
+	}
+
+	/**
+	 * Применяет к уже существующей записи сессии её повторно присланное состояние.
+	 * Правда о сессии — на хосте, запись — её реплика, но:
+	 *  - начало пишется один раз (при создании): от запроса к запросу оно плавает
+	 *    на погрешность доставки, поэтому time/calc_time здесь не трогаем;
+	 *  - окончание, сообщённое службой, тоже пишется один раз;
+	 *  - окончание, поставленное сервером (LOST/MANUAL), — догадка: данные службы
+	 *    его перезаписывают (в т.ч. «сессия всё ещё открыта»).
+	 * Модель не сохраняет.
+	 *
+	 * @param array $data тело запроса push (поля в формате API: end_time — unix)
+	 * @return bool изменилась ли запись (нужно ли сохранять)
+	 */
+	public function applySessionPush(array $data): bool
+	{
+		$serverClosed = !empty($this->end_time) && in_array((int)$this->end_type, static::SERVER_END_TYPES);
+		$incomingEnd = $data['end_time'] ?? null;
+
+		if (empty($incomingEnd)) {
+			//служба говорит, что сессия открыта
+			if (!$serverClosed) return false;
+			$this->end_time = null;
+			$this->end_type = null;
+			$this->closed_by = null;
+			return true;
+		}
+
+		//служба сообщает окончание
+		if (!empty($this->end_time) && !$serverClosed) return false;
+
+		//для пересчета окончания в часы сервера нужны часы клиента на момент этой отправки
+		if (isset($data['local_time'])) $this->local_time = $data['local_time'];
+		$this->end_time = $incomingEnd;
+		$this->end_type = $data['end_type'] ?? null;
+		$this->closed_by = null;
+		//флаг начала относится к уже записанному началу, остальные — к присланному окончанию
+		$this->flags = ((int)$this->flags & static::FLAG_START_ESTIMATED)
+			| ((int)($data['flags'] ?? 0) & ~static::FLAG_START_ESTIMATED);
+		return true;
+	}
+
+	/**
+	 * Закрывает открытые сессии ОС, которых нет в присланном ею полном списке открытых:
+	 * служба о них не знает (потеряла локальное состояние, была переустановлена и т.п.),
+	 * значит сами они уже не закроются.
+	 *
+	 * @param int $compId
+	 * @param string[] $openUids ключи сессий, открытых на хосте
+	 * @return int сколько сессий закрыто
+	 */
+	public static function closeLost(int $compId, array $openUids): int
+	{
+		$condition = ['and',
+			['comps_id'=>$compId],
+			['not',['session_uid'=>null]],
+			['end_time'=>null],
+		];
+		if (count($openUids)) $condition[] = ['not in','session_uid',array_values($openUids)];
+
+		return static::updateAll([
+			'end_time'=>gmdate('Y-m-d H:i:s'),
+			'end_type'=>static::END_LOST,
+		],$condition);
 	}
 
 	/**
