@@ -91,7 +91,7 @@ class UsersSearch extends Users
         
         if (!$this->archived) {
 			$filter
-				->andFilterWhere(['users.Uvolen'=>0]);
+				->andWhere(static::notResignedCondition());
 		}
 		
 		$filter

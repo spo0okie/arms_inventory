@@ -81,7 +81,7 @@ class Notifier extends Component
 				? Users::findOne((int)$spec)
 				: Users::find()
 					->where(['or', ['Login' => $spec], ['Email' => $spec]])
-					->orderBy(['Uvolen' => SORT_ASC, 'id' => SORT_DESC])
+					->orderBy([Users::resignedExpression() => SORT_ASC, 'id' => SORT_DESC])
 					->one();
 			if ($user) $found[] = $user;
 			else Yii::warning("Notifier::findUsers: получатель '$spec' не найден", 'notify');

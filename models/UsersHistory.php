@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\models\traits\UsersModelNamesTrait;
+use app\models\traits\UsersModelResignTrait;
 
 /**
  * Журнал изменений сотрудников (зеркало таблицы users_history).
@@ -41,6 +42,8 @@ use app\models\traits\UsersModelNamesTrait;
  * @property int|null $manager_id
  * @property string|null $employ_date
  * @property string|null $resign_date
+ * @property int|null $resign_defer
+ * @property string|null $resign_defer_until
  * @property int|null $nosync
  * @property string|null $notepad
  * @property string|null $private_phone
@@ -59,6 +62,7 @@ use app\models\traits\UsersModelNamesTrait;
 class UsersHistory extends HistoryModel
 {
 	use UsersModelNamesTrait;
+	use UsersModelResignTrait;
 
 	public static $title = 'Изменение сотрудника';
 	public static $titles = 'Изменения сотрудников';

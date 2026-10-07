@@ -356,7 +356,7 @@ class Aces extends ArmsModel
 	{
 		//[таблица субъектов, junction-таблица, ключ junction, условие «субъект жив»]
 		$subjects=[
-			[Users::tableName(),	'users_in_aces',	'users_id',		'COALESCE(users.Uvolen,0)=0'],
+			[Users::tableName(),	'users_in_aces',	'users_id',		Users::notResignedCondition()],
 			[Comps::tableName(),	'comps_in_aces',	'comps_id',		'COALESCE(comps.archived,0)=0'],
 			[Services::tableName(),	'services_in_aces',	'services_id',	'COALESCE(services.archived,0)=0'],
 			[Networks::tableName(),	'networks_in_aces',	'networks_id',	'COALESCE(networks.archived,0)=0'],

@@ -6,6 +6,7 @@ use app\helpers\QueryHelper;
 use app\models\base\ArmsModel;
 use app\models\traits\UsersModelCalcFieldsTrait;
 use app\models\traits\UsersModelNamesTrait;
+use app\models\traits\UsersModelResignTrait;
 use app\modules\schedules\models\Schedules;
 use Exception;
 use Yii;
@@ -36,6 +37,10 @@ use yii\web\IdentityInterface;
  * @property string $Bday День рождения
  * @property string $employ_date Дата приема
  * @property string $resign_date Дата увольнения
+ * @property int $resign_defer Отложить увольнение
+ * @property string $resign_defer_until Отложить увольнение до (пусто - бессрочно)
+ * @property bool $resignDeferred Увольнение отложено (и срок откладывания не истёк)
+ * @property bool $resigned Уволен с учётом откладывания увольнения
  * @property int $manager_id Руководитель (ссылка на запись сотрудника)
  * @property Users $manager Непосредственный руководитель
  * @property string $notepad
@@ -85,6 +90,7 @@ class Users extends ArmsModel implements IdentityInterface
 {
 	use UsersModelCalcFieldsTrait;
 	use UsersModelNamesTrait;
+	use UsersModelResignTrait;
 
 	public static $users=[];
 	public static $working_cache=null;
@@ -137,6 +143,10 @@ class Users extends ArmsModel implements IdentityInterface
 
 		// remove fields that contain sensitive information
 		unset($fields['auth_key'], $fields['password'], $fields['access_token']);
+
+		//итоговый признак увольнения (Uvolen за вычетом откладывания) отдаём всегда:
+		//внешние потребители (синхронизация с AD) должны опираться на него, а не считать сами
+		$fields['resigned'] = 'resigned';
 
 		return $fields;
 	}
@@ -193,7 +203,9 @@ class Users extends ArmsModel implements IdentityInterface
     {
         return [
 	        [['Ename', 'Persg', 'Uvolen', ], 'required'],
-	        [['Persg', 'Uvolen', 'nosync','org_id','manager_id'], 'integer'],
+	        [['Persg', 'Uvolen', 'nosync','org_id','manager_id','resign_defer'], 'integer'],
+	        [['resign_defer_until'], 'default', 'value' => null],
+	        [['resign_defer_until'], 'date', 'format' => 'php:Y-m-d'],
 	        [['manager_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['manager_id' => 'id']],
 	        [['employee_id', 'Orgeh', 'Bday', 'employ_date','resign_date'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Mobile','private_phone','ips','auth_key'], 'string', 'max' => 255],
@@ -281,6 +293,32 @@ class Users extends ArmsModel implements IdentityInterface
 			],
 			'employ_date' => ['Дата приёма','hint'=>'Дата приёма сотрудника на работу'],
 			'resign_date' => ['Дата увольнения','hint'=>'Дата увольнения сотрудника'],
+			'resign_defer' => [
+				'Отложить увольнение',
+				'hint'=>'Не считать сотрудника уволенным, даже если кадровая система уже пометила его уволенным:'
+					.'<br>он остаётся в списках работающих, а его учётная запись не отключается синхронизацией.'
+					.'<br>Признак «Уволен» при этом не меняется - им по-прежнему управляет кадровая система',
+				'typeClass'=>\app\types\BooleanType::class,
+			],
+			'resign_defer_until' => [
+				'Отложить увольнение до',
+				'hint'=>'Последний день, когда сотрудник ещё не считается уволенным.'
+					.'<br>Пусто - увольнение отложено бессрочно (пока откладывание не снимут вручную)',
+				'typeClass'=>\app\types\DateType::class,
+			],
+			//read-only вычисляемые поля (категория C): только вывод
+			'resignDeferred' => [
+				'Увольнение отложено',
+				'hint'=>'Откладывание увольнения включено и его срок ещё не истёк',
+				'typeClass'=>\app\types\BooleanType::class,
+			],
+			'resigned' => [
+				'Уволен',
+				'hint'=>'Итоговый признак увольнения: сотрудник помечен уволенным '
+					.'и откладывание увольнения не действует (не включено или его срок истёк).'
+					.'<br>Именно на него опираются списки, архивность и синхронизация с AD',
+				'typeClass'=>\app\types\BooleanType::class,
+			],
 			'id' => ['id','hint'=>'Внутренний идентификатор записи'],
 			'netIps_ids' => ['alias'=>'ips'],
 			'Ename' => [
@@ -482,7 +520,8 @@ class Users extends ArmsModel implements IdentityInterface
 			'uid' => ['Идентификатор','hint'=>'Уникальный идентификатор человека.<br>ИНН / СНИЛС / MD5(ИНН) и т.п.','typeClass'=>\app\types\StringType::class],
 			'Uvolen' => [
 				'Уволен',
-				'hint'=>'Признак того, что сотрудник уволен (запись остаётся для истории)',
+				'hint'=>'Признак того, что сотрудник уволен по данным кадровой системы (запись остаётся для истории).'
+					.'<br>Уволенным в инвентаризации он считается с учётом откладывания увольнения',
 				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'work_phone' => [
@@ -929,7 +968,7 @@ class Users extends ArmsModel implements IdentityInterface
     public static function listItems($items=null, $keyField = 'id', $valueField = 'Ename', $asArray = true)
     {
 
-        $query = static::find()->filterWhere(['Uvolen'=>0])->andWhere(['!=','Login',''])->orderBy('Ename');
+        $query = static::find()->where(static::notResignedCondition())->andWhere(['!=','Login',''])->orderBy('Ename');
         if (!is_null($items)) $query->filterWhere(['id'=>$items]);
         if ($asArray) $query->select([$keyField, $valueField])->asArray();
 
@@ -944,7 +983,7 @@ class Users extends ArmsModel implements IdentityInterface
 	public static function fetchWorking($current=null)
 	{
 		if (!is_null(static::$working_cache)) return static::$working_cache;
-		$query = static::find()->filterWhere(['Uvolen'=>0])->orderBy(['Ename'=>SORT_ASC,'Login'=>SORT_DESC,'Persg'=>SORT_ASC]);
+		$query = static::find()->where(static::notResignedCondition())->orderBy(['Ename'=>SORT_ASC,'Login'=>SORT_DESC,'Persg'=>SORT_ASC]);
 		$list= (static::$working_cache = ArrayHelper::map($query->all(), 'id', 'Ename'));
 		if ($current && (!isset($list[$current]))) {
 			$list[$current]=static::findOne($current)->Ename;
@@ -966,7 +1005,7 @@ class Users extends ArmsModel implements IdentityInterface
 		//при поиске по логину предпочитаем сначала искать среди трудоустроенных
 		return static::find()
 			->where(['LOWER(Login)'=>strtolower($login)])
-			->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])
+			->orderBy([static::resignedExpression()=>SORT_ASC,'id'=>SORT_DESC])
 			->one();
 	}
 
@@ -978,7 +1017,7 @@ class Users extends ArmsModel implements IdentityInterface
 	public static function findByName(string $name)	{
 		return static::find()
 			->where(['LOWER(Ename)'=>strtolower($name)])
-			->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])
+			->orderBy([static::resignedExpression()=>SORT_ASC,'id'=>SORT_DESC])
 			->one();
 	}
 
@@ -1069,6 +1108,8 @@ class Users extends ArmsModel implements IdentityInterface
 		if (parent::beforeSave($insert)) {
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=NetIps::fetchIpIds($this->ips);
+			//срок без самого откладывания смысла не имеет
+			if (!$this->resign_defer) $this->resign_defer_until=null;
 			return true;
 		}
 		return false;
@@ -1121,7 +1162,7 @@ class Users extends ArmsModel implements IdentityInterface
 	}
 
 	public function getIsArchived() {
-		return $this->Uvolen;
+		return $this->resigned;
 	}
 
 }

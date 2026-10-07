@@ -34,8 +34,8 @@ if (!isset($modalParent)) $modalParent=null;
 					<?= $form->field($model, 'Bday') ?>
 				</div>
 			</div>
-			
-			
+
+
 			<div class="row">
 				<div class="col-md-8">
 					<?= $form->field($model, 'org_id') ?>
@@ -54,7 +54,7 @@ if (!isset($modalParent)) $modalParent=null;
 						'type' => DepDrop::TYPE_SELECT2,
 						'options' => [
 							'placeholder' => 'Подразделение',
-							
+
 						],
 						'select2Options' => [
 							'pluginOptions' => [
@@ -99,17 +99,26 @@ if (!isset($modalParent)) $modalParent=null;
 			</div>
 
 
-			
+
 			<?= $form->field($model, 'Mobile') ?>
-			
+
 			<?= $form->field($model, 'private_phone') ?>
-			
-			
+
+
 			<?= $form->field($model, 'manager_id')->select2() ?>
-			
-			<?= $form->field($model, 'Uvolen')->checkbox() ?>
-			
-			<?= $form->field($model, 'nosync')->checkbox() ?>
+
+
+			<div class="row">
+				<div class="col-md-6">
+					<?= $form->field($model, 'Uvolen')->checkbox() ?>
+					<?= $form->field($model, 'resign_defer')->checkbox() ?>
+					<?= $form->field($model, 'nosync')->checkbox() ?>
+				</div>
+				<div class="col-md-6">
+					<?= $form->field($model, 'resign_defer_until') ?>
+				</div>
+			</div>
+
 		</div>
 		<div class="col-md-6">
 			<?= $form->field($model,'ips')->textAutoresize()?>

@@ -102,10 +102,8 @@ class PhonesController extends BaseRestController
 			}
 		}
 		$user= Users::find()
-			->where([
-				'phone'=>$num,
-				'Uvolen'=>false,
-			])
+			->where(['phone'=>$num])
+			->andWhere(Users::notResignedCondition())
 			->one();
 		/**
 		 * @var $user Users
@@ -183,10 +181,8 @@ class PhonesController extends BaseRestController
 			}
 		}
 		$usersByPhone= Users::find()
-			->where([
-				'phone'=>$num,
-				'Uvolen'=>false,
-			])
+			->where(['phone'=>$num])
+			->andWhere(Users::notResignedCondition())
 			->all();
 		if (count($usersByPhone)) foreach($usersByPhone as $user) {
 			$users[$user->id]=$user;

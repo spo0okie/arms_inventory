@@ -37,11 +37,17 @@ if (!isset($static_view)) $static_view=false;
 			<?= $model->employee_id ?> (<?= \app\models\Users::$WTypes[$model->Persg][1] ?? $model->Persg ?>)
 		    -
 			<?php
-		        if ($model->Uvolen) {
+		        if ($model->resigned) {
 		            if (strlen($model->resign_date??''))
 		                echo 'Уволен с '.$model->resign_date;
 		            else
 		                echo 'Уволен';
+			    } elseif ($model->Uvolen) {
+					//по кадрам уже уволен, но увольнение отложено - для инвентаризации ещё работает
+					echo ModelFieldWidget::renderFieldTitle($model,'resign_defer',null,'span','Увольнение отложено')
+						.(strlen($model->resign_defer_until??'')?' до '.$model->resign_defer_until:' бессрочно');
+					if (strlen($model->resign_date??''))
+						echo ' (по кадрам уволен с '.$model->resign_date.')';
 			    } elseif (strlen($model->employ_date??''))
 					echo 'Работает с '.$model->employ_date;
 			    else

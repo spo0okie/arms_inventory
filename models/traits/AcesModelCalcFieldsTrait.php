@@ -207,7 +207,7 @@ trait AcesModelCalcFieldsTrait
 	public static function subjectIsArchived($subject): bool
 	{
 		if (!is_object($subject)) return false;
-		if ($subject instanceof Users) return (bool)$subject->Uvolen;
+		if ($subject instanceof Users) return (bool)$subject->resigned;
 		return $subject->canBeArchived && (bool)$subject->archived;
 	}
 	
