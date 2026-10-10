@@ -76,6 +76,21 @@ class AcesTransitTest extends Unit
 		);
 	}
 
+	public function testRecordWithoutNeighboursIsOneHopRoute()
+	{
+		//ACE 9100 (проброс на MSK-PROXY) ни с чем не связан: маршрут — он сам, одним хопом
+		$ace = Aces::findOne(9100);
+		$this->assertFalse($ace->hasTransit);
+		$this->assertSame([], Aces::routesOf([$ace]), 'цепочек нет');
+		$routes = Aces::routesOrSelf([$ace])[9100];
+		$this->assertCount(1, $routes);
+		$this->assertSame([9100], array_map(static fn(Aces $hop) => (int)$hop->id, $routes[0]));
+		$this->assertStringContainsString('55.66.77.81', $ace->transit, 'текстом — «субъекты → ресурс»');
+		$this->assertStringEndsWith('→ MSK-PROXY', $ace->transit);
+		//у записи из цепочки routesOrSelf отдаёт цепочки, а не одиночный хоп
+		$this->assertCount(2, Aces::routesOrSelf([Aces::findOne(9202)])[9202]);
+	}
+
 	public function testRelationsReadBothSidesOfSameTable()
 	{
 		$this->assertSame([9202], array_map('intval', Aces::findOne(9200)->next_aces_ids));

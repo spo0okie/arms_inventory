@@ -117,7 +117,7 @@ class AccessLevelSwitchWidget extends Widget
 		$this->view->registerJs($this->js(),View::POS_END);
 
 		return Html::tag('div',
-			Html::tag('span','Уровень доступов:',['class'=>'small opacity-75 me-2'])
+			Html::tag('span','Детализация доступов:',['class'=>'small opacity-75 me-2'])
 			.Html::tag('div',implode('',$buttons),['class'=>'btn-group','role'=>'group']),
 			['class'=>'access-level-switch d-flex align-items-center my-2']
 		);

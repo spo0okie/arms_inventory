@@ -262,7 +262,14 @@ class Aces extends ArmsModel
 				'Маршрут',
 				'hint' => 'Полные маршруты, в которых участвует эта запись: от первого субъекта через посредников '
 					.'до конечного ресурса. Собираются по указателям «следующие/предыдущие хопы»',
-				'indexHint' => '{same}.<br>Пусто — соединение не транзитное (один хоп)',
+				'indexHint' => 'Кто → по какому доступу → к чему. Если запись — часть цепочки (есть '
+					.'«следующие/предыдущие хопы»), показана вся цепочка от первого субъекта через посредников '
+					.'до конечного ресурса, эта запись выделена. Иначе — один хоп: сама запись.<br>'
+					.'Заменяет собой колонки «Субъекты», «Типы доступа» и «Ресурс» — их можно скрыть в настройках таблицы',
+				//связи одиночного хопа (субъекты, ресурс, типы) — как у колонок subjects/resource/access_types;
+				//self-join aces сюда нельзя (см. docs/dev/access-chains.md §4): цепочки грузит routesOf()
+				'join' => ['users','comps','services','netIps','networks','segments','accessTypes',
+					'acl.service','acl.comp','acl.tech','acl.ip','acl.network','acl.segment'],
 				'typeClass'=>\app\types\StringType::class,
 				'readOnly' => true,
 			],
@@ -667,16 +674,19 @@ class Aces extends ArmsModel
 	}
 
 	/**
-	 * Маршруты текстом (экспорт, API): «субъекты → ресурс → ресурс», по строке на маршрут
+	 * Маршруты текстом (экспорт, API): «субъекты → ресурс → ресурс», по строке на маршрут.
+	 * Запись без соседних хопов — маршрут из одного хопа: «субъекты → ресурс».
 	 * @return string
 	 */
 	public function getTransit(): string
 	{
+		if ($this->isNewRecord) return '';
 		$lines=[];
-		foreach (static::routesOf([$this])[$this->id]??[] as $hops) {
+		foreach (static::routesOrSelf([$this])[$this->id]??[] as $hops) {
 			$first=reset($hops);
 			$names=[];
-			foreach ($first->subjects as $subject) $names[]=is_object($subject)?$subject->name:(string)$subject;
+			//sname: у адреса-субъекта name — подпись резервирования (обычно пусто)
+			foreach ($first->subjects as $subject) $names[]=is_object($subject)?$subject->sname:(string)$subject;
 			$line=implode(', ',$names);
 			foreach ($hops as $hop) $line.=' → '.(is_object($hop->acl)?$hop->acl->sname:'?');
 			$lines[]=$line;
@@ -712,6 +722,21 @@ class Aces extends ArmsModel
 				if (count($hops)>1) $result[$aceId][]=$hops;
 			}
 		}
+		return $result;
+	}
+
+	/**
+	 * То же, что {@see routesOf()}, но запись без соседних хопов даёт маршрут из одного
+	 * хопа — саму себя. Так колонка «Маршрут» заполнена всегда: одиночный доступ и
+	 * цепочка читаются одним видом, а не «пусто в 90% строк» (docs/dev/access-chains.md, §4).
+	 * Одиночные записи отдаются как есть (их связи грузит грид по join-аннотации колонки).
+	 * @param Aces[] $aces
+	 * @return array [id записи => [маршрут => Aces[]]]
+	 */
+	public static function routesOrSelf(array $aces): array
+	{
+		$result=static::routesOf($aces);
+		foreach ($aces as $ace) if (!isset($result[$ace->id])) $result[$ace->id]=[[$ace]];
 		return $result;
 	}
 

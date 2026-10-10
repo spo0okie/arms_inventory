@@ -66,16 +66,16 @@ return [
 			return '';
 		}
 	],
-	//транзит: маршруты, проходящие через записи этого списка доступа
+	//маршрут: цепочки, проходящие через записи этого списка доступа; запись без соседних
+	//хопов — сама одним хопом (Aces::routesOrSelf)
 	'transit'=>[
 		'value'=>function($data) use ($renderer,$glue){
-			$aces=array_filter($data->aces,static function($ace){return $ace->hasTransit;});
-			if (!count($aces)) return '';
+			if (!count($data->aces)) return '';
 			$routes=[];
-			foreach (\app\models\Aces::routesOf($aces) as $aceRoutes) $routes=array_merge($routes,$aceRoutes);
+			foreach (\app\models\Aces::routesOrSelf($data->aces) as $aceRoutes) $routes=array_merge($routes,$aceRoutes);
 			return $renderer->render('/aces/routes',[
 				'routes'=>$routes,
-				'current'=>\yii\helpers\ArrayHelper::getColumn($aces,'id'),
+				'current'=>\yii\helpers\ArrayHelper::getColumn($data->aces,'id'),
 				'glue'=>$glue,
 			]);
 		},

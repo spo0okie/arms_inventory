@@ -65,12 +65,12 @@ return [
 			return '';
 		}
 	],
-	//транзит: полные маршруты, в которых участвует запись (пусто — один хоп)
+	//маршрут: полные цепочки, в которых участвует запись; без соседних хопов — она сама
+	//одним хопом (Aces::routesOrSelf)
 	'transit'=>[
 		'value'=>function($data) use ($renderer,$glue){
-			if (!$data->hasTransit) return '';
 			return $renderer->render('/aces/routes',[
-				'routes'=>\app\models\Aces::routesOf([$data])[$data->id]??[],
+				'routes'=>\app\models\Aces::routesOrSelf([$data])[$data->id]??[],
 				'current'=>$data->id,
 				'glue'=>$glue,
 			]);
