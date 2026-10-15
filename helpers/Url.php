@@ -8,20 +8,20 @@
 namespace yii\helpers;
 
 class Url extends \yii\helpers\BaseUrl {
-	
+
 	public static $localServerCache=null;
-	
+
 	// Set the $scheme to be true by default.
 	public static function to($url = '', $scheme = false) {
-		
+
 		return parent::to($url, $scheme || (!empty(\Yii::$app->request->origin) && !static::sameServer(\Yii::$app->request->origin)));
 	}
-	
+
 	// Set the $scheme to be true by default.
 	public static function toRoute($route, $scheme = false) {
 		return parent::toRoute($route, $scheme || (!empty(\Yii::$app->request->origin) && !static::sameServer(\Yii::$app->request->origin)));
 	}
-	
+
 	/**
 	 * Префикс, с которого начинаются все pretty-URL приложения.
 	 *
@@ -37,7 +37,7 @@ class Url extends \yii\helpers\BaseUrl {
 		$manager=\Yii::$app->urlManager;
 		return rtrim($manager->showScriptName?$manager->getScriptUrl():$manager->getBaseUrl(),'/');
 	}
-	
+
 	/**
 	 * Возвращает имя сервера из url
 	 * @param $url
@@ -48,7 +48,7 @@ class Url extends \yii\helpers\BaseUrl {
 		$nonScheme=$schemeTokens[1]??$url;
 		return explode('/',$nonScheme)[0];
 	}
-	
+
 	/**
 	 * Локальный сервер приложения
 	 * @return string
@@ -59,7 +59,7 @@ class Url extends \yii\helpers\BaseUrl {
 		}
 		return static::$localServerCache;
 	}
-	
+
 	/**
 	 * Проверка что URL ведет на тот же сервер что и наш
 	 * @param $url
@@ -68,7 +68,7 @@ class Url extends \yii\helpers\BaseUrl {
 	public static function sameServer($url) {
 		return (static::localServer()) == (strtolower(static::serverName($url)));
 	}
-	
+
 	/**
 	 * В точности как current, Но заменяет параметры не рекурсивно, что позволяет заменять параметры-массивы пустыми значениями
 	 * @param array $params
@@ -81,5 +81,31 @@ class Url extends \yii\helpers\BaseUrl {
 		$currentParams[0] = '/' . \Yii::$app->controller->getRoute();
 		$route = array_replace($currentParams, $params);
 		return static::toRoute($route, $scheme);
+	}
+
+	/**
+	 * Возвращает доменные атриубуты из URL: схему, домен, порт
+ 	 * @param mixed $url
+     *
+     * @return null|array{string, string, int|null}
+     */
+	public static function normailzeDomain($url)
+	{
+    	$parts = parse_url($url);
+
+	    if (
+	        !is_array($parts)
+	        || !isset($parts['scheme'], $parts['host'])
+	    ) {
+	        return null;
+	    }
+
+		$scheme = strtolower($parts['scheme']);
+    	$host = strtolower($parts['host']);
+     	$port = $parts['port'] ?? (
+        	$scheme === 'https' ? 443 : ($scheme === 'http' ? 80 : null)
+        );
+
+        return [$scheme, $host, $port];
 	}
 }

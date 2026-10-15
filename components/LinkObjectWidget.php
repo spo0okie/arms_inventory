@@ -90,9 +90,20 @@ class LinkObjectWidget extends Widget
 
 		//проверяем с нашего ли сайта пришел запрос
 		$request = Yii::$app->request;
-		$origin = $request->headers->get('Origin');
-		if ($origin !== null && $origin !== 'null') {
-    		$this->sameOrigin = strcasecmp($origin, $request->hostInfo) == 0;
+		$source = $request->headers->get('Origin');
+
+		if ($source === null || $source === 'null' || $source === '') {
+    		$source = $request->referrer;
+		}
+
+
+		if ($source) {
+			$sourceOrigin = Url::normailzeDomain($source);
+    		$projectOrigin = Url::normailzeDomain($request->hostInfo);
+
+      		if ($sourceOrigin !== null && $projectOrigin !== null) {
+        		$this->sameOrigin = ($sourceOrigin === $projectOrigin);
+        	}
 		}
 
 
