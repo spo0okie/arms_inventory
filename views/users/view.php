@@ -34,6 +34,9 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			//АРМ сотрудника (компьютеры из закреплённого оборудования); нет АРМ - нет и заголовка
 			$workplaceArms=[];
 			foreach ($model->techs as $arm) if ($arm->isComputer) $workplaceArms[]=$arm;
+			//Сначала АРМ в работе; внутри групп сохраняется исходный порядок (PHP 8+).
+			usort($workplaceArms, static fn($a, $b) =>
+				(int)(bool)($b->state?->operating ?? false) <=> (int)(bool)($a->state?->operating ?? false));
 			if (count($workplaceArms)) {
 				echo '<h2>Рабочее место</h2>';
 				foreach ($workplaceArms as $arm)
