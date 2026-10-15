@@ -64,6 +64,7 @@ class LinkObjectWidget extends Widget
 
 
 	private $samePage=false;//признак того что элемент отображается на той же странице куда ведет ссылка
+	private $sameOrigin=true;//признак что запрос прилетел с нашего же сайта (данные могут подтягиваться и в другой сайт AJAX-ом)
 	private $itemId=null;	//id модели (для ссылки копирования)
 
 	public function init()
@@ -87,6 +88,14 @@ class LinkObjectWidget extends Widget
 			$this->controller= StringHelper::class2Id($this->model->masterClass ?? get_class($this->model));
 		}
 
+		//проверяем с нашего ли сайта пришел запрос
+		$request = Yii::$app->request;
+		$origin = $request->headers->get('Origin');
+		if ($origin !== null && $origin !== 'null') {
+    		$this->sameOrigin = strcasecmp($origin, $request->hostInfo) == 0;
+		}
+
+
 		//все маршруты строим абсолютными ('//'): виджет рендерится и внутри модулей
 		//(schedules), где относительный 'comps/ttip' превратился бы в 'schedules/comps/ttip' (404)
 		if (!isset($this->url) && $this->controller && $id) {
@@ -100,7 +109,7 @@ class LinkObjectWidget extends Widget
 					Yii::$app->controller->route==$this->controller.'/ttip'
 				)
 				&&
-				Yii::$app->request->get('id')==$id
+				$request->get('id')==$id
 			);
 		} elseif (is_array($this->url)) {
 			$this->url=Url::to($this->url);
@@ -173,7 +182,7 @@ class LinkObjectWidget extends Widget
 
 		//если мы уже на этой странице, то не делаем ссылки
 		return (
-				$this->samePage?
+				$this->samePage && $this->sameOrigin?
 				Html::tag('span',$this->name,$this->hrefOptions)
 				:
 				Html::a($this->name,$this->url,$this->hrefOptions)
