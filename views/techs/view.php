@@ -16,15 +16,9 @@ Url::remember();
 $this->title = $model->num;
 //крошки собираются автоматически в layout (views/layouts/main.php)
 
+// Вычисляем угол до карточки оборудования, не меняя расположение кнопок.
+ob_start();
 ?>
-<div class="techs-view">
-	<?= IsArchivedObjectWidget::widget(['model'=>$model,'title'=>'Это оборудование перенесено в архив']) ?>
-	<div class="row">
-		<div class="col-md-6">
-			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'options'=>['static_view'=>false, 'no_model'=>true]]) ?>
-			<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
-		</div>
-		<div class="col-md-6">
 			<?php CornerWidget::begin(['model'=>$model]) ?>
 				<h1 class="text-end">
 					<?php if ($model->isComputer) foreach (Yii::$app->params['arms.docs'] as $doc=>$params) if (is_array($params)) {
@@ -47,6 +41,16 @@ $this->title = $model->num;
 					]) ?>
 				</h1>
 			<?php CornerWidget::end() ?>
+<?php $cornerWidget=ob_get_clean(); ?>
+<div class="techs-view">
+	<?= IsArchivedObjectWidget::widget(['model'=>$model,'title'=>'Это оборудование перенесено в архив']) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'options'=>['static_view'=>false, 'no_model'=>true]]) ?>
+			<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
+		</div>
+		<div class="col-md-6">
+			<?= $cornerWidget ?>
 			<div>
 				<?php if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
 					echo ModelWidget::widget(['model'=>$scan, 'view'=>'thumb', 'options'=>['static_view'=>true]]);

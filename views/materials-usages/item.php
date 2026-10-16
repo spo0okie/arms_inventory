@@ -20,6 +20,7 @@ if (!isset($cost)) $cost=false;
 
 if (is_object($model)) {
 	echo \app\components\ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'item_class'=>'materials-usages-item cursor-default',
 		'name'=>

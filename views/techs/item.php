@@ -20,6 +20,7 @@ if (!empty($model)) {
     if (!isset($name)) $name=$model->name;
 
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
 		'link'=> LinkObjectWidget::widget([
@@ -33,6 +34,7 @@ if (!empty($model)) {
 	
 	if ($show_ips) {
 		echo ItemObjectWidget::widget([
+			'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 			'link'=>$this->render('/net-ips/model-ips',[
 				'model'=>$model,
 				'options'=>	isset($ips_options)?$ips_options:[],

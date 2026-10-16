@@ -20,6 +20,7 @@ if (is_object($model)) {
 
 
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model' => $model,
 		'marker' => $marker,
 		'archived_class' => 'text-decoration-line-through',

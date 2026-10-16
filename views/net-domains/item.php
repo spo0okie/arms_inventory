@@ -9,6 +9,7 @@ use yii\helpers\Url;
 if (!empty($model)) {
 	if (!isset($name)) $name=$model->name;
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$name,
 		//легаси CSS-класс по имени — fallback пока домену не назначен маркер

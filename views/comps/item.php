@@ -26,6 +26,7 @@ if (is_object($model)) {
 	}
 
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
 		'link'=> LinkObjectWidget::widget([
@@ -44,6 +45,7 @@ if (is_object($model)) {
 		//говорим скрывать имя компа из IP адреса чтобы не было задвоения имени
 		if (!isset($ips_options['rendered_comment'])) $ips_options['rendered_comment']=$name;
 		echo ItemObjectWidget::widget([
+			'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 			'link'=>$this->render('//net-ips/model-ips',[
 				'model'=>$model,
 				'options'=>	$ips_options,

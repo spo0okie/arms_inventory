@@ -21,6 +21,8 @@ $services=$model->services;
 //если сотрудник отвечает за сервисы, показываем и ОС этих сервисов (compsTotal)
 $compsField=count($services)?'compsTotal':'comps';
 if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',false);
+// Инициализируем переключатель до карточек: он задаёт общий режим отображения архивных элементов.
+$cornerWidget=CornerWidget::widget(['model'=>$model]);
 
 ?>
 <div class="users-view">
@@ -45,7 +47,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			?>
 		</div>
 		<div class="col-md-3">
-			<?= CornerWidget::widget(['model'=>$model]) ?>
+			<?= $cornerWidget ?>
 			<?php
 
 			echo ModelFieldWidget::widget([

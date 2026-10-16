@@ -7,6 +7,7 @@ use app\components\ItemObjectWidget;
 
 if (is_object($model)) {
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$model->name,
 		'static'=>true,

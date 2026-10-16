@@ -289,6 +289,7 @@ class ModelFieldWidget extends Widget
 			'card'=>$this->card,
 			'card_options'=>$this->card_options,
 			'archived'=>$this->archived,
+			'show_archived'=>$this->show_archived, // Передаём явный режим всему списку.
 			'lineBr'=>$this->lineBr,
 			'glue'=>$this->glue,
 			'show_empty'=>$this->show_empty,

@@ -25,6 +25,7 @@ if (!isset($name)) $name=$model->descr;
 		'hitlist'=>$hitlist
 	]);
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$name,
 		'static'=>$static_view,

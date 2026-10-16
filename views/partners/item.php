@@ -24,6 +24,7 @@ if (is_object($model)) {
 		default: $modelName = $name;
 	}
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$modelName,
 		'static'=>$static_view,

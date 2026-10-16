@@ -8,7 +8,6 @@ use yii\helpers\Url;
 
 if (!isset($href)) $href=false;
 if (!isset($static_view)) $static_view=true;
-if (!isset($show_archived)) $show_archived=true;
 if (!isset($icon)) $icon=false;
 
 if (is_object($model)) {
@@ -20,6 +19,6 @@ if (is_object($model)) {
 		'modal'=>true,
 		'url'=> Url::to(['/services/view','id'=>$model->services_id,'showArchived'=>$model->archived]),
 		'item_class'=>'org-phones-item cursor-default',
-		'show_archived'=>$show_archived,
+		'show_archived'=>$show_archived??null, // Учитываем режим переключателя и списка.
 	]);
 } else echo "Отсутствует";

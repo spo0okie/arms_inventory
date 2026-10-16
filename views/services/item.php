@@ -9,7 +9,8 @@ use app\components\LinkObjectWidget;
 /* @var $crop_parent boolean Обрезать имя родителя из имени */
 
 if (!isset($static_view)) $static_view=false;
-if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',true);
+// Отдельная ссылка использует тот же режим, что и списки на странице.
+if (!isset($show_archived)) $show_archived=\app\components\ShowArchivedWidget::isOn();
 if (!isset($noDelete)) $noDelete=false;
 
 
@@ -66,6 +67,7 @@ if (is_object($model)) {
 		$name=$model->getNameWithoutParent($name);
 	
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,

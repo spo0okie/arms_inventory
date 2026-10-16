@@ -10,6 +10,7 @@ if (!isset($static_view)) $static_view=true;
 
 if (is_object($model)) {
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model->soft,
 		'archived_class'=>'text-decoration-line-through',
 		'link'=> LinkObjectWidget::widget([

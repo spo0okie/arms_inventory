@@ -25,6 +25,7 @@ if (!empty($model)) {
 	}
 	
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
 		'link'=> LinkObjectWidget::widget([

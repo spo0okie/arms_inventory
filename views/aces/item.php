@@ -16,6 +16,7 @@ if (!isset($class)) $class='';
 if (!empty($model)) {
 	if ($name== Aces::$NAME_MISSING) $class.=' fst-italic';
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'item_class'=>$class,
 		'archived_class'=>'text-decoration-line-through',

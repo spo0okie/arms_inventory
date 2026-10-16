@@ -8,6 +8,7 @@ use app\components\ItemObjectWidget;
 if (!isset($static_view)) $static_view = false;
 
 echo ItemObjectWidget::widget([
+	'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 	'model'=>$model,
 	'url'=>$model->url,
 	'hrefOptions'=>['target'=>'_blank'],

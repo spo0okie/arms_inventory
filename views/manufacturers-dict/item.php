@@ -17,6 +17,7 @@ if (is_object($model)) {
 		['/manufacturers-dict/view','id'=>$model->id]:
 		['/manufacturers-dict/update','id'=>$model->id];
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$model->word,
 		'static'=>$static_view,

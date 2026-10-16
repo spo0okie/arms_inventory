@@ -23,6 +23,8 @@ $manufacturers= Manufacturers::fetchNames();
 $model->swList->sortByName();
 
 $skipMonitors=is_object($model->arm)?($model->arm->monitorsCount):false;
+// Задаём режим архивных элементов до рендера карточек и списков.
+$cornerWidget=CornerWidget::widget(['model'=>$model]);
 
 $soft=[
 	'free'=>[],
@@ -85,7 +87,7 @@ foreach ($model->swList->items as $item) {
 					$style='';
 					if ($item->type== HwListItem::$TYPE_MONITOR && $skipMonitors) {
 						$classes[]='archived-item';
-						$style="style='".ShowArchivedWidget::archivedDisplay(true)."'";
+						$style="style='".ShowArchivedWidget::archivedDisplay(true,ShowArchivedWidget::isOn())."'";
 					}
 					echo $this->render('/hwlist/item',
 						compact('model','item', 'manufacturers','classes','style')
@@ -114,7 +116,7 @@ foreach ($model->swList->items as $item) {
 
 	</div>
 	<div class="col-md-6">
-		<?= CornerWidget::widget(['model'=>$model]) ?>
+		<?= $cornerWidget ?>
 		<div class="software_settings" data-doc-anchor="software">
 			<?= ModelFieldWidget::renderCompositeTitle($model,['raw_soft','soft_ids'],'Софт','h3') ?>
 			<?php

@@ -12,6 +12,7 @@ if (!isset($static_view)) $static_view=false;
 if (!empty($model)) {
 	if (!isset($name)) $name=$model->name;
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
 		'link'=> LinkObjectWidget::widget([

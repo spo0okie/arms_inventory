@@ -72,7 +72,7 @@ if ($ignored) {
 	$name = Html::tag('span', Html::encode($addr), ['class' => 'text-decoration-line-through text-muted']);
 	echo Html::tag('span', $name . ' ' . $actions, [
 		'class' => 'comp-ip-item archived-item',
-		'style' => ShowArchivedWidget::archivedDisplay(true),
+		'style' => ShowArchivedWidget::archivedDisplay(true,ShowArchivedWidget::isOn()),
 	]);
 } else {
 	//активный адрес: типовой рендер ссылки (как у net-ips/item.php) + действия

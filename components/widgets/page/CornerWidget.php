@@ -30,12 +30,10 @@ use yii\helpers\Html;
  * Примечание: сам факт рендера ShowArchivedWidget переключает страницу в режим
  * "архивные по умолчанию скрыты" (ShowArchivedWidget::$defaultValue) - эта
  * неочевидная связь сохраняется и при вызове через этот виджет. ВАЖНО: режим
- * включается только С МОМЕНТА рендера угла, а угол стоит в правой колонке -
- * контент левых колонок (основная карточка) рендерится раньше и этот дефолт
- * не увидит: архивное там выйдет зачеркнутым, но видимым. Блоки-списки таких
- * мест резолвят show_archived сами из запроса с дефолтом false и прокидывают
- * его в ListObjectsWidget/ItemObjectWidget явно (см. ui-sources.md §3,
- * образцы: views/aces/list.php, views/acls/list.php).
+ * включается при init() угла, до содержимого begin()/end(). Для страниц с
+ * карточками перед углом нужно заранее вычислить HTML угла и вывести его
+ * на прежнем месте (views/users/view.php, views/comps/view.php). Альтернатива —
+ * явно передать show_archived в списки (см. ui-sources.md §3).
  */
 class CornerWidget extends Widget
 {
@@ -62,21 +60,28 @@ class CornerWidget extends Widget
 	/** @var array HTML-опции контейнера */
 	public array $options=[];
 
+	/** @var string HTML переключателя, подготовленный до содержимого begin()/end(). */
+	private string $archivedContent='';
+
+	/** Инициализирует переключатель до рендера вложенных архивных элементов. */
 	public function init()
 	{
 		parent::init();
 		CornerWidgetAsset::register($this->view);
+		// Теги внутри begin()/end() должны сразу видеть выбранный режим.
+		if ($this->archived) $this->archivedContent=ShowArchivedWidget::widget($this->archivedOptions);
 		ob_start();
 		ob_implicit_flush(false);
 	}
 
+	/** Собирает угол с ранее подготовленным переключателем и вложенным содержимым. */
 	public function run()
 	{
 		$content=$this->content.ob_get_clean();
 
 		$parts=[];
 		if ($this->archived)
-			$parts[]=ShowArchivedWidget::widget($this->archivedOptions);
+			$parts[]=$this->archivedContent;
 
 		if ($this->history && $this->model) {
 			$history=HistoryWidget::widget(array_merge(

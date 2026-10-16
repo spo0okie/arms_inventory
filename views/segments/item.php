@@ -20,6 +20,7 @@ if (!empty($model)) {
 	}
 	if (!isset($name)) $name=$model->name;
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
 		'item_class'=>$item_class,

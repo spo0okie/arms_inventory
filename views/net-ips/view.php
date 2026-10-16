@@ -13,6 +13,8 @@ use yii\helpers\Html;
 $this->title = $model->sname;
 //крошки собираются автоматически в layout (views/layouts/main.php)
 \yii\web\YiiAsset::register($this);
+// Задаём режим архивных элементов до рендера карточек и списков.
+$cornerWidget=CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]]);
 
 //шапка: слева адрес, привязки, DNS-имена, пробросы; справа — сводка сети адреса
 $this->params['headerContent'] =
@@ -22,7 +24,7 @@ $this->params['headerContent'] =
 			.PanelsWidget::widget(['model'=>$model])
 		.'</div>'
 		.'<div class="col-md-4">'
-			.CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]])
+			.$cornerWidget
 			.$this->render('network',['model'=>$model])
 			//уровень показа доступов во вкладках ниже (docs/dev/access-chains.md, §5)
 			.'<div class="mt-3">'.AccessLevelSwitchWidget::widget().'</div>'

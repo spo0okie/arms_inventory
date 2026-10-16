@@ -7,6 +7,7 @@ use app\components\ItemObjectWidget;
 
 if (!empty($model)) {
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'item_class'=>$class??'',
 		//'archived_class'=>'text-decoration-line-through',

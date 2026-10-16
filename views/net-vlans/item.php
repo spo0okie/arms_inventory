@@ -11,6 +11,7 @@ if (!empty($model)) {
 	//VLAN раскрашивается маркером своего L2-домена (легаси CSS-класс по имени — fallback)
 	$marker=$model->netDomain->marker??false;
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$name,
 		'marker'=>$marker,

@@ -23,6 +23,8 @@ Url::remember();
 $this->title = $model->name;
 //крошки собираются автоматически в layout (views/layouts/main.php)
 YiiAsset::register($this);
+// Задаём режим архивных элементов до рендера карточек и списков.
+$cornerWidget=CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]]);
 
 $this->params['headerContent']=
 	
@@ -48,7 +50,7 @@ $this->params['headerContent']=
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includedBy'])
 		.'</div>'
 		.'<div class="flex-fill flex-lg-shrink-0">'
-			.CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]])
+			.$cornerWidget
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'links'])
 			.$this->render('/attaches/model-list',['model'=>$model,'static_view'=>false])
 		.'</div>'

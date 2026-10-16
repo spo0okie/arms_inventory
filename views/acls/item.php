@@ -33,6 +33,7 @@ if (!empty($model)) {
 		echo ModelWidget::widget(['model'=>$model->segment,'options'=>['static_view'=>true]]).$update;
 	else {
 		echo ItemObjectWidget::widget([
+			'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 			'model'=>$model,
 			'name'=>$name??$model->sname,
 			'noDelete'=>true,

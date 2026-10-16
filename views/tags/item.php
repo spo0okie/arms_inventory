@@ -16,6 +16,7 @@ use app\models\Tags;
 if (is_object($model)) {
 	$textColor = $model->getTextColor();
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,

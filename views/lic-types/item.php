@@ -16,6 +16,7 @@ if (!isset($static_view)) $static_view=false;
 if (is_object($model)) {
 	$ttipUrl=$static_view?null:Url::to(['/lic-types/ttip','id'=>$model->id]);
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$model->descr,
 		'static'=>$static_view,

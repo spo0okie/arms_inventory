@@ -23,6 +23,7 @@ if (!empty($model)) {
 	} else {
 		//все URL переопределяем, т.к. страницам org-struct кроме id нужен org_id
 		echo ItemObjectWidget::widget([
+			'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 			'model'=>$model,
 			'name'=>$name??null,
 			'url'=>['/org-struct/view','id'=>$model->id,'org_id'=>$model->org_id],

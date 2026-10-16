@@ -11,6 +11,8 @@ use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\MaintenanceJobs */
+// Задаём режим архивных элементов до рендера карточек и списков.
+$cornerWidget=CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]]);
 ?>
 
 <div class="d-flex flex-wrap flex-row-reverse">
@@ -48,7 +50,7 @@ use kartik\markdown\Markdown;
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'reqsRecursive']) ?>
 		</div>
 		<div class="flex-fill">
-			<?= CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]]) ?>
+			<?= $cornerWidget ?>
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'links']) ?>
 			<?= $this->render('/attaches/model-list',['model'=>$model,'static_view'=>false]) ?>
 		</div>

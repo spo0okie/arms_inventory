@@ -33,6 +33,7 @@ if (is_object($model)) {
 	if ($icon) $name='<span class="fas fa-user small"></span>'.$name;
 	
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'archived_class'=>'uvolen',
 		'archivedProperty'=>'resigned',
@@ -41,6 +42,7 @@ if (is_object($model)) {
 	
 	if ($show_ips) {
 		echo ItemObjectWidget::widget([
+			'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 			'link'=>$this->render('@app/views/net-ips/model-ips',[
 				'model'=>$model,
 				'options'=>	isset($ips_options)?$ips_options:[],

@@ -33,6 +33,7 @@ if (!empty($model)) {
 		$cssClass=$satisfied?'bg-success link-light':'bg-danger link-light';
 	}
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
 		'archivedProperty'=>'archivedOrAbsorbed',

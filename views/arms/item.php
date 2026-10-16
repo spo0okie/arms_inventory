@@ -12,6 +12,7 @@ if (!isset($icon)) $icon=false;
 if (is_object($model)) {
 	$ttipUrl=(!isset($no_ttip)||!$no_ttip)?Url::to(['/arms/ttip','id'=>$model->id]):null;
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$model->num,
 		'namePrefix'=>$icon?'<span class="fas fa-desktop"></span>':'',

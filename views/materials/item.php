@@ -24,6 +24,7 @@ if (is_object($model)) {
 		($rest?(' '.$model->rest.($model->type?$model->type->units:'type_error')):'');
 
 	echo \app\components\ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'noDelete'=>true,
 		'static'=>true,

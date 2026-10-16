@@ -17,6 +17,7 @@ if (is_object($model)) {
 	if (!isset($name)) $name=$model->keyShort;
 	$ttipUrl=$static_view?null:Url::to(['/lic-keys/ttip','id'=>$model->id]);
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'name'=>$name,
 		'static'=>$static_view,

@@ -38,6 +38,7 @@ if (!empty($model)) {
 
 
 	echo ItemObjectWidget::widget([
+		'show_archived'=>$show_archived??null, // Учитываем явный режим списка.
 		'model'=>$model,
 		'marker'=>$marker,
 		'item_class'=>$class,
