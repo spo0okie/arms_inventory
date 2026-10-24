@@ -37,6 +37,8 @@ $config=\yii\helpers\ArrayHelper::merge(require __DIR__ . '/web.php',[
             'showScriptName' => true,
         ],
         'request' => [
+            // Codeception передаёт имя скрипта без web/: фиксируем путь для правильного @webroot.
+            'scriptFile' => dirname(__DIR__) . '/web/index-test.php',
             'cookieValidationKey' => 'test',
             'enableCsrfValidation' => false,
         ],
