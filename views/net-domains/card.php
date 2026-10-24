@@ -1,25 +1,20 @@
 <?php
 
-use app\components\TextFieldWidget;
-use yii\helpers\Html;
-use app\components\widgets\page\ModelWidget;
+use app\components\LinkObjectWidget;
+use app\components\ModelFieldWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\NetDomains */
 
-$deleteable=true; //тут переопределить возможность удаления элемента
-if (!isset($static_view)) $static_view=false;
+$static_view = $static_view ?? false;
 
 ?>
 
 <h1>
-	<?= ModelWidget::widget(['model'=>$model]) ?>
-	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['net-domains/delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить этот элемент? Действие необратимо',
-			'method' => 'post',
-		],
+	<?= LinkObjectWidget::widget([
+		'model' => $model,
+		'static' => $static_view,
+		'hideUndeletable' => false,
 	]) ?>
 </h1>
-<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
-
+<?= ModelFieldWidget::renderFieldValue($model, 'comment') ?>

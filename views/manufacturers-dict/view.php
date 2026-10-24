@@ -1,5 +1,6 @@
 <?php
 
+use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -12,18 +13,14 @@ $this->title = $model->id;
 ?>
 <div class="manufacturers-dict-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Изменить', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Удалить эту запись?',
-                'method' => 'post',
-            ],
-        ]) ?>
-    </p>
+	<h1>
+		<?= LinkObjectWidget::widget([
+			'model' => $model,
+			'name' => Html::encode($this->title),
+			'hideUndeletable' => false,
+			'confirmMessage' => 'Удалить эту запись?',
+		]) ?>
+	</h1>
 
     <?= DetailView::widget([
         'model' => $model,

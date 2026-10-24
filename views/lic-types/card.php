@@ -1,29 +1,21 @@
 <?php
 
-use app\components\TextFieldWidget;
+use app\components\LinkObjectWidget;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
-use app\components\widgets\page\ModelWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicTypes */
 
 if (!isset($static_view)) $static_view=false;
-$deleteable=!count($model->licGroups);
 ?>
 <h1>
-	<?= ModelWidget::widget(['model'=>$model]) ?>
-
-	<?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить эту схему лицензирования? Это действие необратимо!',
-			'method' => 'post',
-		],
-	]); else { ?>
-		<span class="small">
-			<span class="fas fa-lock"	title="Невозможно в данный момент удалить эту схему лицензирования, т.к. присутствуют группы лицензий с этой схемой лицензирования."></span>
-		</span>
-	<?php } ?>
+	<?= LinkObjectWidget::widget([
+		'model' => $model,
+		'name' => Html::encode($model->descr),
+		'static' => $static_view,
+		'hideUndeletable' => false,
+		'confirmMessage' => 'Удалить эту схему лицензирования? Это действие необратимо!',
+	]) ?>
 </h1>
 
 

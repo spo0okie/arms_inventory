@@ -1,25 +1,22 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\DetailView;
-
+use app\components\LinkObjectWidget;
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\NetIps */
 
-$deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
 
 ?>
 
 <h1 class="text-monospace">
-	<?= Html::encode($model->sname) ?>
-	<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['net-ips/update','id'=>$model->id])) ?>
-	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['net-ips/delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить этот элемент? Действие необратимо',
-			'method' => 'post',
-		],
+	<?php // Стандартная шапка учитывает обратные связи и статический режим тултипа. ?>
+	<?= LinkObjectWidget::widget([
+		'model' => $model,
+		'name' => Html::encode($model->sname),
+		'static' => $static_view,
+		'hideUndeletable' => false,
 	]) ?>
 </h1>
 

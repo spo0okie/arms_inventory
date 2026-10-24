@@ -1,5 +1,6 @@
 <?php
 
+use app\components\LinkObjectWidget;
 use app\components\DynaGridWidget;
 use app\models\TechTypes;
 use yii\data\ActiveDataProvider;
@@ -17,23 +18,13 @@ $this->title = $model->name;
 
 $techModels=$model->techModels;
 
-$this->params['headerContent']='<h2>'.
-        Html::encode($this->title).' '.
-        Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]).
-        (!count($techModels)?Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
-	        'data' => [
-		        'confirm' => 'Удалить этот тип оборудования?',
-		        'method' => 'post',
-	        ],
-        ]):'').
-    	'</h2>'.
-		(
-			count($techModels)?
-			'<p class="small">
-				<span class="fas fa-exclamation-triangle"></span> Невозможно удалить этот тип оборудования, т.к. заведены модели оборудования этого типа. (см ниже)
-			</p>':''
-		);
-	
+// Общая шапка учитывает модели оборудования через обратную связь tech_models_ids.
+$this->params['headerContent'] = '<h2>'.LinkObjectWidget::widget([
+	'model' => $model,
+	'name' => Html::encode($this->title),
+	'hideUndeletable' => false,
+	'confirmMessage' => 'Удалить этот тип оборудования?',
+]).'</h2>';
 
 $tabs=[];
 $tabs[] = [

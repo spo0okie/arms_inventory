@@ -1,5 +1,6 @@
 <?php
 
+use app\components\LinkObjectWidget;
 use yii\helpers\Html;
 
 
@@ -17,26 +18,13 @@ $techs=$model->techModels;
 ?>
 
 <h1>
-	<?= Html::encode($model->name) ?>
-	<?php if (!$static_view) { ?>
-		<?= Html::a('<span class="fas fa-pencil-alt" />',['update','id'=>$model->id]) ?>
-		<?php if (!count($soft)&&!count($dict)&&!count($techs))
-			echo Html::a('<span class="fas fa-trash" />',
-				[
-					'delete',
-					'id'=>$model->id,
-				],[
-					'data'=>[
-						'method'=>'post',
-						'confirm'=>'Удалить этого производителя?',
-					]
-				]);
-		else { ?>
-			<span class="small">
-				<span class="fas fa-lock"	title="Невозможно в данный момент удалить этого производителя, т.к. он привязан к софту, моделям оборудования или словарь написаний не пуст"></span>
-			</span>
-		<?php }
-	} ?>
+	<?= LinkObjectWidget::widget([
+		'model' => $model,
+		'name' => Html::encode($model->name),
+		'static' => $static_view,
+		'hideUndeletable' => false,
+		'confirmMessage' => 'Удалить этого производителя?',
+	]) ?>
 </h1>
 
 <?= \app\components\ModelFieldWidget::renderFieldValue($model,'full_name') ?>
