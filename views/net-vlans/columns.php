@@ -24,13 +24,13 @@ return [
 	],
 	'name'=>[
 		'value'=>function($data) use ($renderer){
-			return $renderer->render('item',['model'=>$data]);
+			return $renderer->render('//net-vlans/item',['model'=>$data]);
 		},
 		'contentOptions'=>[
 			'class'=>'text-right'
 		]
 	],
-	'vlan',
+	'vlan'=>['attribute'=>'vlan'],
 	'domain_id'=>[
 		'value'=>function($data) use ($renderer){
 			return ModelWidget::widget(['model'=>$data->netDomain]);
@@ -39,7 +39,10 @@ return [
 			'class'=>'text-center'
 		]
 	],
-	'comment',
+	'comment'=>[
+		// Сохраняем штатный рендер текста и фильтр по исходному атрибуту.
+		'contentOptions' => ['field' => 'commentRecursive'],
+	],
 ];
 
 

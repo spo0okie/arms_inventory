@@ -38,7 +38,7 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 					<?= $form->field($model,  'segments_id')->select2() ?>
 				</div>
 				<div class="col-md-6">
-					<?= $form->field($model, 'vlan_id')->select2() ?>
+					<?= $form->field($model, 'vlan_id')->select2(['data' => \app\models\NetVlans::fetchNames(true)]) ?>
 				</div>
 			</div>
 			<?= $form->field($model,  'comment') ?>

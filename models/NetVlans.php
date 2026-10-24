@@ -15,11 +15,15 @@ use yii\helpers\ArrayHelper;
  * @property string $name
  * @property string $sname
  * @property string $domainCode
- * @property int $vlan
- * @property int $domain_id
+ * @property int|string $vlan
+ * @property int|null $domain_id
  * @property string $comment
  * @property NetDomains $netDomain
- * @property Networks $networks
+ * @property Networks[] $networks
+ * @property NetVlans|null $parent Глобальный резерв для локального VLAN
+ * @property NetVlans|null $globalVlan Связь для жадной загрузки резерва
+ * @property string $nameRecursive
+ * @property string $commentRecursive
  */
 class NetVlans extends ArmsModel
 {
@@ -27,9 +31,10 @@ class NetVlans extends ArmsModel
 	public static $title='Vlan';
 	public static $titles='Vlan\'ы';
 
+	/** {@inheritdoc} */
 	public static function modelDescription(): string
 	{
-		return 'Справочник VLAN: номера VLAN с привязкой к сетям и доменам L2.';
+		return 'VLAN в доменах L2 и глобальные резервы номеров. Локальные VLAN наследуют незаполненные название и пояснение от резерва.';
 	}
 
 	/**
@@ -46,16 +51,15 @@ class NetVlans extends ArmsModel
     public function rules()
     {
         return [
-            [['domain_id'], 'integer'],
-			[
-				['vlan', 'domain_id'], 'unique',
-				'targetAttribute' => ['vlan', 'domain_id'],
-				'message'=>'Такая комбинация домена и Vlan уже есть',
-				'when' => fn($model)=> !str_contains($model->vlan, '-') // Проверяем, что VLAN не является диапазоном
-			],
+			// Пустой выбор домена всегда обозначает один и тот же резерв (NULL).
+			[['domain_id'], 'default', 'value' => null],
+			[['domain_id'], 'integer', 'min' => 1],
+			[['domain_id'], 'exist', 'targetClass' => NetDomains::class, 'targetAttribute' => 'id'],
+			[['domain_id'], 'validateReservation', 'skipOnEmpty' => false],
 			[['name'], 'string', 'max' => 255],
 			[['comment'], 'safe'],
-			[['vlan'], 'validateVlanRange'], // Добавляем валидацию диапазона
+			[['vlan'], 'validateVlanRange', 'skipOnEmpty' => false],
+			[['vlan'], 'validateVlanUnique'],
 		];
     }
 
@@ -75,10 +79,12 @@ class NetVlans extends ArmsModel
 			],
 			'name' => [
 				'Название',
-				'hint' => 'Понятное обозначение<br>'
+				'hint' => 'Понятное обозначение.<br>'
+					.'Может наследоваться от глобального резервирования этого VLAN (если такое есть).<br>'
 					.'Можно использовать макрос {VLAN} для подстановки номера Vlan<br>'
-					.'(удобно при создании нескольких VLAN указанием диапазона в поле Vlan ID)<br>'
+					.'(удобно при создании нескольких VLAN указанием диапазона в поле Vlan ID).<br>'
 					.Networks::$latinNameHint,
+				'is_inheritable' => true,
 			],
 			'networks_ids' => [
 				'Сети',
@@ -94,13 +100,17 @@ class NetVlans extends ArmsModel
 			'domain_id' => [
 				'Домен L2',
 				'hint' => 'В каком L2 домене находится этот Vlan'
-				. '<br><i>(Для разделения VLAN с одинаковыми номерами, но в разных доменах)</i>',
-				'placeholder' => 'Выберите L2 Домен',
+				. '<br>(Для разделения VLAN с одинаковыми номерами, но в разных доменах)'
+				. '<br><i>Если L2 домен не указать, будет создано резервирование номера VLAN для всех L2 доменов<br>'
+				.'(для сквозного использования номеров VLAN).</i>',
+				'placeholder' => 'Резервирование VLAN',
 			],
 			'comment' => [
 				'Пояснение',
 				//был ключ 'comment' вместо 'hint' (опечатка) - подсказка не отображалась
-				'hint' => 'Все что нужно знать об этом Vlan, но что не ясно из названия',
+				'hint' => 'Все что нужно знать об этом VLAN, но что не ясно из названия.<br>'
+				.'Может наследоваться от глобального резервирования этого VLAN (если такое есть).',
+				'is_inheritable' => true,
 				'type' => 'text',
 				'typeClass' => \app\types\TextType::class,
 			],
@@ -109,28 +119,70 @@ class NetVlans extends ArmsModel
 
 
 	/**
-	 * Валидация диапазона VLAN.
+	 * Валидация формата номера и диапазона единым типом VLAN.
 	 * @param string $attribute
 	 * @param array $params
 	 */
-	public function validateVlanRange($attribute, $params)
+	public function validateVlanRange($attribute, $params = [])
 	{
-		if (strpos($this->$attribute, '-') !== false) {
-			if (!$this->isNewRecord) {
-				$this->addError($attribute, 'Диапазон VLAN можно задавать только при создании.');
-				return;
-			}
+		VlanType::validateValue($this, $attribute, $this->isNewRecord);
+	}
 
-			[$start, $end] = explode('-', $this->$attribute);
-			$start = (int)$start;
-			$end = (int)$end;
+	/** Проверяет все номера диапазона в выбранном домене, включая глобальный резерв. */
+	public function validateVlanUnique($attribute, $params = []): void
+	{
+		if ($this->hasErrors('domain_id') || ($bounds = VlanType::bounds($this->$attribute)) === null) return;
+		$query = static::find()->where(['domain_id' => $this->domain_id ?: null])
+			->andWhere(['between', 'vlan', $bounds[0], $bounds[1]]);
+		if (!$this->isNewRecord) $query->andWhere(['<>', 'id', $this->id]);
+		$conflicts = $query->orderBy('vlan')->select('vlan')->column();
+		if ($conflicts) $this->addError($attribute, 'В выбранном домене / резервированиях уже есть VLAN: '.implode(', ', $conflicts).'.');
+	}
 
-			if ($start < 1 || $end > 4096 || $start > $end) {
-				$this->addError($attribute, 'Диапазон VLAN должен быть в пределах 1-4096 и корректным.');
-			}
-		} elseif ($this->$attribute < 1 || $this->$attribute > 4096) {
-			$this->addError($attribute, 'VLAN должен быть в пределах 1-4096.');
+	/** Не позволяет превратить используемый локальный VLAN в резерв. */
+	public function validateReservation($attribute, $params = []): void
+	{
+		if ($this->$attribute === null && !$this->isNewRecord
+			&& $this->getOldAttribute('domain_id') !== null && $this->getNetworks()->exists()) {
+			$this->addError($attribute, 'Нельзя убрать L2-домен у VLAN, к которому привязаны L3 сети.');
 		}
+	}
+
+	/** Сбрасывает вычисленные значения перед AJAX-валидацией изменённой формы. */
+	public function beforeValidate()
+	{
+		$this->recursiveCache = [];
+		return parent::beforeValidate();
+	}
+
+	/** Резерв не имеет родителя: иначе пустые поля рекурсивно наследовались бы от себя. */
+	public function getParent(): ?NetVlans
+	{
+		return empty($this->domain_id) || VlanType::bounds($this->vlan) === null
+			|| str_contains((string)$this->vlan, '-') ? null : $this->globalVlan;
+	}
+
+	/** Наследует пустое пояснение; общий обработчик TextType заменяет только макрос PARENT. */
+	public function getCommentRecursive(): string
+	{
+		return (string)$this->findRecursiveAttr('comment', 'commentRecursive');
+	}
+
+	/** Связь по номеру для жадной загрузки и SQL-поиска унаследованных значений. */
+	public function getGlobalVlan(): ActiveQuery
+	{
+		return $this->hasOne(self::class, ['vlan' => 'vlan'])
+			->alias('global_vlan')->andOnCondition(['global_vlan.domain_id' => null]);
+	}
+
+	/** SQL-эквивалент наследования строковых полей; имена колонок задаются только кодом. */
+	public static function inheritedSql(string $attribute): string
+	{
+		if (!in_array($attribute, ['name', 'comment'], true)) {
+			throw new \InvalidArgumentException('Наследуются только название и пояснение VLAN.');
+		}
+		// empty() в общем механизме наследования считает строку «0» пустой.
+		return "COALESCE(NULLIF(NULLIF(net_vlans.$attribute, ''), '0'), NULLIF(NULLIF(global_vlan.$attribute, ''), '0'), '')";
 	}
 
 	/**
@@ -180,8 +232,8 @@ class NetVlans extends ArmsModel
 		foreach (static::find()
 			->joinWith('netDomain', false, 'INNER JOIN')
 			->where(['net_domains.places_id' => $placeIds])
-			->with('networks')->all() as $vlan) {
-			$parts = array_filter([trim((string)$vlan->name)]);
+			->with(['networks', 'globalVlan'])->all() as $vlan) {
+			$parts = array_filter([trim((string)$vlan->nameRecursive)]);
 			foreach ($vlan->networks as $network) {
 				if (!empty($network->archived)) continue;
 				$parts[] = trim($network->text_addr.' '
@@ -201,52 +253,70 @@ class NetVlans extends ArmsModel
 	 */
 	public function getSname()
 	{
-		return $this->name.' ('.$this->vlan.')';
+		return $this->nameRecursive.' ('.$this->vlan.')';
 	}
 
 	/**
-	 * Возвращает список всех доменов
-	 * @return array|mixed|null
+	 * Возвращает подписи VLAN с учётом наследования; для L3-сетей исключает резервы.
+	 * @param bool $localOnly Только VLAN с указанным доменом.
+	 * @return array
 	 */
-	public static function fetchNames()
+	public static function fetchNames($localOnly = false)
 	{
-		$list = static::find()
-			->orderBy('name')
-			->all();
+		$query = static::find()->joinWith('globalVlan');
+		if ($localOnly) $query->andWhere(['not', ['net_vlans.domain_id' => null]]);
+		$list = $query->orderBy(new \yii\db\Expression(static::inheritedSql('name').' ASC, net_vlans.vlan ASC'))->all();
 		return ArrayHelper::map($list, 'id', 'sname');
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * Создаёт диапазон целиком в транзакции, сохраняя последний VLAN в текущем объекте.
+	 * При ошибке восстанавливает введённый диапазон для повторного показа формы.
+	 * @param bool $runValidation
+	 * @param array|null $attributeNames
+	 * @return bool
 	 */
+	public function save($runValidation = true, $attributeNames = null)
+	{
+		if (!is_string($this->vlan) || !str_contains($this->vlan, '-')) {
+			return parent::save($runValidation, $attributeNames);
+		}
+		// Диапазон проверяется целиком до первой записи, даже при save(false).
+		if (!$this->validate()) return false;
+		[$start, $end] = VlanType::bounds($this->vlan);
+		$original = $this->attributes;
+		$transaction = static::getDb()->beginTransaction();
+		$saved = false;
+		try {
+			for ($number = $start; $number < $end; $number++) {
+				$item = new self();
+				$item->attributes = $original;
+				$item->vlan = $number;
+				if (!$item->save()) {
+					$this->addErrors($item->errors);
+					return false;
+				}
+			}
+			$this->vlan = $end;
+			if (!parent::save(true, $attributeNames)) return false;
+			$transaction->commit();
+			$saved = true;
+			return true;
+		} finally {
+			if (!$saved) {
+				if ($transaction->isActive) $transaction->rollBack();
+				$this->setAttributes($original, false);
+				$this->setOldAttributes(null);
+				$this->recursiveCache = [];
+			}
+		}
+	}
+
+	/** Подставляет номер в явно введённое название, не копируя унаследованное значение. */
 	public function beforeSave($insert)
 	{
-		if (parent::beforeSave($insert)) {
-			if (str_contains((string)$this->vlan, '-')) {
-				[$start, $end] = explode('-', $this->vlan);
-				$start = (int)$start;
-				$end = (int)$end;
-
-				for ($vlan = $start; $vlan <= $end-1; $vlan++) {
-					$model = new self();
-					$model->attributes = $this->attributes;
-					$model->vlan = $vlan;
-					$model->save(); // Сохраняем
-				}
-
-				//оставляем себе последний VLAN вместо диапазона
-				$this->vlan = $vlan;
-
-			}
-
-			if ($this->name !== null) {
-				$this->name=str_replace('{VLAN}',(string)$this->vlan,$this->name);
-			}
-
-
-			return true;
-		}
-
-		return false;
+		if (!parent::beforeSave($insert)) return false;
+		if ($this->name !== null) $this->name = str_replace('{VLAN}', (string)$this->vlan, $this->name);
+		return true;
 	}
 }

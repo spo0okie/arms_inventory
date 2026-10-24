@@ -13,4 +13,5 @@ $this->title = $model->name;
 ?>
 <div class="net-domains-view">
 	<?= $this->render('card',['model'=>$model]) ?>
+	<?= $this->render('_vlans',['model'=>$model]) ?>
 </div>

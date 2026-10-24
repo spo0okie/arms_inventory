@@ -102,6 +102,10 @@ class Networks extends ArmsModel
             [['name'], 'string', 'max' => 255],
 			[['comment','notepad','links','ranges'], 'safe'],
 			[['vlan_id', 'segments_id', 'archived'], 'integer'],
+			// L3-сеть должна принадлежать конкретному L2-домену через локальный VLAN.
+			[['vlan_id'], 'exist', 'targetClass' => NetVlans::class, 'targetAttribute' => 'id',
+				'filter' => ['not', ['domain_id' => null]],
+				'message' => 'Выберите VLAN с L2-доменом; резерв номера VLAN нельзя привязать'],
 			[['segments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Segments::class, 'targetAttribute' => ['segments_id' => 'id']],
 		];
     }
@@ -216,7 +220,7 @@ class Networks extends ArmsModel
 			],
 			'vlan_id' => [
 				'Vlan',
-				'hint' => 'В каком Vlan находится эта сеть',
+				'hint' => 'Локальный VLAN, в котором находится сеть. Глобальный резерв номера выбрать нельзя: сначала создайте VLAN в нужном L2-домене.',
 				'placeholder' => 'Выберите VLAN',
 				'typeClass'=>\app\types\LinkType::class,
 			],
