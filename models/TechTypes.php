@@ -80,6 +80,8 @@ class TechTypes extends ArmsModel
 
 	public $linksSchema=[
 		'marker_id'=>[Markers::class,'tech_types_ids'],
+		// Заведённые модели оборудования блокируют удаление типа.
+		'tech_models_ids'=>[TechModels::class,'type_id'],
 	];
 
 	/**

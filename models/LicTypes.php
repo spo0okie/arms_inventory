@@ -40,6 +40,8 @@ class LicTypes extends ArmsModel
 
 	public $linksSchema=[
 		'scans_id'=>Scans::class,
+		// Группы лицензий блокируют удаление используемой схемы.
+		'lic_groups_ids'=>[LicGroups::class,'lic_types_id'],
 	];
 
     /**

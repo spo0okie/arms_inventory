@@ -64,6 +64,8 @@ class TechStates extends ArmsModel
 
 	public $linksSchema=[
 		'marker_id'=>[Markers::class,'tech_states_ids'],
+		// Оборудование с этим состоянием блокирует его удаление.
+		'techs_ids'=>[Techs::class,'state_id'],
 	];
 
     /**
