@@ -102,8 +102,11 @@ class Database extends \Codeception\Module
 		return $commands;
 	}
 
+	/** Загружает дамп, в том числе после удаления тестовой БД набором migrations. */
 	public static function loadSqlDump($fileName=__DIR__ . '/../../_data/arms_demo.sql')
 	{
+		// PDO с dbname должен подключиться до выполнения CREATE DATABASE из дампа.
+		static::prepareYiiDb();
 		$commands=static::parseSqlDump($fileName);
 		// Выполняем все команды по порядку
 		foreach ($commands as $sql) {

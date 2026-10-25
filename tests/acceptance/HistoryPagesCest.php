@@ -15,11 +15,7 @@ class HistoryPagesCest
 	protected function classesProvider()
 	{
 		Helper\Yii2::initFromFilename('test-web.php');
-		codecept_debug('Initializing Suite/HistoryTest DB...');
-		//Подготавливаем временную БД
-		Helper\Database::dropYiiDb();
-		Helper\Database::prepareYiiDb();
-		Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
+		// Демо-история загружена в bootstrap; не удаляем данные других провайдеров.
 		
 		$classes=[];
 		$modelsPath = __DIR__.'/../../models';

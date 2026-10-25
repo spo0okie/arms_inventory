@@ -1,9 +1,14 @@
 actor: Tester
+params:
+    - tests/_params.php
 paths:
     tests: tests
     output: tests/log
     data: tests/_data
     helpers: tests/_support
+extensions:
+    enabled:
+        - Helper\ResponseReport
 settings:
     memory_limit: 1024M
     colors: true

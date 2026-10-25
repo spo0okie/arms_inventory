@@ -74,7 +74,7 @@ class ModelTypeSafetyTest extends Unit
     {
 
 		\Helper\Yii2::initFromFileName('test-console.php');
-		\Helper\Database::loadSqlDump();
+		// Для метаданных достаточно схемы, загруженной один раз в bootstrap.
         
         // Подключаем ArmsModel напрямую, чтобы был доступен для проверки наследования     
         //require_once codecept_root_dir() . '/models/base/ArmsModel.php';;

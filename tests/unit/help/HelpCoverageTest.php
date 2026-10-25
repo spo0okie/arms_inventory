@@ -77,7 +77,7 @@ class HelpCoverageTest extends Unit
 	public function testHelpCoverage()
 	{
 		\Helper\Yii2::initFromFileName('test-console.php');
-		\Helper\Database::loadSqlDump();
+		// Проверка подсказок читает метаданные из общей подготовленной БД.
 
 		$missing = $this->collectMissing();
 		$baseline = $this->baseline();

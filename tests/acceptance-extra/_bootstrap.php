@@ -11,9 +11,6 @@ require_once __DIR__ . '/../../helpers/StringHelper.php';
 
 codecept_debug('Initializing Extra acceptance tests DB...');
 Helper\Yii2::initFromFilename('test-web.php');
-codecept_debug('Initializing Suite/HistoryTest DB...');
-//Подготавливаем временную БД
-Helper\Database::dropYiiDb();
-Helper\Database::prepareYiiDb();
+// Эти проверки читают фиксированные демо-ID; дамп сам пересоздаёт БД один раз.
 Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
 codecept_debug('_bootstrap for extra acceptance tests finished');

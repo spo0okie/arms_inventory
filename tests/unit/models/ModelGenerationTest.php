@@ -22,7 +22,7 @@ class ModelGenerationTest extends Unit
     {
 
 		\Helper\Yii2::initFromFileName('test-console.php');
-		\Helper\Database::loadSqlDump();
+		// Bootstrap уже загрузил схему; экземпляры моделей создаёт фабрика в тесте.
 
 		$data=[];
         foreach(ModelHelper::getModelClasses() as $class) {

@@ -71,8 +71,8 @@ class PageAccessCest
 	 * Подготавливает маршруты, которые есть у приложения чтобы их протестировать
 	 * Эта функция через phpDoc указана у теста testAllRoutesAccessible как dataProvider
 	 * И по логике codeception она вызывается до _beforeSuite
-	 * А нам в ней нужно рабочее приложение с развернутой тестовой БД
-	 * поэтому инициализации приложения и его БД перенесено в эту функцию
+	 * Схему и демо-данные заранее загружает bootstrap набора.
+	 * Здесь настраиваем приложение и генерируем собственные модели CRUD-сценариев.
 	 * 
 	 * Опциональный параметр "class" ограничивает тестирование определенным классом модели.
 	 * Если передан параметр, будут протестированы только маршруты для этого класса.
@@ -84,25 +84,9 @@ class PageAccessCest
 	{
 		$routes = [];
 		static::$scenarioRegistry = [];
-		// test-web.php используется также отдельным web/index-test.php сервером, где
-		// debug-модуль безопасен (короткие HTTP-запросы). В codeception-процессе же
-		// Yii живёт весь прогон: testXxx() через ModelFactory::create делают сотни
-		// INSERT/UPDATE, их логи буферизуются yii\debug\LogTarget::messages до shutdown
-		// и только там сериализуются через export(). На ~900 сценариях буфер вырастает
-		// до ~1GB и падает с OOM. Поэтому сам test-web.php не трогаем, а для текущего
-		// инстанса Yii локально отключаем debug-модуль и traceLevel.
-		$config = require __DIR__ . '/../../config/test-web.php';
-		$config['bootstrap'] = array_values(array_diff($config['bootstrap'] ?? [], ['debug']));
-		unset($config['modules']['debug']);
-		if (isset($config['components']['log']['traceLevel'])) {
-			$config['components']['log']['traceLevel'] = 0;
-		}
-		Helper\Yii2::initFromConfig($config);
-		codecept_debug('Initializing Suite DB...');
-		//Подготавливаем временную БД
-		Helper\Database::dropYiiDb();
-		Helper\Database::prepareYiiDb();
-		Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
+		// Общие настройки тестового окружения применяются и к провайдерам.
+		Helper\Yii2::initFromFileName('test-web.php');
+		// Не пересоздаём общую БД: сценарии получают свои модели через ModelFactory.
 
 		
 		// Получаем опциональный фильтр по классу модели из окружения (если передан)

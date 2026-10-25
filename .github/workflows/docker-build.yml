@@ -69,10 +69,10 @@ jobs:
           mkdir -p web/scans/thumbs runtime/swagger-temp tests/_output tests/log
           chmod -R 777 web/scans runtime tests/_output tests/log
 
-      # Схема тестовой БД: грузим демо-дамп проекта (acceptance/rest при старте
-      # пересоздают БД из него самостоятельно, unit'у нужна готовая схема).
-      - name: Load test DB schema
-        run: mysql -h 127.0.0.1 -P 3306 -u root arms_test < tests/_data/arms_demo.sql
+      # Unit bootstrap загружает дамп до data provider; отдельный импорт не нужен.
+      # Запускаем до web-сервера, чтобы его проверка готовности уже видела тестовую БД.
+      - name: Unit tests
+        run: php vendor/bin/codecept run unit
 
       - name: Start test web server (:8081)
         run: |
@@ -82,9 +82,6 @@ jobs:
             sleep 1
           done
           echo "web server did not start"; cat /tmp/websrv.log; exit 1
-
-      - name: Unit tests
-        run: php vendor/bin/codecept run unit
 
       - name: Acceptance tests
         run: php vendor/bin/codecept run acceptance

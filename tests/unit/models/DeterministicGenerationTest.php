@@ -22,7 +22,7 @@ class DeterministicGenerationTest extends Unit
     protected function _before()
     {
         \Helper\Yii2::initFromFileName('test-console.php');
-        \Helper\Database::loadSqlDump();
+        // Общая БД подготовлена bootstrap; AccessTypes генерируется без сохранения.
     }
 
     /**

@@ -5,7 +5,7 @@ use yii\helpers\ArrayHelper;
 $dbTest = ArrayHelper::merge(
 	require __DIR__ . '/db.php',
 	require __DIR__ . '/db-local.php',
-	['dsn'=>'mysql:host=127.0.0.1;dbname=arms_test', 'username' => 'root',    'password' => '',]
+	['dsn'=>'mysql:host=127.0.0.1;dbname=arms_test', 'username' => 'root',    'password' => '', 'enableSchemaCache' => false,]
 );
 
 /**
@@ -27,7 +27,9 @@ $config=ArrayHelper::merge(	require __DIR__ . '/console.php',[
 	],
     'params' => ArrayHelper::merge(
 		require __DIR__ . '/params.php',
-		require __DIR__ . '/params-local.php'
+		require __DIR__ . '/params-local.php',
+		// Генерация моделей и консольные тесты не наследуют боевой режим авторизации.
+		['useRBAC' => false, 'authorizedView' => false]
 	),
 ]);
 

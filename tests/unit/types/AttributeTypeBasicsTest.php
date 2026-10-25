@@ -44,7 +44,7 @@ class AttributeTypeBasicsTest extends Unit
 	public function testTypeContracts(string $typeClass): void
 	{
 		\Helper\Yii2::initFromFileName('test-console.php');
-		\Helper\Database::loadSqlDump();
+		// Контракты типов используют общую схему, а не отдельный дамп на каждый тип.
 
 		$model = new AccessTypes();
 		$context = new AttributeContext(

@@ -43,3 +43,7 @@ web/scans/*
 /cloud*.cmd
 !yii.bat
 .claude/*
+
+# Изолированная публикация ресурсов тестового приложения.
+/web/assets-test/
+!/test.bat

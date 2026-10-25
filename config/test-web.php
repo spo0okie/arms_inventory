@@ -19,7 +19,7 @@ $testParams = \yii\helpers\ArrayHelper::merge(
 $testDb = \yii\helpers\ArrayHelper::merge(
 	require __DIR__ . '/db.php',
 	require __DIR__ . '/db-local.php',
-	['dsn'=>'mysql:host=127.0.0.1;dbname=arms_test', 'username' => 'root',    'password' => '',]
+	['dsn'=>'mysql:host=127.0.0.1;dbname=arms_test', 'username' => 'root',    'password' => '', 'enableSchemaCache' => false,]
 );
 
 /**
@@ -27,7 +27,6 @@ $testDb = \yii\helpers\ArrayHelper::merge(
  */
 $config=\yii\helpers\ArrayHelper::merge(require __DIR__ . '/web.php',[
     'id' => 'arms-tests',
-	'bootstrap' => ['debug'],
     'components' => [
         'db' => $testDb,
 		'db_root' => array_merge($testDb,[
@@ -43,35 +42,30 @@ $config=\yii\helpers\ArrayHelper::merge(require __DIR__ . '/web.php',[
             'enableCsrfValidation' => false,
         ],
 		'log' => [
-			'traceLevel' => 5,
+			'traceLevel' => 0,
 			'targets' => [
 				[
 					'class' => 'yii\log\FileTarget',
-					'levels' => ['error', 'warning', 'info', 'trace'],
+					'levels' => ['error', 'warning'],
 					'categories' => ['application', 'yii\db\*'],
 					'logFile' => '@runtime/logs/console.log',
 				],
 			],
 		],
     ],
-	'modules'=>[
-		'debug'=>[
-			'class' => 'yii\debug\Module',
-			// uncomment the following to add your IP if you are not connecting from localhost.
-			//'allowedIPs' => ['127.0.0.1', '::1'],
-			// 'user'-панель на PHP 8.1+ дергает class_exists($this->filterModel) без проверки
-			// на null (yii2-debug UserPanel::init()) — при авторизованном запросе это
-			// deprecation-предупреждение, а т.к. выше error_reporting(E_ALL) не глушит
-			// deprecated, Yii ErrorHandler превращает его в фатальный ErrorException прямо
-			// во время bootstrap приложения (до того как появляется error-страница) — 500
-			// вместо ожидаемого кода доступа. Ловится только на связке PHP 8.1+/CI
-			// (AuthorizationModesCest после логина). Отключаем панель, т.к. она не нужна тестам.
-			'panels' => ['user' => false],
-		],
-	],
     'params' => $testParams,
 ]);
 
 \Yii::$classMap['yii\helpers\Url'] = dirname(__DIR__) . '/helpers/Url.php';
+
+// Toolbar и SQL backtrace не участвуют в проверках, но накапливают логи между тестами.
+$config['bootstrap'] = array_values(array_diff($config['bootstrap'], ['debug']));
+unset($config['modules']['debug']);
+// CLI и HTTP не делят опубликованные файлы и PHP-сессии с рабочим Apache.
+\yii\helpers\FileHelper::createDirectory(dirname(__DIR__) . '/web/assets-test');
+\yii\helpers\FileHelper::createDirectory(dirname(__DIR__) . '/runtime/test-sessions');
+$config['components']['assetManager']['basePath'] = dirname(__DIR__) . '/web/assets-test';
+$config['components']['assetManager']['baseUrl'] = '/web/assets-test';
+$config['components']['session']['savePath'] = dirname(__DIR__) . '/runtime/test-sessions';
 
 return $config;

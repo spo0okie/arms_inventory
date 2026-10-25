@@ -9,3 +9,7 @@ require_once __DIR__ . '/../../vendor/yiisoft/yii2/Yii.php';
 require_once __DIR__ . '/../../helpers/ArrayHelper.php';
 require_once __DIR__ . '/../../helpers/StringHelper.php';
 
+// История и авторизация читают демо-данные; все провайдеры используют одну БД.
+Helper\Yii2::initFromFileName('test-console.php');
+Helper\Database::loadSqlDump();
+

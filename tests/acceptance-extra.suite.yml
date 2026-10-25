@@ -6,10 +6,10 @@ modules:
             configFile: 'config/test-web.php'
             transaction: false
             cleanup: false
-            entryUrl: http://localhost:8081/web/index-test.php
+            entryUrl: '%TEST_ENTRY_URL%'
         - PhpBrowser:
-            url: http://localhost:8081/web/index-test.php
+            url: '%TEST_ENTRY_URL%'
         - REST:
             depends: PhpBrowser
-            url: http://localhost:8081
+            url: '%TEST_SERVER_URL%'
 bootstrap: _bootstrap.php

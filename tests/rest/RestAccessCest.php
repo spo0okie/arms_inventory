@@ -78,17 +78,11 @@ class RestAccessCest
 	{
 		$routes = [];
 		static::$scenarioRegistry = [];
-		// Отключаем debug-модуль на время прогона (см. комментарий в PageAccessCest).
-		$config = require __DIR__ . '/../../config/test-web.php';
-		$config['bootstrap'] = array_values(array_diff($config['bootstrap'] ?? [], ['debug']));
-		unset($config['modules']['debug']);
-		if (isset($config['components']['log']['traceLevel'])) {
-			$config['components']['log']['traceLevel'] = 0;
-		}
-		Helper\Yii2::initFromConfig($config);
+		// Общие настройки тестового окружения применяются и к провайдерам.
+		Helper\Yii2::initFromFileName('test-web.php');
 		codecept_debug('Initializing REST Suite DB...');
-		Helper\Database::dropYiiDb();
-		Helper\Database::prepareYiiDb();
+		// Единственный импорт на REST-набор изолирует его от изменений других наборов.
+		// Дамп сам пересоздаёт БД; дальнейшие CRUD-данные генерируют провайдеры.
 		Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
 
 		$routeFilters = $this->parseRouteFilters(getenv('TEST_REST_ROUTES') ?: '');

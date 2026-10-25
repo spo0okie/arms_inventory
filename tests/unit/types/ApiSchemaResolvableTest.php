@@ -24,7 +24,7 @@ class ApiSchemaResolvableTest extends Unit
     public function testEveryApiAttributeResolvesType(): void
     {
         \Helper\Yii2::initFromFileName('test-console.php');
-        \Helper\Database::loadSqlDump();
+        // Типы API читают общую схему и не требуют восстановления демо-данных.
 
         $unresolved = [];
         foreach (ModelHelper::getModelClasses() as $modelClass) {

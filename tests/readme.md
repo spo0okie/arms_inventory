@@ -10,7 +10,7 @@
 
 - **Codeception** — основан на PHPUnit
 - Версия PHP: >=8.1
-- Точка входа: [`test.bat`](test.bat) (Windows) или `vendor/bin/codecept run` (Linux/macOS)
+- Точка входа: [`test.bat`](../test.bat) (Windows) или `php tests/bin/run.php` (Linux/macOS)
 
 ### Технологический стек
 
@@ -50,14 +50,48 @@ tests/
 
 ## 3. Как запускать тесты
 
+`test.bat` запускает `tests/bin/run.php`: скрипт поднимает отдельный PHP HTTP-сервер
+на свободном порту, выполняет все наборы Codeception и завершает свой сервер.
+Apache на :8081 для этого запуска не нужен. Аргументы передаются Codeception:
+`test.bat unit`, `test.bat --xml=report.xml`, `test.bat --debug`.
+
+По умолчанию дочерние процессы работают без Xdebug; явно заданный `XDEBUG_MODE`
+сохраняется (например, `XDEBUG_MODE=coverage` для покрытия). На HTTP-сервере
+включён OPcache; `web/index-test.php` инвалидирует `params-test.php` после смены
+режима авторизации. Ошибки PHP, включая deprecated, не подавляются.
+
+Для уже запущенного сервера задайте `ARMS_TEST_SERVER_URL`, например
+`http://127.0.0.1:8081`: скрипт использует его и не останавливает. Прямой запуск
+`php vendor/bin/codecept run` также поддерживается, но требует готового сервера
+(по умолчанию `http://127.0.0.1:8081`).
+
+В тестовом web-конфиге выключены toolbar и SQL backtrace; сессии хранятся в
+`runtime/test-sessions`, опубликованные ресурсы — в `web/assets-test`. Это
+исключает конфликты прав с файлами рабочего Apache. Схема БД не кэшируется:
+наборы пересоздают `arms_test`, а migrations проверяет пустую БД.
+
+Большие тела упавших HTTP-ответов остаются в `.fail.html`/`.fail.json`; расширение
+`Helper\ResponseReport` выводит в консоли путь к полному ответу. Это не меняет
+assertions, статусы и число падений: REST-модуль иначе добавляет весь HTML в
+отчёт, и форматирование сотен страниц может длиться дольше самих тестов.
+Короткие тела (до 4096 байт) остаются в консольном отчёте.
+
+Обычные тесты работают в открытом режиме: `useRBAC=false`,
+`authorizedView=false`. Для web/unit/acceptance/REST значения задаются в
+`config/params-test.php`; консольный тестовый конфиг также явно отключает
+наследование боевого режима авторизации из `params-local.php`.
+`AuthorizationModesCest` временно меняет оба флага для своих HTTP-проверок и
+восстанавливает исходный файл в `_after()`. Unit-проверки матрицы доступа
+временно меняют `Yii::$app->params` и возвращают значения в `finally`.
+
 ### Основные команды
 
 ```bash
 # Все тесты (через test.bat)
 test.bat
 
-# Все тесты (Linux/macOS)
-php vendor/bin/codecept run
+# Все тесты с отдельным HTTP-сервером (Linux/macOS)
+php tests/bin/run.php
 
 # Конкретный тип тестов
 php vendor/bin/codecept run unit
@@ -113,7 +147,7 @@ php vendor/bin/codecept run --coverage
   депрекейты (strlen(null) и т.п.), которые на dev/prod роняют страницы
 - Тестовая БД: `arms_test` (mysql:host=127.0.0.1)
 - Отключена CSRF валидация: `enableCsrfValidation => false`
-- Debug модуль включён
+- Debug toolbar отключён; ошибки и предупреждения остаются включены
 
 ---
 
@@ -165,6 +199,11 @@ php vendor/bin/codecept run --coverage
 [`_data/readme.md`](_data/readme.md) (там же: как накатить миграции на
 тестовую БД локально через `tests/bin/yii`).
 
+Дамп импортируется один раз на набор, до data provider: unit и acceptance —
+в bootstrap, REST — в провайдере, acceptance-extra — в bootstrap. Повторно
+загружать его в отдельных тестах не нужно; обоснование сохранённых импортов
+и правила изоляции — в [database.md](database.md).
+
 Дамп — ещё и БД демо-сайта: данные под новые возможности сеются скриптами
 `_data/demo-seed/*.sql`, а не правками в БД руками. Правила, состав и то, что
 намеренно не сеется, — в том же [`_data/readme.md`](_data/readme.md).
@@ -180,6 +219,9 @@ php vendor/bin/codecept run --coverage
 | ModelData | [`_support/Helper/ModelData.php`](_support/Helper/ModelData.php) | Генерация тестовых данных моделей |
 
 ---
+
+Полный замер всех наборов и ограничения интерпретации результатов:
+[performance.md](performance.md).
 
 ## 7. Подводные камни
 
