@@ -24,6 +24,7 @@ class NetVlansSearch extends NetVlans
         return [
             [['id', ], 'integer'],
             [['name', 'comment', 'vlan'], 'string'],
+			[['vlan'], 'validateVlanFilter'],
             [['availability'], 'in', 'range' => ['used', 'used_reserved', 'free', 'all']],
             [['name', 'comment','vlan', 'domain_id','networks_ids', 'availability'], 'safe'],
         ];
@@ -51,6 +52,14 @@ class NetVlansSearch extends NetVlans
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
+
+	/** Проверяет единый формат номера или диапазона для обоих списков VLAN. */
+	public function validateVlanFilter(string $attribute): void
+	{
+		if (VlanType::bounds($this->$attribute) === null) {
+			$this->addError($attribute, 'Укажите номер или диапазон от 1 до 4094.');
+		}
+	}
 
     /**
      * Creates data provider instance with search query applied
@@ -92,14 +101,17 @@ class NetVlansSearch extends NetVlans
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+			// Ошибочный фильтр не должен возвращать весь список или приводиться MySQL к числу.
+			$query->where('0=1');
             return $dataProvider;
         }
 
+		if ($this->vlan !== null && $this->vlan !== '') {
+			[$start, $end] = VlanType::bounds($this->vlan);
+			$query->andWhere(['between', 'net_vlans.vlan', $start, $end]);
+		}
         // grid filtering conditions
         $query
-			->andFilterWhere(['net_vlans.vlan' => $this->vlan])
 			->andFilterWhere(['or like', $vlanName, \app\helpers\StringHelper::explode($this->name,'|',true,true)])
 			->andFilterWhere(['or like', 'net_domains.name', \app\helpers\StringHelper::explode($this->domain_id,'|',true,true)])
 			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', \app\helpers\StringHelper::explode($this->networks_ids,'|',true,true)])
@@ -134,17 +146,15 @@ class NetVlansSearch extends NetVlans
 			],
 		]);
 		if (!$this->validate()) return $provider;
-		$bounds = null;
-		if ($this->vlan !== null && $this->vlan !== '') {
-			$bounds = VlanType::bounds($this->vlan);
-			if ($bounds === null) {
-				$this->addError('vlan', 'Укажите номер или диапазон от 1 до 4094.');
-				return $provider;
-			}
-		}
+		$bounds = $this->vlan !== null && $this->vlan !== '' ? VlanType::bounds($this->vlan) : null;
 		$local = NetVlans::find()->where(['domain_id' => $domainId])
-			->with(['globalVlan', 'netDomain.marker'])->indexBy('vlan')->all();
+			->with(['globalVlan', 'netDomain.marker', 'networks'])->indexBy('vlan')->all();
 		$reserved = NetVlans::find()->where(['domain_id' => null])->indexBy('vlan')->all();
+		// SQL общего поиска определяет совпадения, а полный $local — занятость номера.
+		// Иначе отфильтрованный локальный VLAN мог бы ошибочно стать свободным резервом.
+		$matchingIds = array_fill_keys($this->search($params)->query
+			->andWhere(['or', ['net_vlans.domain_id' => $domainId], ['net_vlans.domain_id' => null]])
+			->select('net_vlans.id')->column(), true);
 		$numbers = match ($this->availability) {
 			'used' => array_keys($local),
 			// Объединяем по номеру: локальный VLAN и его резерв дают одну строку.
@@ -157,10 +167,11 @@ class NetVlansSearch extends NetVlans
 			if ($bounds !== null && ($number < $bounds[0] || $number > $bounds[1])) continue;
 			$reserve = $reserved[$number] ?? null;
 			$source = $item ?? $reserve;
-			$name = (string)($source->nameRecursive ?? '');
-			$comment = (string)($source->commentRecursive ?? '');
-			if ($this->name !== null && $this->name !== '' && mb_stripos($name, $this->name) === false) continue;
-			if ($this->comment !== null && $this->comment !== '' && mb_stripos($comment, $this->comment) === false) continue;
+			if ($source !== null) {
+				if (!isset($matchingIds[$source->id])) continue;
+			} elseif (!$this->matchesUnreservedNumber((int)$number)) {
+				continue;
+			}
 			if ($item === null) {
 				// Свободный номер — несохранённая модель: штатные колонки получают тот же контракт.
 				$item = new NetVlans(['vlan' => (int)$number, 'domain_id' => $domainId]);
@@ -171,5 +182,19 @@ class NetVlansSearch extends NetVlans
 		}
 		$provider->allModels = $rows;
 		return $provider;
+	}
+
+	/** У свободного номера без резерва есть только номер в отображаемом имени. */
+	private function matchesUnreservedNumber(int $number): bool
+	{
+		foreach (['comment', 'networks_ids', 'domain_id'] as $attribute) {
+			if (\app\helpers\StringHelper::explode($this->$attribute, '|', true, true)) return false;
+		}
+		$names = \app\helpers\StringHelper::explode($this->name, '|', true, true);
+		if (!$names) return true;
+		foreach ($names as $name) {
+			if (mb_stripos(' (' . $number . ')', $name) !== false) return true;
+		}
+		return false;
 	}
 }

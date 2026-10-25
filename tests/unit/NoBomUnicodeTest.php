@@ -3,6 +3,7 @@
 namespace tests\unit;
 
 use Codeception\Test\Unit;
+use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -60,17 +61,16 @@ class NoBomUnicodeTest extends Unit
 
         try {
             $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
+                // Отсекаем vendor до обхода: его файлы не входят в проверку BOM.
+                new RecursiveCallbackFilterIterator(
+                    new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
+                    static fn($entry) => $entry->getFilename() !== 'vendor' || !$entry->isDir()
+                )
             );
 
             $phpFiles = new RegexIterator($iterator, '/\.php$/', RegexIterator::MATCH);
 
             foreach ($phpFiles as $file) {
-                // Исключаем файлы из vendor
-                if (strpos($file->getPathname(), DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR) !== false) {
-                    continue;
-                }
-
                 // Проверяем наличие BOM (EF BB BF в начале файла)
                 $handle = fopen($file->getPathname(), 'rb');
                 if ($handle === false) {

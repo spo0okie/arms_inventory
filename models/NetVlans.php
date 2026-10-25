@@ -2,6 +2,9 @@
 
 namespace app\models;
 
+use app\generation\context\AttributeContext;
+use app\generation\context\GenerationContext;
+use app\generation\ModelFactory;
 use app\models\base\ArmsModel;
 use app\types\VlanType;
 use yii\db\ActiveQuery;
@@ -31,6 +34,26 @@ class NetVlans extends ArmsModel
 	public static $title='Vlan';
 	public static $titles='Vlan\'ы';
 
+	/**
+	 * Роли генерации VLAN; локальный VLAN обязательно принадлежит L2-домену.
+	 * @return array<string, callable(self, GenerationContext): void>
+	 */
+	public static function roles(): array
+	{
+		return [
+			'real' => static function (self $model, GenerationContext $context): void {
+				// Сохраняем seed и глубину исходной генерации; готовый домен не заменяем.
+				ModelFactory::generateAttribute(new AttributeContext(
+					attribute: 'domain_id',
+					model: $model,
+					generationContext: $context,
+					empty: false,
+					required: true,
+				));
+			},
+		];
+	}
+
 	/** {@inheritdoc} */
 	public static function modelDescription(): string
 	{
@@ -58,6 +81,7 @@ class NetVlans extends ArmsModel
 			[['domain_id'], 'validateReservation', 'skipOnEmpty' => false],
 			[['name'], 'string', 'max' => 255],
 			[['comment'], 'safe'],
+			[['vlan'], 'required'],
 			[['vlan'], 'validateVlanRange', 'skipOnEmpty' => false],
 			[['vlan'], 'validateVlanUnique'],
 		];

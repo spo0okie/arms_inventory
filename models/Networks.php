@@ -58,7 +58,7 @@ class Networks extends ArmsModel
 	private $first_unused_cache=null;
 	private $dhcp_list_cache=null;
 	private $ranges_cache=null;
-	
+
 	public static $titles='Сети';
 
 	public static function modelDescription(): string
@@ -66,19 +66,19 @@ class Networks extends ArmsModel
 		return 'IP сети: подсети с масками, сегментами и VLAN; адреса сетей связываются с ОС и оборудованием.';
 	}
 	public static $title='Сеть';
-	
+
 	public static $latinNameHint='<br>'
 	. '<i>'
 	. '<b>Hint:</b> Рекомендуется написание латиницей без пробелов<br>'
 	. 'чтобы можно было использовать сквозное именование в инвентаризации,<br>'
 	. 'коммутаторах, маршрутизаторах, гипервизорах, фаерволах и т.п.'
 	. '</i>';
-	
+
 	public $text_router;
 	public $domain;
-	
-	
-	
+
+
+
     /**
      * {@inheritdoc}
      */
@@ -109,13 +109,14 @@ class Networks extends ArmsModel
 			[['segments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Segments::class, 'targetAttribute' => ['segments_id' => 'id']],
 		];
     }
-	
+
 	public $linksSchema=[
-		'vlan_id'=>		[NetVlans::class,'networks_ids'],
+		// Сеть может принадлежать только локальному VLAN с L2-доменом.
+		'vlan_id'=>		[NetVlans::class,'networks_ids','role'=>'real'],
 		'segments_id'=>	[Segments::class,'networks_ids'],
 		'org_inets_ids'=>[OrgInet::class,'networks_id'],
 	];
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -233,7 +234,7 @@ class Networks extends ArmsModel
 			'segment' => ['alias'=>'segments_id'],
 		]);
 	}
-	
+
 	/**
 	 * Дополнительные поля для REST API (?expand=...).
 	 * В самой таблице адреса лежат числами (addr/mask/router/dhcp), поэтому
@@ -260,13 +261,13 @@ class Networks extends ArmsModel
 		];
 		return array_merge(parent::extraFields(),array_combine($extra,$extra));
 	}
-	
+
 	public function getPlace()
 	{
 		if (!is_object($this->netDomain)) return null;
 		return $this->netDomain->place;
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -274,7 +275,7 @@ class Networks extends ArmsModel
 	{
 		return $this->hasOne(NetVlans::class, ['id' => 'vlan_id']);
 	}
-	
+
 	/**
 	 * @return NetDomains
 	 */
@@ -282,7 +283,7 @@ class Networks extends ArmsModel
 	{
 		return is_object($this->netVlan)?$this->netVlan->netDomain:null;
 	}
-	
+
 	/**
 	 * Name for search
 	 * @return string
@@ -291,8 +292,8 @@ class Networks extends ArmsModel
 	{
 		return $this->text_addr. ($this->name?(' ('.$this->name.')'):'');
 	}
-	
-	
+
+
 	/**
 	 * читаемый DHCP
 	 * @return string
@@ -302,7 +303,7 @@ class Networks extends ArmsModel
 	{
 		return empty($this->dhcp)?'':long2ip($this->dhcp);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
@@ -312,7 +313,7 @@ class Networks extends ArmsModel
 		return $this->hasMany(OrgInet::class, ['id' => 'org_inets_id'])
 			->viaTable('{{%org_inets_in_networks}}', ['networks_id' => 'id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -320,7 +321,7 @@ class Networks extends ArmsModel
 	{
 		return $this->hasMany(Acls::class, ['networks_id' => 'id']);
 	}
-	
+
 	public function getComps()
 	{
 		if (isset($this->attrsCache['comps'])) return $this->attrsCache['comps'];
@@ -336,7 +337,7 @@ class Networks extends ArmsModel
 			->viaTable('{{%ips_in_comps}}', ['ips_id' => 'id'])
 			->via('ips');*/
 	}
-	
+
 	public function getTechs()
 	{
 		if (isset($this->attrsCache['techs'])) return $this->attrsCache['techs'];
@@ -348,14 +349,14 @@ class Networks extends ArmsModel
 		}
 		return $this->attrsCache['techs']=$techs;
 	}
-	
+
 	public function getIncomingAcesEffective()
 	{
-		
+
 
 		if (isset($this->attrsCache['incomingAcesEffective']))
 			return $this->attrsCache['incomingAcesEffective'];
-		
+
 		$this->attrsCache['incomingAcesEffective']=$this->getIncomingAces();
 
 		//доступы к сегменту этой сети — доступы и в саму сеть (сегмент разворачивается
@@ -366,13 +367,13 @@ class Networks extends ArmsModel
 				$this->segment->getIncomingAces()
 			);
 		}
-		
+
 		foreach ($this->ips as $ip) {
 			$this->attrsCache['incomingAcesEffective']=ArrayHelper::recursiveOverride(
 				$this->attrsCache['incomingAcesEffective'],
 				$ip->getIncomingAces()
 			);
-			
+
 			foreach ($ip->comps as $comp) {
 				$this->attrsCache['incomingAcesEffective']=ArrayHelper::recursiveOverride(
 					$this->attrsCache['incomingAcesEffective'],
@@ -399,10 +400,10 @@ class Networks extends ArmsModel
 				}
 			}
 		}
-		
+
 		return $this->attrsCache['incomingAcesEffective'];
 	}
-	
+
 	/**
 	 * читаемый Router
 	 * @return string
@@ -411,7 +412,7 @@ class Networks extends ArmsModel
 	{
 		return empty($this->router)?'':long2ip($this->router);
 	}
-	
+
 	/**
 	 * емкость сети
 	 * @return int|null
@@ -421,7 +422,7 @@ class Networks extends ArmsModel
 		if (is_numeric($this->mask)) return (int)pow(2,(32-$this->mask));
 		return null;
 	}
-	
+
 	/**
 	 * @return PhpIP\IPv4Block
 	 */
@@ -430,37 +431,37 @@ class Networks extends ArmsModel
 		if (is_object($this->_IPv4Block)) return $this->_IPv4Block;
 		return $this->_IPv4Block=PhpIP\IPv4Block::create($this->text_addr);
 	}
-	
+
 	public function getReadableNetMask()
 	{
 		return $this->IPv4Block()->getNetmask()->humanReadable();
 	}
-	
+
 	public function getReadableWildcard()
 	{
 		return $this->IPv4Block()->getNetmask()->bit_negate()->humanReadable();
 	}
-	
+
 	public function getReadableNetworkIp()
 	{
 		return $this->IPv4Block()->getFirstIp()->humanReadable();
 	}
-	
+
 	public function getReadableFirstIp()
 	{
 		return $this->IPv4Block()->getFirstIp()->plus(1)->humanReadable();
 	}
-	
+
 	public function getReadableBroadcastIp()
 	{
 		return $this->IPv4Block()->getLastIp()->humanReadable();
 	}
-	
+
 	public function getReadableLastIp()
 	{
 		return $this->IPv4Block()->getLastIp()->minus(1)->humanReadable();
 	}
-	
+
 	public function containsIp($ip)
 	{
 		return $ip->isIn($this);
@@ -470,7 +471,7 @@ class Networks extends ArmsModel
 	{
 		return max(1,$this->capacity-2);
 	}
-	
+
 	/**
 	 * Network
 	 * @return ActiveQuery|Networks
@@ -479,7 +480,7 @@ class Networks extends ArmsModel
 	{
 		return $this->hasMany(NetIps::class, ['networks_id'=>'id'])->orderBy(['addr'=>SORT_ASC]);
 	}
-	
+
 	public function getIpsByAddr()
 	{
 		if (is_null($this->ips_cache))
@@ -487,7 +488,7 @@ class Networks extends ArmsModel
 
 		return $this->ips_cache;
 	}
-	
+
 	/**
 	 * DHCP сервера в виде массива long
 	 * @return array
@@ -497,7 +498,7 @@ class Networks extends ArmsModel
 			$this->dhcp_list_cache=NetIps::ipList2long($this->text_dhcp);
 		return $this->dhcp_list_cache;
 	}
-	
+
 	/**
 	 * Возвращает поле ranges из множества строк вида 1-14 бла бла бла
 	 * в виде массива из [1,14,"бла бла бла"]
@@ -524,7 +525,7 @@ class Networks extends ArmsModel
 		}
 		return $this->ranges_cache;
 	}
-	
+
 	/**
 	 * Первый свободный IP
 	 * @noinspection PhpUnusedFunctionInspection
@@ -548,7 +549,7 @@ class Networks extends ArmsModel
 		}
 		return $this->first_unused_cache;
 	}
-	
+
 	/**
 	 * @return ActiveQuery|Segments
 	 */
@@ -556,9 +557,9 @@ class Networks extends ArmsModel
 	{
 		return $this->hasOne(Segments::class, ['id' => 'segments_id']);
 	}
-	
 
-	
+
+
 	/**
 	 * занято адресов
 	 * @return int|null
@@ -569,7 +570,7 @@ class Networks extends ArmsModel
 		if (is_array($this->ips)) return count($this->ips);
 		return 0;
 	}
-	
+
 	/**
 	 * Процент использования сети
 	 * @return int|null
@@ -581,7 +582,7 @@ class Networks extends ArmsModel
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Network
 	 * @param null $addr
@@ -597,7 +598,7 @@ class Networks extends ArmsModel
 			['<','addr',$addr+(int)pow(2,(32-$mask))]
 			])->all();
 	}
-	
+
 	/**
 	 * @param $i
 	 * @return NetIps|null
@@ -609,7 +610,7 @@ class Networks extends ArmsModel
 		//foreach ($this->ips as $ip) if ($ip->addr == $this->addr+$i) return $ip;
 		//return null;
 	}
-	
+
 	/**
 	 * Имея текстовый список IP/MASK возвращает ids объектов IP сетей
 	 * @param      $text
@@ -627,12 +628,12 @@ class Networks extends ArmsModel
 					if (is_object($network))
 						$ids[]=$network->id;
 				}
-				
+
 			}
 		}
 		return $ids;
 	}
-	
+
 	/**
 	 * @inheritdoc
 	 */
@@ -643,35 +644,35 @@ class Networks extends ArmsModel
 			$this->addr=$addr->getNetworkAddress()->numeric();
 			$this->mask=$addr->getPrefixLength();
 			$this->text_addr=$addr->getNetworkAddress()->humanReadable().'/'.$this->mask;
-			
+
 			if (!empty($this->text_router)) $this->router=ip2long($this->text_router);
 			return true;
 		}
 		return false;
 	}
-	
+
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
-		
+
 		//NetIps::updateAll([])
-		
+
 		if ($insert || isset($changedAttributes['addr']) || isset($changedAttributes['mask'])) {
 			$totalIps=[];
-			
+
 			//previous
 			foreach ($this->ips as $ip)
 				$totalIps[$ip->id]=$ip;
-			
+
 			//new
 			foreach ($this->findIps() as $ip)
 				$totalIps[$ip->id]=$ip;
-			
+
 			foreach ($totalIps as $ip) $ip->save();
 		}
-		
+
 	}
-	
+
 	/**
 	 * проверяет что все строки текстового атрибута $attribute, содержащие маску это существующие IP сети
 	 * @param $model
@@ -693,8 +694,8 @@ class Networks extends ArmsModel
 			}
 		}
 	}
-	
-	
+
+
 	/** Возвращает список всех элементов
     * @return array|mixed|null
     */

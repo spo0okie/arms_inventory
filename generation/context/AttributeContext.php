@@ -20,6 +20,7 @@ class AttributeContext
         public readonly ArmsModel $model,
         public readonly GenerationContext $generationContext,
 		public readonly bool $empty=false,		//нужно ли пустой
+		public readonly bool $required=false,	//связь обязательна для текущего сценария генерации
     ) {}
 
     /**

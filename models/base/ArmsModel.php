@@ -156,7 +156,8 @@ class ArmsModel extends ActiveRecord
 	}
 
 	/**
-	 * список ролей которые может реализовать модель (для генерации)
+	 * Роли генерации: callback получает модель и её текущий GenerationContext.
+	 * @return array<string, callable>
 	 */
 	public static function roles(): array
 	{

@@ -168,7 +168,8 @@ class ModelFactory
 		}
 		
 		
-		$isRequired = $model->getAttributeIsRequired($attribute);
+		// Роль может требовать связь даже на предельной глубине, как обычное required-правило.
+		$isRequired = $attributeContext->required || $model->getAttributeIsRequired($attribute);
 
 		if (!is_subclass_of($class, ArmsModel::class)) {
 			if ($isRequired) {
@@ -404,8 +405,9 @@ class ModelFactory
 	 *
 	 * @param ArmsModel $model Модель
 	 * @param string $role Имя preset
+	 * @param GenerationContext $context Текущий контекст модели, включая seed и глубину связей
 	 */
-	protected static function applyPreset(ArmsModel $model, string $role): void
+	protected static function applyPreset(ArmsModel $model, string $role, GenerationContext $context): void
 	{
 		// Проверяем есть ли статический метод roles() у модели
 		if (!method_exists($model, 'roles')) {
@@ -419,7 +421,8 @@ class ModelFactory
 		
 		$preset = $roles[$role];
 		if (is_callable($preset)) {
-			$preset($model);
+			// Передаём исходный контекст, чтобы роль не начинала независимую генерацию.
+			$preset($model, $context);
 		}
 	}
 	
@@ -462,7 +465,7 @@ class ModelFactory
 			self::generateAttributes($model, $context, $options);    //заполняем атрибуты
 			
 			if (!empty($options['role'])) {
-				self::applyPreset($model, $options['role']);
+				self::applyPreset($model, $options['role'], $context);
 			}
 			
 			if (!empty($options['overrides'])) {

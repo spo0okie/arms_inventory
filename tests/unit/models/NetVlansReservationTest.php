@@ -217,12 +217,16 @@ class NetVlansReservationTest extends Unit
 			['networks_ids' => 'нет совпадения|192.0.2.0/25'],
 			['networks_ids' => 'Голос'],
 			['name' => 'нет совпадения|Телефония', 'comment' => 'нет совпадения|Общее'],
+			['name' => 'нет совпадения|3900'],
 			['vlan' => '3900-3901'],
 		] as $filter) {
 			$params = ['NetVlansSearch' => $filter + ['availability' => 'all']];
 			$common = (new NetVlansSearch())->search($params)->query
 				->andWhere(['net_vlans.domain_id' => $this->domain->id])->all();
-			$rows = (new NetVlansSearch())->searchDomain($this->domain->id, $params)->getModels();
+			$provider = (new NetVlansSearch())->searchDomain($this->domain->id, $params);
+			// Сравниваем полные выборки; страницы двух списков могут иметь разную сортировку.
+			$provider->pagination = false;
+			$rows = $provider->getModels();
 			$actual = array_filter($rows, static fn($row) => !$row->isNewRecord);
 			$this->assertEqualsCanonicalizing(array_column($common, 'id'), array_column($actual, 'id'));
 			if (isset($filter['networks_ids'])) {
@@ -249,6 +253,26 @@ class NetVlansReservationTest extends Unit
 			$this->assertSame([], $search->search($params)->getModels());
 			$this->assertTrue($search->hasErrors('vlan'));
 			$this->assertSame([], (new NetVlansSearch())->searchDomain($this->domain->id, $params)->getModels());
+		}
+	}
+
+	/** Фильтрация предшествует пагинации, включая свободные номера без резервов. */
+	public function testDomainFiltersBeforePagination(): void
+	{
+		$params = ['NetVlansSearch' => ['availability' => 'all']];
+		$provider = (new NetVlansSearch())->searchDomain($this->domain->id, $params);
+		$this->assertSame(4094, $provider->getTotalCount());
+		$this->assertCount(100, $provider->getModels());
+		$params['NetVlansSearch']['name'] = 'нет совпадения|3903';
+		$provider = (new NetVlansSearch())->searchDomain($this->domain->id, $params);
+		$this->assertSame(1, $provider->getTotalCount());
+		$this->assertSame([3903], array_column($provider->getModels(), 'vlan'));
+		$this->assertTrue(reset($provider->allModels)->isNewRecord);
+		// У незарезервированного номера нет ни пояснения, ни связанных сетей.
+		foreach (['comment', 'networks_ids'] as $attribute) {
+			$filtered = $params;
+			$filtered['NetVlansSearch'][$attribute] = 'нет совпадения';
+			$this->assertSame([], (new NetVlansSearch())->searchDomain($this->domain->id, $filtered)->getModels());
 		}
 	}
 

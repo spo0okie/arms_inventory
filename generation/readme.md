@@ -111,6 +111,7 @@ class AttributeContext
         public readonly bool         $empty,
         public readonly ArmsModel    $model,
         public readonly GenerationContext $generationContext,
+        public readonly bool         $required = false, // обязательная связь для текущей роли
     ) {}
 
     public function generatorConfig(): array    // конфиг генерации из attributeData
@@ -198,33 +199,54 @@ public function linksSchema(): array
 
 ## Presets (Roles)
 
-Preset — это бизнес-сценарий создания модели через `Model::roles()`:
+Preset — это бизнес-сценарий создания модели через `Model::roles()`.
+Callback роли получает модель и **её текущий `GenerationContext`**:
+`empty`, `seed`, `depth`, `maxDepth` и RNG сохраняются в рамках исходной генерации.
+Роль применяется после генерации атрибутов, перед overrides, `afterGenerate()` и валидацией.
+
+Например, локальный VLAN должен иметь L2-домен, хотя для глобального резерва домен необязателен:
 
 ```php
+// NetVlans
 public static function roles(): array
 {
     return [
-        'pc' => function($model) {
-            // Создаём связанные модели с нужными параметрами
-            $type = ModelFactory::create(TechType::class, [
-                'overrides' => ['is_comp' => true]
-            ]);
-            $model->type_id = $type->id;
+        'local' => static function (self $model, GenerationContext $context): void {
+            // Заполняем только нужную связь с исходными seed и глубиной.
+            ModelFactory::generateAttribute(new AttributeContext(
+                attribute: 'domain_id',
+                model: $model,
+                generationContext: $context,
+                empty: false,
+                required: true,
+            ));
         },
     ];
 }
 ```
 
 ```php
-// Использование
-$pc = ModelFactory::create(Techs::class, ['role' => 'pc']);
+// Явный выбор роли при создании VLAN.
+$vlan = ModelFactory::create(NetVlans::class, ['role' => 'local']);
+
+// Выбор роли связанной модели в Networks::$linksSchema.
+public $linksSchema = [
+    'vlan_id' => [NetVlans::class, 'networks_ids', 'role' => 'local'],
+];
 ```
+
+`AttributeContext::$required` делает связь обязательной **только для этого вызова генератора**,
+не меняя `rules()` модели. Как обычная required-связь, она создаётся и на границе `maxDepth`;
+вложенная модель получает увеличенную глубину и исходный лимит, поэтому её необязательные
+связи на предельной глубине не разворачиваются. Уже заполненная связь сохраняется.
+Сам `empty: false` без `required: true` не отменяет ограничение `maxDepth`.
 
 **Требования:**
 
 - Идемпотентность
-- Возвращает валидную модель
+- Приводит модель к валидному состоянию (callback возвращает `void`)
 - Не ломает генерацию
+- Для связанных атрибутов использует текущий контекст, не начинает независимую генерацию с новым seed и глубиной
 
 ---
 
