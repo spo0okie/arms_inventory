@@ -25,10 +25,11 @@ class ResignDeferReportTest extends Unit
 		Notifications::deleteAll();
 		Users::updateAll(['resign_defer' => 0, 'resign_defer_until' => null]);
 		$this->recipient = $this->makeUser(['Email' => 'resign-report@example.test']);
-		$this->employee = $this->makeUser(['resign_defer' => 1, 'updated_by' => 'flag-author']);
+		$this->employee = $this->makeUser(['resign_defer' => 1, 'updated_by' => 'flag-author', 'notepad' => "First <note>\nSecond line"]);
 		Yii::$app->params['notify.enable'] = true;
 		Yii::$app->params['notify.resignDefer.recipients'] = [$this->recipient->id, $this->recipient->id];
 		Yii::$app->params['web.hostInfo'] = 'https://arms.example.test';
+		Yii::$app->params['textFields']['Users.notepad'] = 'text';
 		$this->report = new ResignDeferReport();
 		$this->report->stateFile = tempnam(sys_get_temp_dir(), 'resign-report-');
 		unlink($this->report->stateFile);
@@ -65,6 +66,8 @@ class ResignDeferReportTest extends Unit
 		$this->assertStringContainsString('https://arms.example.test/users/view?id=' . $this->employee->id, $mail->body);
 		$this->assertStringContainsString('&lt;User&gt;', $mail->body);
 		$this->assertStringContainsString('бессрочно', $mail->body);
+		$this->assertStringContainsString('First &lt;note&gt;<br', $mail->body);
+		$this->assertStringContainsString('Second line', $mail->body);
 		$this->assertSame(0, $this->report->run());
 		$this->assertSame(1, (int)Notifications::find()->count());
 	}
@@ -74,6 +77,7 @@ class ResignDeferReportTest extends Unit
 	{
 		$this->report->run();
 		$this->employee->resign_defer = 0;
+		$this->employee->notepad = 'Current <comment>';
 		$this->employee->updated_by = 'flag-remover';
 		$this->assertTrue($this->employee->save());
 		$this->employee->Doljnost = 'changed';
@@ -83,6 +87,7 @@ class ResignDeferReportTest extends Unit
 		$body = Notifications::find()->orderBy(['id' => SORT_DESC])->one()->body;
 		$this->assertStringContainsString('флаг исключения снят; снял: flag-remover', $body);
 		$this->assertStringNotContainsString('another-editor', $body);
+		$this->assertStringContainsString('Current &lt;comment&gt;', $body);
 	}
 
 	/** Дата включительна; истечение обнаруживается и без редактирования карточки. */
@@ -212,6 +217,7 @@ class ResignDeferReportTest extends Unit
 		$this->assertStringContainsString('бессрочно', $body);
 		$this->assertFileDoesNotExist($this->report->stateFile);
 		Yii::$app->params['web.hostInfo'] = 'https://arms.example.test';
+		Yii::$app->params['textFields']['Users.notepad'] = 'text';
 		$this->assertSame(1, $this->report->run());
 		$this->assertFileExists($this->report->stateFile);
 	}
@@ -361,5 +367,70 @@ class ResignDeferReportTest extends Unit
 			Yii::$app->set('db', $db);
 			Yii::setAlias('@runtime', $originalRuntime);
 		}
+	}
+	/** Удалённая карточка сохраняет записную книжку из предыдущего снимка. */
+	public function testDeletedUserRetainsCommentFromSnapshot()
+	{
+		$this->report->run();
+		Users::deleteAll(['id' => $this->employee->id]);
+		$this->assertSame(1, $this->report->run());
+		$body = Notifications::find()->orderBy(['id' => SORT_DESC])->one()->body;
+		$this->assertStringContainsString('пользователь удалён', $body);
+		$this->assertStringContainsString('First &lt;note&gt;', $body);
+	}
+	/** Markdown форматируется штатным типом и в новых, и в отменённых исключениях. */
+	public function testMarkdownCommentInBothSections()
+	{
+		Yii::$app->params['textFields']['Users.notepad'] = 'markdown';
+		$this->employee->notepad = '**Important note**';
+		$this->assertTrue($this->employee->save());
+		$this->assertSame(1, $this->report->run());
+		$this->assertStringContainsString('<strong>Important note</strong>', Notifications::find()->one()->body);
+		$this->employee->resign_defer = 0;
+		$this->assertTrue($this->employee->save());
+		$this->assertSame(1, $this->report->run());
+		$this->assertStringContainsString('<strong>Important note</strong>', Notifications::find()->orderBy(['id' => SORT_DESC])->one()->body);
+	}
+
+	/** DokuWiki в письме уже отрендерена и не требует выполнения JavaScript. */
+	public function testDokuWikiCommentUsesSynchronousRendererAndDefaultFormat()
+	{
+		unset(Yii::$app->params['textFields']['Users.notepad']);
+		Yii::$app->params['textFields']['default'] = 'dokuwiki';
+		$this->employee->notepad = '**Wiki note**';
+		$this->assertTrue($this->employee->save());
+		$report = new class extends ResignDeferReport {
+			/** Подменяет внешний сервис DokuWiki готовым результатом рендера. */
+			protected function renderWikiComment(string $notepad): string
+			{
+				if ($notepad !== '**Wiki note**') throw new \RuntimeException('wrong source text');
+				return '<p><strong>Wiki note</strong></p>';
+			}
+		};
+		$report->stateFile = $this->report->stateFile;
+		$this->assertSame(1, $report->run());
+		$body = Notifications::find()->one()->body;
+		$this->assertStringContainsString('<strong>Wiki note</strong>', $body);
+		$this->assertStringNotContainsString('<script', $body);
+		$this->assertEmpty($report->errors);
+	}
+
+	/** Отказ DokuWiki сохраняет исходный текст и добавляет ошибку в отправляемое письмо. */
+	public function testDokuWikiFailurePreservesRawCommentAndAddsError()
+	{
+		Yii::$app->params['textFields']['Users.notepad'] = 'dokuwiki';
+		$report = new class extends ResignDeferReport {
+			/** Имитирует отказ внешнего рендерера. */
+			protected function renderWikiComment(string $notepad): string
+			{
+				throw new \RuntimeException('wiki renderer offline');
+			}
+		};
+		$report->stateFile = $this->report->stateFile;
+		$this->assertSame(1, $report->run());
+		$body = Notifications::find()->one()->body;
+		$this->assertStringContainsString('wiki renderer offline', $body);
+		$this->assertStringContainsString('First &lt;note&gt;', $body);
+		$this->assertFileDoesNotExist($report->stateFile);
 	}
 }

@@ -2,6 +2,8 @@
 
 namespace app\components;
 
+use app\components\Forms\ActiveField;
+use app\helpers\WikiHelper;
 use app\models\Notifications;
 use app\models\Users;
 use app\models\UsersHistory;
@@ -48,7 +50,8 @@ class ResignDeferReport
 					//Ошибка одной карточки не скрывает остальных участников отчёта.
 					try {
 						if ($user->resignDeferred) {
-							$current[$id] = ['name' => $user->Ename, 'until' => (string)$user->resign_defer_until];
+							//Сохраняем записную книжку и для случая удаления пользователя между проходами.
+							$current[$id] = ['name' => $user->Ename, 'until' => (string)$user->resign_defer_until, 'notepad' => (string)$user->notepad];
 						}
 					} catch (\Throwable $e) {
 						$this->error('Пользователь #' . $id, $e);
@@ -300,11 +303,12 @@ class ResignDeferReport
 	/** Формирует HTML-сводку с безопасным экранированием имён и авторов. */
 	protected function render(array $changes, array $users): string
 	{
-		$body = '<h2>Действующие исключения</h2><ul>';
+		$body = '<h2>Добавленные исключения</h2><ul>';
 		foreach ($changes['active'] as $id => $row) {
 			$until = $row['until'] === '' ? 'бессрочно' : 'по ' . $row['until'] . ' включительно';
 			$body .= '<li>' . $this->userLink($id, $row['name']) . ' — ' . Html::encode($until)
-				. '; включил: ' . Html::encode($this->flagAuthor((int)$id, true)) . '</li>';
+				. '; включил: ' . Html::encode($this->flagAuthor((int)$id, true))
+				. $this->commentHtml($row['notepad'] ?? '') . '</li>';
 		}
 		$body .= '</ul><h2>Отменённые исключения</h2><ul>';
 		foreach ($changes['cancelled'] as $id => $row) {
@@ -315,9 +319,38 @@ class ResignDeferReport
 			} else {
 				$reason = 'срок откладывания истёк (' . $user->resign_defer_until . ')';
 			}
-			$body .= '<li>' . $this->userLink($id, $user ? $user->Ename : $row['name']) . ' — ' . Html::encode($reason) . '</li>';
+			$body .= '<li>' . $this->userLink($id, $user ? $user->Ename : $row['name']) . ' — ' . Html::encode($reason)
+				. $this->commentHtml($user ? $user->notepad : ($row['notepad'] ?? '')) . '</li>';
 		}
 		return $body . '</ul>';
+	}
+
+	/** Рендерит записную книжку в настроенном формате ARMS, сохраняя текст при ошибке. */
+	protected function commentHtml(?string $notepad): string
+	{
+		if (!strlen((string)$notepad)) return '<br>Комментарий: не указан';
+		try {
+			if (ActiveField::textFieldType(Users::class, 'notepad') === 'dokuwiki') {
+				//В письме не выполнится AJAX WikiTextWidget: сразу получаем готовый HTML.
+				$html = $this->renderWikiComment($notepad);
+			} else {
+				$model = new Users();
+				$model->notepad = $notepad;
+				$html = $model->getAttributeTypeClass('notepad')->renderOutput(Yii::$app->view, $model, 'notepad');
+			}
+			return '<div>Комментарий:</div><div>' . $html . '</div>';
+		} catch (\Throwable $e) {
+			$this->error('Рендер записной книжки', $e);
+			return '<br>Комментарий: ' . nl2br(Html::encode($notepad));
+		}
+	}
+
+	/** Синхронный штатный рендер DokuWiki с исправлением ссылок для письма. */
+	protected function renderWikiComment(string $notepad): string
+	{
+		$html = WikiHelper::dokuwikiRender($notepad);
+		if ($html === false) throw new \RuntimeException('Error rendering via dokuwiki');
+		return WikiHelper::parseWikiHtml($html, Yii::$app->params['wikiUrl']);
 	}
 
 	/** Ссылка на профиль сотрудника через общий механизм URL уведомлений. */
