@@ -17,6 +17,17 @@ $config = [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'app\console\commands',
+	//Штатный рендер записной книжки в консольных отчётах использует модуль Markdown.
+	'modules' => [
+		'markdown' => [
+			'class' => 'kartik\markdown\Module',
+			'i18n' => [
+				'class' => 'yii\i18n\PhpMessageSource',
+				'basePath' => '@vendor/kartik-v/yii2-markdown/messages',
+				'forceTranslation' => true,
+			],
+		],
+	],
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
