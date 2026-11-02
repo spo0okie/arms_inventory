@@ -15,7 +15,7 @@ use yii\helpers\Html;
  * Механизм оповещений: отправка outbox и сторож "залежавшихся" объектов
  * (plans/notifications.md, issue #184).
  *
- * Единственная точка фактической отправки почты в приложении — notify/send;
+ * Штатная точка фактической отправки почты в приложении — notify/send;
  * всё остальное (behavior смены атрибута, notify/watch) лишь ставит письма
  * в очередь notifications.
  *
@@ -42,40 +42,48 @@ class NotifyController extends Controller
 	 * Отправляет накопившиеся уведомления из outbox.
 	 *
 	 * Неудачная отправка не останавливает прогон: attempts++/last_error, письмо
-	 * останется в очереди до maxAttempts. Письмо без валидного получателя
+	 * останется в очереди до maxAttempts (сводки увольнения — до успеха). Письмо без валидного получателя
 	 * (пользователь удалён/без почты) закрывается сразу.
 	 */
 	public function actionSend()
 	{
-		$sent = $failed = 0;
-		foreach (Notifications::findPending($this->maxAttempts)->limit($this->limit)->all() as $notification) {
-			/** @var Notifications $notification */
-			$email = $notification->user->Email ?? '';
-			if (empty($email)) {
-				$notification->attempts = $this->maxAttempts;
-				$notification->last_error = 'нет получателя (пользователь удалён или без e-mail)';
-				$notification->save();
-				$failed++;
-				continue;
+		//Резервная очередь читается прежде БД: аварийный отчёт уйдёт и при её отказе.
+		$reserve = new \app\components\ResignDeferReport();
+		$result = $reserve->sendPending($this->limit);
+		$sent = $result['sent'];
+		$failed = $result['failed'];
+		try {
+			foreach (Notifications::findPending($this->maxAttempts)->limit($this->limit)->all() as $notification) {
+				$email = '';
+				try {
+					$email = $notification->user->Email ?? '';
+					if (empty($email)) throw new \RuntimeException('нет получателя (пользователь удалён или без e-mail)');
+					$ok = Yii::$app->mailer->compose()->setTo($email)
+						->setSubject($notification->subject)->setHtmlBody((string)$notification->body)->send();
+					if (!$ok) throw new \RuntimeException('mailer вернул false');
+					$notification->sent_at = new Expression('CURRENT_TIMESTAMP');
+					$notification->last_error = null;
+					if (!$notification->save()) throw new \RuntimeException('Не удалось отметить письмо отправленным');
+					$sent++;
+				} catch (\Throwable $e) {
+					$failed++;
+					try {
+						//Отсутствующий адрес закрывает обычное письмо; отчёт увольнения
+						//останется доступен для повторной попытки даже после maxAttempts.
+						$notification->attempts = empty($email) ? $this->maxAttempts : $notification->attempts + 1;
+						$notification->sent_at = null;
+						$notification->last_error = mb_substr($e->getMessage(), 0, 255);
+						if (!$notification->save()) throw new \RuntimeException('Не удалось сохранить ошибку отправки');
+					} catch (\Throwable $saveError) {
+						Yii::error($saveError->getMessage(), 'notify');
+					}
+					Yii::warning("notify/send #{$notification->id}: {$e->getMessage()}", 'notify');
+				}
 			}
-			try {
-				$ok = Yii::$app->mailer->compose()
-					->setTo($email)
-					->setSubject($notification->subject)
-					->setHtmlBody((string)$notification->body)
-					->send();
-				if (!$ok) throw new \RuntimeException('mailer вернул false');
-				$notification->sent_at = new Expression('CURRENT_TIMESTAMP');
-				$notification->last_error = null;
-				$notification->save();
-				$sent++;
-			} catch (\Throwable $e) {
-				$notification->attempts++;
-				$notification->last_error = mb_substr($e->getMessage(), 0, 255);
-				$notification->save();
-				$failed++;
-				Yii::warning("notify/send #{$notification->id} -> {$email}: {$e->getMessage()}", 'notify');
-			}
+		} catch (\Throwable $e) {
+			//Отказ БД не отменяет уже выполненную отправку резервных писем.
+			$failed++;
+			Yii::error($e->getMessage(), 'notify');
 		}
 		$this->stdout("отправлено: $sent, ошибок: $failed\n");
 		return $failed ? ExitCode::UNSPECIFIED_ERROR : ExitCode::OK;

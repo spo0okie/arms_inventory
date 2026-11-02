@@ -100,6 +100,9 @@ return [
 	//продолжают работать. Действует только при включённом notify.enable.
 	'notify.docs.state.enable'=>true,
 
+	//получатели сводки resign-defer/watch: ID, Login или E-Mail существующих пользователей
+	'notify.resignDefer.recipients'=>[],
+
 	//отправка почты (механизм оповещений, plans/notifications.md)
 	'mailer.useFileTransport'=>true,	//true = складывать письма в runtime/mail вместо реальной отправки
 	'mailer.transport'=>['scheme'=>'smtp','host'=>'localhost','port'=>25],

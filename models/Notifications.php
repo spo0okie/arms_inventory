@@ -198,7 +198,8 @@ class Notifications extends ArmsModel
 	{
 		return static::find()
 			->where(['sent_at' => null])
-			->andWhere(['<', 'attempts', $maxAttempts])
+			//Сводки увольнения повторяются до успешной доставки, независимо от лимита документов.
+			->andWhere(['or', ['<', 'attempts', $maxAttempts], ['like', 'event_key', 'resign-defer:%', false]])
 			->orderBy(['id' => SORT_ASC]);
 	}
 }
