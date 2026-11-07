@@ -63,7 +63,8 @@ class Scans extends ArmsModel
 	 */
 	const WEB_ROOT_DIR='/web';
 	
-	public static $supportedFormats=['png','jpg','jpeg','pdf','gif','bmp','tiff',];
+	// WebP разрешён для загрузки вместе с остальными форматами сканов.
+	public static $supportedFormats=['png','jpg','jpeg','pdf','gif','bmp','tiff','webp',];
 	public $scanFile;
 
 	public static $viewThumbSizes=[512,512];
@@ -327,7 +328,7 @@ class Scans extends ArmsModel
 	 */
 	public function getThumbExt(){
 		$ext=strtolower($this->format);
-		return $ext=='png'||$ext=='pdf'?'png':'jpeg';
+		return self::formThumbFormat($ext);
 	}
 	
 	/**
@@ -347,7 +348,8 @@ class Scans extends ArmsModel
 	 * @return string
 	 */
 	public static function formThumbFormat($ext){
-		return $ext=='png'||$ext=='pdf'?'png':'jpeg';
+		// PNG сохраняет прозрачность WebP в миниатюре.
+		return in_array($ext, ['png', 'pdf', 'webp'], true)?'png':'jpeg';
 	}
 	
 	/**
@@ -579,7 +581,7 @@ class Scans extends ArmsModel
 	}
 
 	/** @var string[] форматы, считающиеся изображением (фото), — под портрет и галерею */
-	public static $imageFormats = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff'];
+	public static $imageFormats = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'webp'];
 
 	/**
 	 * Признак того, что скан — изображение (а не, например, PDF-документ)
