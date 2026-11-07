@@ -89,8 +89,9 @@
 	color: var(--bs-body-color) !important;
 }
 
-/* панели-группировки на формах (card bg-light: ACL/ACE и т.п.) — светлые
-   блоки в тёмной; поверхность темы */
+/* панели-группировки на формах (card bg-light: ACL/ACE; bg-secondary:
+   сворачиваемые блоки моделей и оборудования) — поверхность тёмной темы */
+[data-bs-theme=dark] .card.bg-secondary,
 [data-bs-theme=dark] .card.bg-light {
 	background-color: var(--arms-surface) !important;
 }
