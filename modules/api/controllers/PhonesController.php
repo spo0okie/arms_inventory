@@ -5,6 +5,7 @@ namespace app\modules\api\controllers;
 use app\controllers\ArmsBaseController;
 use app\models\Techs;
 use app\models\Users;
+use app\helpers\PhoneHelper;
 use yii\web\NotFoundHttpException;
 use OpenApi\Attributes as OA;
 
@@ -43,13 +44,18 @@ class PhonesController extends BaseRestController
 
 	#[OA\Get(
 		path: "/api/phones/search-by-num",
-		summary: "Поиск пользователя по внутреннему номеру телефона",
+		summary: "Поиск пользователя по номеру телефона",
 		parameters: [new OA\Parameter(
 			name: "num",
 			description: "Искомый номер телефона",
 			in: "query",
 			required: true,
 			schema: new OA\Schema(type: "string")
+		), new OA\Parameter(
+			name: "searchExternal",
+			description: "Дополнительно искать по мобильному и личному телефону",
+			in: "query",
+			schema: new OA\Schema(type: "boolean", default: false)
 		)],
 		responses: [
 			new OA\Response(
@@ -72,6 +78,7 @@ class PhonesController extends BaseRestController
 	 * 2. Если аппарат привязан к АРМу с пользователем — возвращает его ФИО.
 	 * 3. Если аппарат напрямую привязан к пользователю — возвращает его ФИО.
 	 * 4. Ищет не уволенного пользователя с phone === $num.
+	 * При searchExternal также сравнивает нормализованные Mobile и private_phone.
 	 * При неудаче выбрасывает 404.
 	 *
 	 * GET-параметры:
@@ -80,7 +87,7 @@ class PhonesController extends BaseRestController
 	 * @return string  Полное ФИО пользователя (Users.Ename)
 	 * @throws NotFoundHttpException если пользователь не найден
 	 */
-	public function actionSearchByNum(string $num){
+	public function actionSearchByNum(string $num, $searchExternal = false){
 		//ищем телефонный аппарат по номеру
 		$tech = Techs::find()
 			->where(['comment' => $num ])
@@ -102,7 +109,7 @@ class PhonesController extends BaseRestController
 			}
 		}
 		$user= Users::find()
-			->where(['phone'=>$num])
+			->where($this->userPhoneCondition($num, $searchExternal))
 			->andWhere(Users::notResignedCondition())
 			->one();
 		/**
@@ -117,13 +124,18 @@ class PhonesController extends BaseRestController
 
 	#[OA\Get(
 		path: "/api/phones/filter-by-num",
-		summary: "Поиск имени пользователя по внутреннему номеру телефона",
+		summary: "Поиск имени пользователя по номеру телефона",
 		parameters: [new OA\Parameter(
 			name: "num",
 			description: "Искомый номер телефона",
 			in: "query",
 			required: true,
 			schema: new OA\Schema(type: "string")
+		), new OA\Parameter(
+			name: "searchExternal",
+			description: "Дополнительно искать по мобильному и личному телефону",
+			in: "query",
+			schema: new OA\Schema(type: "boolean", default: false)
 		)],
 		responses: [
 			new OA\Response(
@@ -149,6 +161,7 @@ class PhonesController extends BaseRestController
 	 * 2. Если аппарат привязан к АРМу с пользователем — возвращает его ФИО.
 	 * 3. Если аппарат напрямую привязан к пользователю — возвращает его ФИО.
 	 * 4. Ищет не уволенного пользователя с phone === $num.
+	 * При searchExternal также сравнивает нормализованные Mobile и private_phone.
 	 * При неудаче выбрасывает 404.
 	 *
 	 * GET-параметры:
@@ -157,7 +170,7 @@ class PhonesController extends BaseRestController
 	 * @return array пользователи с подходящим номером телефона
 	 * @throws NotFoundHttpException если пользователь не найден
 	 */
-	public function actionFilterByNum(string $num){
+	public function actionFilterByNum(string $num, $searchExternal = false){
 		/** @var Users[] $users */
 		$users=[];
 		//ищем телефонный аппарат по номеру
@@ -181,7 +194,7 @@ class PhonesController extends BaseRestController
 			}
 		}
 		$usersByPhone= Users::find()
-			->where(['phone'=>$num])
+			->where($this->userPhoneCondition($num, $searchExternal))
 			->andWhere(Users::notResignedCondition())
 			->all();
 		if (count($usersByPhone)) foreach($usersByPhone as $user) {
@@ -189,6 +202,18 @@ class PhonesController extends BaseRestController
 		}
 		if (count($users)) return array_values($users);
 		throw new NotFoundHttpException("not found");
+	}
+
+
+	/** Добавляет внешние телефоны по явному флагу, включая строковые true/false из URL. */
+	private function userPhoneCondition(string $num, $searchExternal): array
+	{
+		$condition = ['phone' => $num];
+		if (filter_var($searchExternal, FILTER_VALIDATE_BOOLEAN)) {
+			// Нормализация применяется к обеим сторонам сравнения.
+			return ['or', $condition, PhoneHelper::exactCondition(['Mobile', 'private_phone'], $num)];
+		}
+		return $condition;
 	}
 
 	#[OA\Get(
