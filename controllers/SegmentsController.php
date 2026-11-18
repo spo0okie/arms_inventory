@@ -20,14 +20,14 @@ use yii\web\NotFoundHttpException;
 class SegmentsController extends ArmsBaseController
 {
 	public $modelClass=Segments::class;
-	
+
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'view'=>['list','matrix'],
 		]);
 	}
-	
+
 	/**
 	 * Отображает компактную таблицу всех сегментов (partial view).
 	 *
@@ -46,19 +46,19 @@ class SegmentsController extends ArmsBaseController
 			if (!Yii::$app->request->get('showArchived',$this->defaultShowArchived))
 				$query->where(['not',['IFNULL(archived,0)'=>1]]);
 		}
-		
+
 		$dataProvider = new ActiveDataProvider([
 			'query' => $query,
 			'pagination' => false,
 			'sort'=>false
 		]);
-		
+
 		return $this->renderPartial('table-compact', [
 			'dataProvider' => $dataProvider,
 		]);
 	}
 
-    	
+
 	/**
 	 * Acceptance test data for actionList.
 	 *
@@ -94,6 +94,8 @@ class SegmentsController extends ArmsBaseController
 		$query=Segments::find()->orderBy(['name'=>SORT_ASC]);
 		if (!Yii::$app->request->get('showArchived',false))
 			$query->where(['not',['IFNULL(archived,0)'=>1]]);
+
+		$this->view->params['layout-container'] = 'container-fluid';
 
 		return $this->render('matrix', [
 			'segments' => $query->all(),
@@ -134,14 +136,14 @@ class SegmentsController extends ArmsBaseController
 		$networksSearch->segments_id=$id;
 		$networksSearch->archived= Yii::$app->request->get('showArchived',false);
 		$networksProvider = $networksSearch->search(Yii::$app->request->queryParams);
-	
+
 		$servicesSearch = new ServicesSearch();
 		$servicesSearch->segment_id=$id;
 		$servicesSearch->archived=Yii::$app->request->get('showArchived',false);
-	
+
 		$servicesProvider = $servicesSearch->search(Yii::$app->request->queryParams);
-	
-	
+
+
 		return $this->render('view', [
             'model' => $this->findModel($id),
 			'networksSearch' => $networksSearch,
