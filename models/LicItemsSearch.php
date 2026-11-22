@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -62,10 +63,13 @@ class LicItemsSearch extends LicItems
             'id' => $this->id,
             'lic_group_id' => $this->lic_group_id,
             'count' => $this->count,
-            'active_from' => $this->active_from,
-            'active_to' => $this->active_to,
-            'created_at' => $this->created_at,
         ]);
+
+        // Для обычной даты сохраняем точное совпадение.
+        foreach (['active_from', 'active_to', 'created_at'] as $column) {
+            $value = $this->$column;
+            $query->andFilterWhere(QueryHelper::valuePresenceCondition($column, $value) ?? [$column => $value]);
+        }
 
         $query->andFilterWhere(['or like', 'descr', \app\helpers\StringHelper::explode($this->descr,'|',true,true)])
 			->andFilterWhere(['or like', 'comment', \app\helpers\StringHelper::explode($this->comment,'|',true,true)]);

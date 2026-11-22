@@ -75,8 +75,11 @@ class AbsencesSearch extends Absences
 
 		$filter->andFilterWhere(['like', 'absences.external_id', $this->external_id])
 			->andFilterWhere(['like', 'absences.comment', $this->comment])
-			->andFilterWhere(['>=', 'absences.date_to', $this->date_from])
-			->andFilterWhere(['<=', 'absences.date_from', $this->date_to])
+			// Подстановки проверяют саму дату, обычные значения задают пересечение интервалов.
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('absences.date_from',$this->date_from,
+				static fn($token) => ['>=', 'absences.date_to', $token]))
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('absences.date_to',$this->date_to,
+				static fn($token) => ['<=', 'absences.date_from', $token]))
 			->andFilterWhere(QueryHelper::querySearchString(['AND/OR',
 				'IFNULL(users.Ename,"")',
 			], $this->objects));

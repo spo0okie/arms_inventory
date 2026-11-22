@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\helpers\StringHelper;
@@ -111,10 +112,8 @@ class MaterialsUsagesSearch extends MaterialsUsages
 			])->andFilterWhere([
 				'or like',
 				'CONCAT(ifnull(techs.num,"") , " ",materials_usages.comment)', StringHelper::explode($this->to,'|',true,true)
-			])->andFilterWhere([
-				'or like',
-				'materials_usages.date', StringHelper::explode($this->date,'|',true,true)
-			]);
+			])->andFilterWhere(QueryHelper::querySearchNumberOrDate('materials_usages.date',$this->date,
+				static fn($token,$column) => ['like',$column,trim($token)]));
 
         return $dataProvider;
     }

@@ -99,8 +99,9 @@ class AcesSearch extends Aces
 		$filter->andFilterWhere([
             'id' => $this->id,
 			'services_subjects.id' => $this->services_subject_ids,
-            'updated_at' => $this->updated_at,
         ]);
+		$filter->andFilterWhere(QueryHelper::valuePresenceCondition('updated_at', $this->updated_at)
+			?? ['updated_at' => $this->updated_at]);
 
 		//доступ к сервису: ACL на сам сервис и (если задано) записи на его узлы/адреса,
 		//вписывающиеся в стандартные доступы сервиса — подзапросами, по ИЛИ

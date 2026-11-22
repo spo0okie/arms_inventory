@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
@@ -114,7 +115,8 @@ class MaterialsSearch extends Materials
         $query->andFilterWhere(['or like', static::$modelSearch, StringHelper::explode($this->model,'|',true,true)])
 			->andFilterWhere(['or like', 'getplacepath(materials.places_id)', StringHelper::explode($this->place,'|',true,true)])
 			->andFilterWhere(['or like', 'materials.comment', StringHelper::explode($this->comment,'|',true,true)])
-			->andFilterWhere(['or like', 'materials.date', StringHelper::explode($this->date,'|',true,true)])
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('materials.date',$this->date,
+				static fn($token,$column) => ['like',$column,trim($token)]))
         ->groupBy('materials.id')
         //->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
         //вот это вызывало ошибку неизвестный столбец в хэвинг условии

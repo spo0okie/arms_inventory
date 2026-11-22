@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -60,9 +61,10 @@ class MaintenanceReqsSearch extends MaintenanceReqs
             'id' => $this->id,
             'spread_comps' => $this->spread_comps,
             'spread_techs' => $this->spread_techs,
-            'updated_at' => $this->updated_at,
             'updated_by' => $this->updated_by,
         ]);
+        $query->andFilterWhere(QueryHelper::valuePresenceCondition('updated_at', $this->updated_at)
+            ?? ['updated_at' => $this->updated_at]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'description', $this->description])

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -75,13 +76,13 @@ class TagsSearch extends Tags
             ->andFilterWhere(['like', 'description', $this->description])
             ->andFilterWhere(['like', 'updated_by', $this->updated_by]);
 
-        // Фильтрация по датам
-        if (!empty($this->created_at)) {
-            $query->andFilterWhere(['>=', 'created_at', $this->created_at]);
-        }
-        
-        if (!empty($this->updated_at)) {
-            $query->andFilterWhere(['>=', 'updated_at', $this->updated_at]);
+        // Обычная дата по-прежнему задаёт нижнюю границу.
+        foreach (['created_at', 'updated_at'] as $column) {
+            $value = $this->$column;
+            if (!empty($value)) {
+                $query->andFilterWhere(QueryHelper::valuePresenceCondition($column, $value)
+                    ?? ['>=', $column, $value]);
+            }
         }
 
         return $dataProvider;

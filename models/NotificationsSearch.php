@@ -76,8 +76,10 @@ class NotificationsSearch extends Notifications
 			->andFilterWhere(['like', 'notifications.subject', $this->subject])
 			->andFilterWhere(['like', 'notifications.body', $this->body])
 			->andFilterWhere(['like', 'notifications.last_error', $this->last_error])
-			->andFilterWhere(['like', 'notifications.created_at', $this->created_at])
-			->andFilterWhere(['like', 'notifications.sent_at', $this->sent_at])
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('notifications.created_at',$this->created_at,
+				static fn($token,$column) => ['like',$column,$token]))
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('notifications.sent_at',$this->sent_at,
+				static fn($token,$column) => ['like',$column,$token]))
 			->andFilterWhere(QueryHelper::querySearchString(['AND/OR',
 				'IFNULL(users.Ename,"")',
 				'IFNULL(users.Email,"")',

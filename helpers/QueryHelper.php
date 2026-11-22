@@ -4,7 +4,8 @@
 namespace app\helpers;
 
 
-use \yii\helpers\StringHelper;
+use yii\db\Expression;
+use yii\helpers\StringHelper;
 
 class QueryHelper
 {
@@ -23,32 +24,36 @@ class QueryHelper
 	'<strong>Siemens &amp; !NX &amp; !teamcenter</strong> - Siemens, но не NX и не Teamcenter<br/>'.
 	'<strong>Debian | Ubuntu</strong> - Debian или Ubuntu<br/>'.
 	'</i>';
-	
+
 	public static $numberSearchHint='Можно делать сложные запросы, используя служебные знаки:'.
 	'<ul>'.
 		'<li><strong>|</strong> (вертикальная черта) - ИЛИ</li>'.
 		'<li><strong>&amp;</strong> (амперсанд/and) - И</li>'.
 		'<li><strong>&lt;</strong> (знак "меньше") - МЕНЬШЕ ЧЕМ</li>'.
 		'<li><strong>&gt;</strong> (знак "больше") - БОЛЬШЕ ЧЕМ</li>'.
+		'<li><strong>*</strong> (звездочка) - должно присутствовать любое непустое значение</li>'.
+		'<li><strong>-</strong> (минус) - значение отсутствует</li>'.
 	'</ul>'.
 	'<i>Примеры:<br />'.
 		'<strong>&lt;1000|&gt;50000</strong> - меньше 1000 или больше 50000<br/>'.
 		'<strong>&gt;10000&amp;&lt;20000</strong> - больше 10000, но меньше 20000<br/>'.
 	'</i>';
-	
+
 	public static $dateSearchHint='Можно делать сложные запросы, используя служебные знаки:'.
 	'<ul>'.
 		'<li><strong>|</strong> (вертикальная черта) - ИЛИ</li>'.
 		'<li><strong>&amp;</strong> (амперсанд/and) - И</li>'.
 		'<li><strong>&lt;</strong> (знак "меньше") - МЕНЬШЕ ЧЕМ</li>'.
 		'<li><strong>&gt;</strong> (знак "больше") - БОЛЬШЕ ЧЕМ</li>'.
+		'<li><strong>*</strong> (звездочка) - должно присутствовать любое непустое значение</li>'.
+		'<li><strong>-</strong> (минус) - дата или время отсутствуют</li>'.
 	'</ul>'.
 	'Если время не подставлено, то считается 00:00:00'.
 	'<i>Примеры:<br />'.
 		'<strong>&lt;2020-01-01|&gt;2021-12-31</strong> - меньше 2020-01-01 или больше 2021-12-31<br/>'.
 		'<strong>&gt;2021-05-01&amp;&lt;2021-05-09 23:59:59</strong> - в интервале от 2021-05-01 до 2021-05-09 включительно<br/>'.
 	'</i>';
-	
+
 	private static $symbolEscapes=[
 		'!'=>'###EXCLAMATION###',
 		'|'=>'###BOOEANOR###',
@@ -56,7 +61,7 @@ class QueryHelper
 		'^'=>'###LINESTART###',
 		'$'=>'###LINEEND###',
 	];
-	
+
 	/**
 	 * Заменяет экранированные символы на служебные макросы
 	 * таким образом в строке остаются только неэкранированные служебные символы
@@ -66,10 +71,10 @@ class QueryHelper
 	private static function escapedStringToMacro($string) {
 		foreach (static::$symbolEscapes as $symbol => $macro)
 			$string=str_replace('\\'.$symbol,$macro,$string);
-		
+
 		return $string;
 	}
-	
+
 	/**
 	 * Если в качестве параметра не строка а массив вроде [or,param1,param2],
 	 * то нам надо  на входящие параметры [like,[or,param1,param2],value1]
@@ -93,7 +98,7 @@ class QueryHelper
 		}
 		return [$operator,$param,$token,false];
 	}
-	
+
 	/**
 	 * Обработка строчного токена (like или not like)
 	 * @param mixed $token с чем сравнивать
@@ -130,17 +135,17 @@ class QueryHelper
 			if (strpos($token,'^')===0) {
 				$token=substr($token,1);
 			} else $token='%'.$token;
-			
+
 			if (strpos($token,'$')===strlen($token)-1) {
 				$token=substr($token,0,strlen($token)-1);
 			} else $token=$token.'%';
 		}
-		
+
 		//return [$operator,$param,static::macroStringToUnescape($token),false];
 		return static::parseArrayInParam($operator,$param,static::macroStringToUnescape($token));
 	}
-	
-	
+
+
 	static function lessOrGreaterToken($token,$param) {
 		if (substr($token,0,1)=='>') {
 			$operator='>';
@@ -154,7 +159,7 @@ class QueryHelper
 
 		return [$operator,$param,static::macroStringToUnescape($token)];
 	}
-	
+
 	/**
 	 * Заменяет служебные макросы из функции выше обратно в служебные символы
 	 * @param $string
@@ -163,10 +168,10 @@ class QueryHelper
 	private static function macroStringToUnescape($string) {
 		foreach (static::$symbolEscapes as $symbol => $macro)
 			$string=str_replace($macro,$symbol,$string);
-		
+
 		return $string;
 	}
-	
+
 	/**
 	 * Что я бл.дь тут понаделал без комментариев. Вроде работает но как?
 	 * вроде как разбивает строку с & или | на токены с нужным оператором
@@ -177,7 +182,7 @@ class QueryHelper
 	 */
 	public static function tokenizeString($string,$param,$tokenParser) {
 		$string=static::escapedStringToMacro($string);
-		
+
 		if (strpos($string,'&')!==false) {
 			$tokens=StringHelper::explode($string,'&',true,true);
 			$tokensOperator='AND';
@@ -188,17 +193,17 @@ class QueryHelper
 			//простой вариант
 			return $tokenParser($string,$param);
 		}
-		
+
 		$subQueries=[];
-		
+
 		foreach ($tokens as $token) if (strlen($token)){
 			$subQueries[]=$tokenParser($token,$param);
 		}
-		
+
 		return array_merge([$tokensOperator],$subQueries);
-		
+
 	}
-	
+
 	/**
 	 * Преобразует LIKE-шаблон (% и _ как подстановки) в регулярное выражение
 	 * @param $pattern string
@@ -315,14 +320,32 @@ class QueryHelper
 		//return [];
 		return static::tokenizeString($string??'',$param,[static::class,'likeToken']);
 	}
-	
-	
+
+
 	/**
-	 * @param $param string
-	 * @param $string string
-	 * @return array
+	 * Возвращает условие наличия значения для * или -. Для прочих значений возвращает null.
 	 */
-	public static function querySearchNumberOrDate($param,$string) {
-		return static::tokenizeString($string??'',$param,[static::class,'lessOrGreaterToken']);
+	public static function valuePresenceCondition(string $column, mixed $value): ?array {
+		$token=is_string($value)?trim($value):null;
+		// Expression сохраняет SQL NULL при вызове andFilterWhere(), который удаляет PHP null.
+		return match ($token) {
+			'*' => ['is not',$column,new Expression('NULL')],
+			'-' => ['is',$column,new Expression('NULL')],
+			default => null,
+		};
+	}
+
+	/**
+	 * Разбирает фильтр числа, даты или времени, включая * и - в выражениях с & и |.
+	 * @param string $param колонка поиска
+	 * @param string|null $string строка поиска
+	 * @param callable|null $tokenParser обработчик обычного токена, если у поля свой поиск
+	 * @return array условие Yii2 Query Builder
+	 */
+	public static function querySearchNumberOrDate($param,$string,?callable $tokenParser=null): array {
+		$tokenParser ??= [static::class,'lessOrGreaterToken'];
+		return static::tokenizeString($string??'',$param,static function ($token,$column) use ($tokenParser) {
+			return static::valuePresenceCondition($column,$token) ?? $tokenParser($token,$column);
+		});
 	}
 }

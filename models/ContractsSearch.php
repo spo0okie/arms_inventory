@@ -154,7 +154,7 @@ class ContractsSearch extends Contracts
 	
 		$query
 			->andFilterWhere(['contracts.state_id'=>$this->state_id])
-			->andFilterWhere(QueryHelper::querySearchString('contracts.date',$this->date))
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('contracts.date',$this->date,[QueryHelper::class,'likeToken']))
 			->andFilterWhere(QueryHelper::querySearchString('contracts.pay_id',$this->pay_id));
 	    
 	    if (strlen($this->deliveryStatus??'')) {

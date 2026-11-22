@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -59,8 +60,9 @@ class SandboxesSearch extends Sandboxes
         $query->andFilterWhere([
             'id' => $this->id,
             'network_accessible' => $this->network_accessible,
-            'updated_at' => $this->updated_at,
         ]);
+        $query->andFilterWhere(QueryHelper::valuePresenceCondition('updated_at', $this->updated_at)
+            ?? ['updated_at' => $this->updated_at]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'suffix', $this->suffix])
