@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\models\base\ArmsModel;
+use app\models\traits\TaggableTrait;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -23,9 +24,20 @@ use yii\db\ActiveQuery;
  * @property OrgStruct[] $children Дочерние подразделения (на основе связи id->parent_id)
  * @property OrgStruct[] $nrChildren Дочерние подразделения (на основе связи hr_id->hr_parent_id)
  * @property Users[] $users Сотрудники этого подразделения
+ * @property Tags[] $tags Теги подразделения
  */
 class OrgStruct extends ArmsModel
 {
+	use TaggableTrait;
+
+	public $linksSchema = [
+		'tags_ids' => [Tags::class, 'orgStructs_ids', 'loader' => 'tags', 'updater' => [
+			// ID подразделения и сервиса в общей таблице связей могут совпадать.
+			'viaTableCondition' => ['model_class' => OrgStruct::class],
+			'viaTableAttributesValue' => ['model_class' => OrgStruct::class],
+		]],
+	];
+
 	public static $title='Орг. структура';
 	public static $titles='Орг. структура';
 
@@ -61,6 +73,7 @@ class OrgStruct extends ArmsModel
 			}],
 			[['org_id','name'], 'required'],
 			[['org_id','id','parent_id'], 'integer'],
+			[['tags_ids'], 'each', 'rule' => ['integer']],
 			[['hr_id', 'parent_hr_id'], 'string', 'max' => 16],
             [['name'], 'string', 'max' => 255],
 			[['hr_id', 'org_id'], 'unique', 'targetAttribute' => ['hr_id', 'org_id']],
@@ -75,6 +88,10 @@ class OrgStruct extends ArmsModel
     {
         return [
 			'id' => ['id','hint'=>'Внутренний идентификатор записи'],
+			'tags_ids' => [
+				'Теги',
+				'hint' => 'Эти теги появятся у ОС, если сотрудник этого подразделения закреплён за самой ОС или за её АРМ.',
+			],
 			'hr_id' => [
 				'ID подразделения в HR БД',
 				'hint'=>'Идентификатор подразделения в кадровой (HR) системе',
@@ -170,6 +187,7 @@ class OrgStruct extends ArmsModel
 		return [
 			'Дочерние подразделения' => $this->children,
 			'Сотрудники' => $this->users,
+			'Теги' => $this->tags,
 		];
 	}
 	

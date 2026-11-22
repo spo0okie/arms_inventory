@@ -146,6 +146,7 @@ class Services extends ArmsModel
 
 	public $linksSchema=[
 		'tags_ids' =>					[Tags::class,'services_ids', 'loader' => 'tags','updater'=>[
+			'viaTableCondition' => ['model_class' => Services::class],
 			'viaTableAttributesValue' => [
 				'model_class' => Services::class,
 			],

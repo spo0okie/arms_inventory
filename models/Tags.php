@@ -47,7 +47,14 @@ class Tags extends ArmsModel
      * @var array
      */
     public $linksSchema = [
-        'services_ids' => [Services::class, 'tag_ids'],
+        'services_ids' => [Services::class, 'tags_ids', 'updater' => [
+            'viaTableCondition' => ['model_class' => Services::class],
+            'viaTableAttributesValue' => ['model_class' => Services::class],
+        ]],
+        'orgStructs_ids' => [OrgStruct::class, 'tags_ids', 'loader' => 'orgStructs', 'updater' => [
+            'viaTableCondition' => ['model_class' => OrgStruct::class],
+            'viaTableAttributesValue' => ['model_class' => OrgStruct::class],
+        ]],
     ];
     
     /**
@@ -237,6 +244,15 @@ class Tags extends ArmsModel
         return $this->hasMany(Services::class, ['id' => 'model_id'])
             ->viaTable('tags_links', ['tag_id' => 'id'], function($query) {
                 $query->andWhere(['model_class' => Services::class]);
+            });
+    }
+
+    /** Возвращает подразделения, которым назначен этот тег. */
+    public function getOrgStructs(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(OrgStruct::class, ['id' => 'model_id'])
+            ->viaTable('tags_links', ['tag_id' => 'id'], function ($query) {
+                $query->andWhere(['model_class' => OrgStruct::class]);
             });
     }
  

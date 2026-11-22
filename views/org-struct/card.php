@@ -12,6 +12,7 @@ use app\components\widgets\page\ModelWidget;
 <h1>
 	<?= Html::encode($model->name) ?>
 </h1>
+<?= \app\components\TagsWidget::widget(['model' => $model]) ?>
 
 <?php
 //единая цепочка положения: организация (partner) → путь по оргструктуре (self-chain)

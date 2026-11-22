@@ -13,6 +13,7 @@
 use app\components\ExpandableCardWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
+use app\components\TagsWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
 use app\models\Comps;
@@ -108,6 +109,10 @@ return [
 				'card_options'=>['cardClass'=>'mb-0']
 			]);
 		},
+	],
+	'tags' => [
+		'filter' => false,
+		'value' => static fn(Comps $model) => TagsWidget::widget(['model' => $model]),
 	],
 	'raw_hw' => [
 		'value' => function ($data) use ($manufacturers) {

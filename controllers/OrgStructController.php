@@ -38,11 +38,19 @@ class OrgStructController extends ArmsBaseController
 	 */
     public function actionIndex($org_id=1)
     {
+		// Дерево выводится целиком, поэтому загружаем подразделения и их теги сразу.
+		$departments = OrgStruct::find()->where(['org_id' => $org_id])
+			->with('tags')->orderBy(['name' => SORT_ASC])->all();
+		$byParent = [];
+		foreach ($departments as $department) {
+			$byParent[$department->parent_id][] = $department;
+		}
+		foreach ($departments as $department) {
+			$department->populateRelation('children', $byParent[$department->id] ?? []);
+		}
+
 		return $this->render('index', [
-			'models' => OrgStruct::find()
-				->where(['org_id'=>$org_id,'parent_id'=>null])
-				->orderBy(['name'=>SORT_ASC])
-				->all(),
+			'models' => $byParent[null] ?? [],
 			'org_id'=>$org_id
 		]);
     }

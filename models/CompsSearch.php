@@ -75,6 +75,8 @@ class CompsSearch extends Comps
     {
 		ManufacturersDict::initCache();
         $query = Comps::find()
+			// Загружаем источники тегов сразу для всей страницы списка.
+			->with(['services.tags', 'user.orgStruct.tags', 'arm.user.orgStruct.tags'])
 			->joinWith([
 				'arm.place',
 				'arm.user',

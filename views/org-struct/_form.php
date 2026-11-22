@@ -44,6 +44,7 @@ if (!isset($modalParent)) $modalParent=null;
 	]) ?>
 	
 	<?= $form->field($model, 'name') ?>
+	<?= $form->field($model, 'tags_ids') ?>
 
     <?= $form->field($model, 'hr_id') ?>
 

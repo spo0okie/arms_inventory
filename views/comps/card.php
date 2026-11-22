@@ -56,6 +56,9 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 			'hideUndeletable'=>false,
 	]) ?>
 </h1>
+<?php if (!($model instanceof HistoryModel)) { ?>
+	<?= \app\components\TagsWidget::widget(['model' => $model]) ?>
+<?php } ?>
 
 <div>
 	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'os') ?><br />

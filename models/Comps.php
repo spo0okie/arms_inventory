@@ -40,6 +40,7 @@ use yii\db\StaleObjectException;
  * @property string $ip_ignore Игнорировать IP адреса
  * @property int $arm_id Рабочее место
  * @property int $user_id Пользователь
+ * @property-read Tags[] $tags Теги сервисов и подразделений пользователей ОС и АРМ
  * @property int[] $admins_ids Администраторы
  * @property int $platform_id ID Облачного сервиса
  * @property Services $platform облачный сервис
@@ -274,6 +275,14 @@ class Comps extends ArmsModel
 			//read-only вычисляемые ссылки (категория C): только вывод
 			'place' => ['ref'=>\app\models\Places::class],
 			'site' => ['ref'=>\app\models\Places::class],
+			'tags' => [
+				'Теги',
+				'hint' => 'ОС получает теги от сервисов, которые на ней работают, и от подразделений '
+					.'пользователей, закреплённых за ОС или её АРМ. Учитываются только теги, '
+					.'назначенные непосредственно этим сервисам и подразделениям.',
+				'indexHint' => '{same}',
+				'ref' => Tags::class, 'refMulti' => true,
+			],
 			'responsible' => [
 				'Ответственный',
 				'hint' => 'Кто отвечает за эту ОС: закреплённый пользователь, иначе ответственный '
@@ -719,6 +728,26 @@ class Comps extends ArmsModel
 	{
 		return $this->hasMany(Services::class, ['id' => 'services_id'])
 			->viaTable('{{%comps_in_services}}', ['comps_id' => 'id']);
+	}
+
+	/** @return Tags[] Уникальные теги сервисов ОС и непосредственных подразделений пользователей ОС и АРМ. */
+	public function getTags(): array
+	{
+		$sources = $this->services;
+		// У ОС и её АРМ могут быть назначены пользователи из разных подразделений.
+		foreach ([$this->user, $this->arm?->user] as $user) {
+			if ($department = $user?->orgStruct) {
+				$sources[] = $department;
+			}
+		}
+
+		$tags = [];
+		foreach ($sources as $source) {
+			foreach ($source->tags as $tag) {
+				$tags[$tag->id] = $tag;
+			}
+		}
+		return array_values($tags);
 	}
 
 	/**
