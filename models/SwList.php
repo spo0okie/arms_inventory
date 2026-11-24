@@ -276,9 +276,40 @@ class SwList {
 
     }
 
+	/** Самостоятельные установки и обнаруженные компоненты каждого видимого продукта. */
+	public function getSoftEffective(): array
+	{
+		$items = array_column($this->items, null, 'id');
+		$found = array_column(array_filter($items, static fn($item) => $item['found']), 'id');
+		if (count($found) < 2) return $items;
+
+		// Паспортная запись без совпадения в отпечатке не поглощает другие продукты.
+		$edges = (new \yii\db\Query())->from('soft_components')
+			->select(['component_id', 'parent_id'])
+			->where(['component_id'=>$found, 'parent_id'=>$found])
+			->orderBy('parent_id')->all();
+		$parents = [];
+		foreach ($edges as $edge) {
+			// При нескольких родителях выбираем первый по ID независимо от сортировки списка.
+			$parents[$edge['component_id']] ??= $edge['parent_id'];
+		}
+		foreach ($parents as $component => $parent) {
+			$visited = [$component=>true];
+			while (isset($parents[$parent]) && !isset($visited[$parent])) {
+				$visited[$parent] = true;
+				$parent = $parents[$parent];
+			}
+			// При повреждённом цикле оставляем записи доступными отдельно.
+			if (isset($visited[$parent])) continue;
+			$items[$parent]['components'][] = $items[$component];
+			unset($items[$component]);
+		}
+		return $items;
+	}
+
     public function getAgreed() {
         $tmp=[];
-        foreach ($this->items as $item)
+        foreach ($this->getSoftEffective() as $item)
             if ($item['agreed']) $tmp[$item['id']]=$item;
 
         return $tmp;
@@ -286,7 +317,7 @@ class SwList {
 
 	public function hasUnsavedAgreed() {
 		$has=false;
-		foreach ($this->items as $item)
+		foreach ($this->getAgreed() as $item)
 			if ($item['agreed'] && !$item['saved']) $has=true;
 
 		return $has;

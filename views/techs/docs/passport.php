@@ -35,7 +35,7 @@ $manufacturers= Manufacturers::fetchNames();
 
         if (count($comp->swList->items)) {
             $comp->swList->sortByName();
-            foreach ($comp->swList->items as $item) {
+            foreach ($comp->swList->getSoftEffective() as $item) {
 				$rendered=$this->render('/swlist/item',['model'=>$comp, 'item'=>$item]);
 	            if ($item['ignored']) {
 		            $ignored[] = $rendered;

@@ -28,6 +28,7 @@ $model->addItem($model->add_item);
 			
 			<?= $form->field($model, 'items')->textAutoresize(['rows'=>3]) ?>
 			<?= $form->field($model, 'additional')->textAutoresize(['rows'=>3]) ?>
+			<?= $form->field($model, 'parents_ids')->select2() ?>
 
 			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
 		</div>

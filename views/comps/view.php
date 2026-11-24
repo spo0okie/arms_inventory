@@ -32,7 +32,7 @@ $soft=[
 	'agreed'=>[],
 	'other'=>[]
 ];
-foreach ($model->swList->items as $item) {
+foreach ($model->swList->getSoftEffective() as $item) {
 	if ($item['ignored']) {
 		$soft['ignored'][]=$item;
 		continue;

@@ -117,6 +117,45 @@ class CompsRescanDeferTest extends Unit
 			->all();
 	}
 
+	/** Поглощение меняет представление установки при наличии родителя на той же ОС. */
+	public function testSharedComponentOnSameOs()
+	{
+		Yii::$app->params['soft.deferred_rescan'] = false;
+		$child = $this->makeSoft('SharedComponentTest');
+		$products = [];
+		foreach (['ParentOneTest', 'ParentTwoTest'] as $name) {
+			$product = new Soft([
+				'manufacturers_id'=>$child->manufacturers_id, 'descr'=>$name,
+				'items'=>$name, 'additional'=>'',
+			]);
+			$this->assertTrue($product->save(), print_r($product->errors, true));
+			$products[] = $product;
+		}
+		[$first, $second] = $products;
+		$child->parents_ids = [$second->id, $first->id];
+		$this->assertTrue($child->save(), print_r($child->errors, true));
+		$first->parents_ids = [$child->id];
+		$this->assertFalse($first->validate(['parents_ids']));
+		$first->parents_ids = [$first->id];
+		$this->assertFalse($first->validate(['parents_ids']));
+
+		// Лицензия покрывает компонент; расход считается по фактическим назначениям.
+		$group = \app\models\LicGroups::find()->one();
+		$group->soft_ids = [$child->id];
+		$this->assertTrue($group->save(false));
+		$used = $group->usedCount;
+		$comp = $this->makeComp(static::fingerprint($child->items));
+		$this->assertArrayHasKey($child->id, $comp->swList->getSoftEffective());
+		$comp->raw_soft = static::fingerprint($child->items, $second->items, $first->items);
+		$this->assertTrue($comp->save(false));
+		$comp = Comps::findOne($comp->id);
+		$this->assertContains($child->id, $comp->softHits_ids);
+		$effective = $comp->swList->getSoftEffective();
+		$this->assertCount(2, $effective);
+		$this->assertEquals([$child->id], array_column($effective[$first->id]['components'], 'id'));
+		$this->assertSame($used, \app\models\LicGroups::findOne($group->id)->usedCount);
+	}
+
 	/**
 	 * Realtime-режим: скан на insert с отпечатком; сохранение без изменения
 	 * отпечатка скан НЕ перезапускает; изменение отпечатка - перезапускает.

@@ -3,6 +3,7 @@
 namespace app\console\commands;
 
 use app\models\Comps;
+use app\models\Soft;
 use app\models\SoftHits;
 use app\models\SwList;
 use Yii;
@@ -27,6 +28,25 @@ use yii\console\ExitCode;
  */
 class SoftRawController extends Controller
 {
+	/** Выводит общие маски additional и продукты, в которых они используются. */
+	public function actionSharedComponents(): int
+	{
+		$productsByMask = [];
+		foreach (Soft::find()->where(['<>', 'additional', ''])->with('manufacturer')->orderBy('id')->each() as $product) {
+			// Повтор одной маски внутри продукта не делает её разделяемой.
+			foreach ($product->getAdditionalArray() as $mask) {
+				if ($mask !== '') $productsByMask[$mask][$product->id] = $product->name;
+			}
+		}
+		ksort($productsByMask, SORT_STRING);
+		foreach ($productsByMask as $mask => $products) {
+			if (count($products) < 2) continue;
+			$this->stdout($mask . PHP_EOL);
+			foreach ($products as $id => $name) $this->stdout("  #$id $name" . PHP_EOL);
+		}
+		return ExitCode::OK;
+	}
+
 	/** @var bool включить в выгрузку примеры имён хостов */
 	public $withComps=false;
 

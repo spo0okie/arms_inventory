@@ -47,6 +47,16 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
     </td>
     <td class="product">
 		<?= ModelWidget::widget(['model'=>$product,'options'=>['hitlist'=>$hitlist,'noDelete'=>true]]) ?>
+		<?php if (!empty($item['components'])) { ?>
+			<details>
+				<summary>Компоненты (<?= count($item['components']) ?>)</summary>
+				<ul>
+				<?php foreach ($item['components'] as $component) { ?>
+					<li><?= ModelWidget::widget(['model'=>\app\models\Soft::fetchItem($component['id']), 'options'=>['noDelete'=>true]]) ?></li>
+				<?php } ?>
+				</ul>
+			</details>
+		<?php } ?>
     </td>
     <td class="passport_tools">
         <?php

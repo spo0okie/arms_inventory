@@ -28,6 +28,7 @@ use app\helpers\StringHelper;
  * @property array $comps_ids Массив ID компов, на которые закреплено ПО
  * @property array $hits_ids Массив ID компов, на которые установлено ПО
  * @property array $lic_groups_ids Типы лицензий включающие данное ПО
+ * @property int[] $parents_ids Продукты, в состав которых может входить компонент
  * @property bool $isFree входит в список бесплатного ПО
  * @property bool $isIgnored входит в список игнорируемого ПО
  *
@@ -85,6 +86,8 @@ class Soft extends ArmsModel
 	}
 	
 	public $linksSchema=[
+		'parents_ids'=>[self::class, 'components_ids', 'loader'=>'parents', 'deletable'=>true],
+		'components_ids'=>[self::class, 'parents_ids', 'loader'=>'components', 'deletable'=>true],
 		'soft_lists_ids'=>[SoftLists::class, 'soft_ids'],
 		'comps_ids'=>[Computer::class, 'soft_ids'],
 		'hits_ids'=>[Computer::class, 'softHits_ids'],
@@ -99,6 +102,14 @@ class Soft extends ArmsModel
     public function rules()
     {
         return [
+			['parents_ids', 'each', 'rule'=>['exist', 'targetClass'=>self::class, 'targetAttribute'=>'id']],
+			['parents_ids', function ($attribute) {
+				// До сохранения LinkerBehavior новые родители доступны только в данных формы.
+				$this->validateRecursiveLink($attribute, [
+					'getLink'=>'parents',
+					'initialLink'=>self::findAll(['id'=>$this->parents_ids]),
+				]);
+			}],
             [['soft_lists_ids','comps_ids'], 'each', 'rule'=>['integer']],
             [['manufacturers_id', 'descr'], 'required'],
             [['manufacturers_id'], 'integer'],
@@ -117,6 +128,12 @@ class Soft extends ArmsModel
     public function attributeData()
     {
         return array_merge(parent::attributeData(),[
+			'parents_ids'=>[
+				'Может входить в состав ПО',
+				'hint'=>'Если на ОС обнаружен один из этих продуктов, компонент показывается в его составе.',
+				'typeClass'=>\app\types\LinkType::class,
+			],
+			'components_ids'=>['Возможные компоненты', 'typeClass'=>\app\types\LinkType::class],
 			'add_item'=>[
 				'Добавить элемент',
 				'hint' => 'В UI не используется. '
@@ -191,7 +208,7 @@ class Soft extends ArmsModel
 	        'created_at' => 'Дата добавления',
 			'hitsCount'=>[
 				'Обнаружено',
-				'indexHint'=>'Количество обнаруженных установок продукта',
+				'indexHint'=>'Количество ОС в списке обнаружений, включая установки в составе другого продукта',
 				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'compsCount'=>[
@@ -222,6 +239,20 @@ class Soft extends ArmsModel
 		return $this->hasMany(LicGroups::class, ['id' => 'lics_id'])
 			->viaTable('{{%soft_in_lics}}', ['soft_id' => 'id']);
     }
+
+	/** Продукты, которые могут поглотить этот компонент. */
+	public function getParents(): ActiveQuery
+	{
+		return $this->hasMany(self::class, ['id'=>'parent_id'])
+			->viaTable('soft_components', ['component_id'=>'id']);
+	}
+
+	/** Компоненты, которые могут входить в этот продукт. */
+	public function getComponents(): ActiveQuery
+	{
+		return $this->hasMany(self::class, ['id'=>'component_id'])
+			->viaTable('soft_components', ['parent_id'=>'id']);
+	}
 	
 	/**
 	 * Количество типов лицензий включающих данное ПО
