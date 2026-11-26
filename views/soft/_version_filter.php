@@ -1,6 +1,5 @@
 <?php
 
-use app\helpers\SoftwareVersionFilter;
 use yii\helpers\Html;
 
 /** @var \app\models\Soft $model */
@@ -22,19 +21,10 @@ $route['id'] = $model->id;
 		'id'=>'soft-version-format', 'class'=>'form-select w-auto',
 		'prompt'=>'Все форматы', 'onchange'=>'this.form.submit()',
 	]) ?>
-	<?php foreach ($format['fields'] ?? [] as $field=>[$label]) {
-		$prefix = $formName.'[versionConditions]['.$key.']['.$field.']';
-		$condition = $conditions[$field] ?? [];
-		$id = 'soft-version-'.$field;
-	?>
-	<div class="d-flex align-items-center gap-2 mt-2">
-		<?= Html::label($label, $id) ?>
-		<?= Html::dropDownList($prefix.'[op]', is_string($condition['op'] ?? null) ? $condition['op'] : '=', SoftwareVersionFilter::OPERATORS,
-			['class'=>'form-select w-auto', 'aria-label'=>'Сравнение: '.$label]) ?>
-		<?= Html::textInput($prefix.'[value]', is_string($condition['value'] ?? null) ? $condition['value'] : '',
-			['id'=>$id, 'class'=>'form-control w-auto', 'placeholder'=>'Любое значение']) ?>
-	</div>
-	<?php } ?>
+	<?= $this->render('_version_conditions', [
+		'format'=>$format, 'conditions'=>$conditions, 'name'=>$formName.'[versionConditions]['.$key.']',
+		'idPrefix'=>'soft-version-',
+	]) ?>
 	<?php if ($format) echo Html::submitButton('Применить', ['class'=>'btn btn-primary mt-2']); ?>
 	<?= Html::error($searchModel, 'versionFormat', ['class'=>'text-danger']) ?>
 <?= Html::endForm() ?>

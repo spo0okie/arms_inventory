@@ -632,6 +632,13 @@ class Soft extends ArmsModel
 			->all();
 	}
 	
+	/** Удаляет правила тегирования удалённого продукта. */
+	public function afterDelete()
+	{
+		SoftVersionTagRule::deleteAll(['soft_id'=>$this->id]);
+		parent::afterDelete();
+	}
+
 	public function beforeDelete()
 	{
 		$this->comps_ids=[];

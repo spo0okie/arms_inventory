@@ -126,7 +126,7 @@ class CompsRescanDeferTest extends Unit
 		$publisher = 'Debian Nginx Maintainers <pkg-nginx-maintainers@alioth-lists.debian.net>';
 		$raw = static fn($v) => json_encode(['publisher'=>$publisher, 'name'=>'rescan-test-nginx', 'version'=>$v]);
 		$comp = $this->makeComp($raw('1.26.3-3+deb13u9'));
-		$search = new \app\models\CompsSearch();
+		$search = new \app\models\CompsSearch(['scenario'=>\app\models\CompsSearch::SCENARIO_INSTALLATIONS]);
 		$params = ['CompsSearch'=>['linkedSoft_ids'=>$product->id, 'versionFormat'=>'debian-stable',
 			'versionConditions'=>['debian-stable'=>['release'=>['op'=>'=', 'value'=>'13'],
 				'update'=>['op'=>'<', 'value'=>'11']]]]];
@@ -134,16 +134,30 @@ class CompsRescanDeferTest extends Unit
 		$this->assertSame('1.26.3-3+deb13u9', $search->versionLabel($comp->id));
 		$params['CompsSearch']['versionConditions']['debian-stable']['release']['value'] = '12';
 		$this->assertEquals(0, $search->search($params)->totalCount);
+		// В общем списке ОС условия из ссылки на карточку ПО не применяются.
+		$this->assertEquals(1, (new \app\models\CompsSearch())->search($params)->totalCount);
+		$tag = new \app\models\Tags(['name'=>'test-version-'.uniqid(),'color'=>'#ff0000']);
+		$this->assertTrue($tag->save());
+		$rule = new \app\models\SoftVersionTagRule([
+			'soft_id'=>$product->id,'tag_id'=>$tag->id,'format'=>'debian-stable',
+			'conditions'=>json_encode(['release'=>['op'=>'=','value'=>'13'],'update'=>['op'=>'<','value'=>'11']]),
+		]);
+		$this->assertTrue($rule->save());
+		$rules = \app\models\SoftVersionTagRule::find()->where(['soft_id'=>$product->id])->with('tag')->all();
+		// Два совпадения дают один тег конкретной установки.
+		$this->assertEquals([$tag->id], array_keys($search->versionTags($comp->id, array_merge($rules,$rules))));
 		$params['CompsSearch']['versionConditions']['debian-stable']['release']['value'] = '13';
 		// Обновление до порога сохраняет ту же связь, но меняет версию.
 		$comp->raw_soft = $raw('1.26.3-3+deb13u11');
 		$this->assertTrue($comp->save(false));
 		$this->assertEquals(0, $search->search($params)->totalCount);
 		$this->assertSame('1.26.3-3+deb13u11', $search->versionLabel($comp->id));
+		$this->assertSame([], $search->versionTags($comp->id, $rules));
 		// Низкая версия есть только у Debian 12, а выпуск 13 — только у новой версии.
 		$comp->raw_soft = $raw('1.22.1-9+deb12u9').','.$raw('1.26.3-3+deb13u12');
 		$this->assertTrue($comp->save(false));
 		$this->assertEquals(0, $search->search($params)->totalCount);
+		$this->assertSame([], $search->versionTags($comp->id, $rules));
 		$params['CompsSearch']['versionConditions']['debian-stable']['release']['value'] = '12';
 		$this->assertEquals(1, $search->search($params)->totalCount);
 	}

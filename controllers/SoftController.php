@@ -8,6 +8,7 @@ use app\models\CompsSearch;
 use app\models\LicGroupsSearch;
 use Yii;
 use app\models\Soft;
+use app\models\SoftVersionTagRule;
 use yii\web\NotFoundHttpException;
 use yii\helpers\Url;
 
@@ -20,7 +21,7 @@ class SoftController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'edit'=>['select-update','generate-description','uploads'],
+			'edit'=>['select-update','generate-description','uploads','version-rule','delete-version-rule'],
 		]);
 	}
 	
@@ -62,7 +63,7 @@ class SoftController extends ArmsBaseController
 	 */
 	public function actionView(int $id)
 	{
-		$searchModel = new CompsSearch();
+		$searchModel = new CompsSearch(['scenario'=>CompsSearch::SCENARIO_INSTALLATIONS]);
 		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(Yii::$app->request->queryParams,['CompsSearch'=>['linkedSoft_ids'=>$id]]));
 		
 		$licSearchModel = new LicGroupsSearch();
@@ -73,7 +74,49 @@ class SoftController extends ArmsBaseController
 			'searchModel'=>$searchModel,
 			'dataProvider'=>$dataProvider,
 			'licProvider'=>$licProvider,
+			'versionRules'=>SoftVersionTagRule::find()->where(['soft_id'=>$id])->with('tag')->orderBy('id')->all(),
 		]);
+	}
+
+	/** Ограничивает удаление правила POST-запросом с проверкой CSRF. */
+	public function behaviors()
+	{
+		$behaviors = parent::behaviors();
+		$behaviors['verbs']['actions']['delete-version-rule'] = ['POST'];
+		$behaviors['verbs']['actions']['version-rule'] = ['GET','POST'];
+		return $behaviors;
+	}
+
+	/** Ищет правило только среди правил открытого продукта. */
+	private function findVersionRule(int $id, int $ruleId): SoftVersionTagRule
+	{
+		return SoftVersionTagRule::findOne(['id'=>$ruleId,'soft_id'=>$id])
+			?? throw new NotFoundHttpException('Правило не найдено.');
+	}
+
+	/** Создаёт или редактирует правило тегирования установки ПО. */
+	public function actionVersionRule(int $id, ?int $ruleId=null)
+	{
+		$model = $this->findModel($id);
+		$rule = $ruleId === null ? new SoftVersionTagRule(['soft_id'=>$id]) : $this->findVersionRule($id, $ruleId);
+		$conditions = $rule->getConditionsArray() ?? [];
+		$request = Yii::$app->request;
+		if ($request->isPost) {
+			$rule->format = $request->post('format');
+			$rule->tag_id = $request->post('tag_id');
+			// Каждая группа полей в форме принадлежит своему формату.
+			$conditions = is_string($rule->format) ? ($request->post('conditions', [])[$rule->format] ?? []) : [];
+			$rule->conditions = json_encode($conditions, JSON_THROW_ON_ERROR);
+			if ($rule->save()) return $this->redirect(['view','id'=>$id]);
+		}
+		return $this->render('version-rule', compact('model','rule','conditions'));
+	}
+
+	/** Удаляет выбранное правило из карточки ПО. */
+	public function actionDeleteVersionRule(int $id, int $ruleId)
+	{
+		$this->findVersionRule($id, $ruleId)->delete();
+		return $this->redirect(['view','id'=>$id]);
 	}
 	
 	

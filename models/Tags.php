@@ -25,6 +25,13 @@ use yii\helpers\Inflector;
  */
 class Tags extends ArmsModel
 {
+	/** Удаляет правила версий, ссылавшиеся на удалённый тег. */
+	public function afterDelete()
+	{
+		SoftVersionTagRule::deleteAll(['tag_id'=>$this->id]);
+		parent::afterDelete();
+	}
+
     /** @var string Название модели в единственном числе */
     public static $title = 'Тег';
     

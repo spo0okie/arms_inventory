@@ -14,6 +14,8 @@ use yii\db\Query;
  */
 class CompsSearch extends Comps
 {
+	/** Только карточка ПО задаёт контекст конкретного продукта. */
+	public const SCENARIO_INSTALLATIONS = 'installations';
 	public $places_id;
 	public $services_ids;
 	public $linkedSoft_ids;
@@ -24,6 +26,22 @@ class CompsSearch extends Comps
 	public $versionConditions = [];
 	public $installedVersion;
 	private array $packagesByHost = [];
+
+	/** Собирает уникальные теги установок выбранного продукта на ОС. */
+	public function versionTags(int $compId, array $rules): array
+	{
+		$tags = [];
+		foreach ($rules as $rule) {
+			if (!$rule->tag || $rule->tag->archived || isset($tags[$rule->tag_id])) continue;
+			foreach ($this->packagesByHost[$compId] ?? [] as $package) {
+				if ($rule->matches($package['version'])) {
+					$tags[$rule->tag_id] = $rule->tag;
+					break;
+				}
+			}
+		}
+		return $tags;
+	}
 
 	/** Различные версии пакетов выбранного продукта на одной ОС. */
 	public function versionLabel(int $compId): string
@@ -72,10 +90,10 @@ class CompsSearch extends Comps
     public function rules()
     {
         return [
-			['versionConditions','safe'],
+			['versionConditions','safe','on'=>self::SCENARIO_INSTALLATIONS],
 			[['ids','arm_state'],'each','rule'=>['integer']],
             [['id', 'domain_id','soft_ids','linkedSoft_ids','softHits_ids'], 'integer'],
-			[['versionFormat','installedVersion'], 'string', 'max'=>255],
+			[['versionFormat','installedVersion'], 'string', 'max'=>255,'on'=>self::SCENARIO_INSTALLATIONS],
             [[
 				'name',
 				'os',
@@ -253,7 +271,7 @@ class CompsSearch extends Comps
 			$query->andWhere($macRange ? ['or',$macLike,$macRange] : $macLike);
 		}
 
-		if ($this->linkedSoft_ids) $this->filterInstallations($query);
+		if ($this->scenario === self::SCENARIO_INSTALLATIONS && $this->linkedSoft_ids) $this->filterInstallations($query);
 		$totalQuery=clone $query;
 
 		return new ActiveDataProvider([
