@@ -41,6 +41,11 @@ ui-sources.md
 unification.md
 
 # --- сборочные каталоги и локальные артефакты ---
+# Продовая выгрузка ПО и конфиги локального экземпляра.
+soft.json
+config/*-local.php
+config/ldap.php
+
 # node_modules есть не только в корне: 42 МБ прячется в modules/schedules/compile/lib/js
 **/node_modules
 vendor

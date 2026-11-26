@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM php:8.2-apache
+FROM php:8.4.28-apache-trixie
 
 ENV TZ=Europe/Moscow
 
@@ -9,20 +9,22 @@ ENV TZ=Europe/Moscow
 # Установка всех зависимостей в одном слое + очистка кэша
 # git для composer
 # mysql для ожидания старта БД
+# apache2 ставим из Debian, чтобы подтянуть обновление безопасности даже при сборке со старого базового образа.
+# PDO, mbstring, xml и curl уже встроены в PHP официального образа.
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    apache2 \
     git \
     default-mysql-client \
     unzip \
     libicu-dev \
     libzip-dev \
     libpng-dev \
-    libonig-dev \
-    libmagickwand-dev \
-    libcurl4-openssl-dev \
+    libmagickwand-7.q16-dev \
     libgmp-dev \
-    libldap2-dev \
-    && docker-php-ext-install \
-        intl pdo pdo_mysql zip gd mbstring xml bcmath gmp ldap curl \
+    libldap-dev \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' apache2-bin)" ge '2.4.71-1~deb13u1' \
+    && docker-php-ext-install -j4 \
+        intl pdo_mysql zip gd bcmath gmp ldap \
     && pear config-set http_proxy "$HTTP_PROXY" \
     && pecl install imagick \
     && docker-php-ext-enable imagick \
@@ -35,8 +37,8 @@ COPY docker/apache/apache.conf /etc/apache2/apache2.conf
 COPY docker/apache/site.conf /etc/apache2/sites-enabled/site.conf
 COPY docker/etc/php-custom.ini /usr/local/etc/php/conf.d/99-custom.ini
 
-# Imagick политика
-COPY docker/etc/imagick-policy.xml /etc/ImageMagick-6/policy.xml
+# Политика Imagick для ImageMagick 7 из Debian trixie.
+COPY docker/etc/imagick-policy.xml /etc/ImageMagick-7/policy.xml
 
 # Добавляем приложение (см. .dockerignore)
 #RUN mkdir /var/www/.composer && chown -R www-data:www-data /var/www
@@ -61,8 +63,8 @@ RUN --mount=type=secret,id=composer_auth \
     su -s /bin/sh www-data -c "COMPOSER_HOME=$COMPOSER_HOME php composer.phar install --no-dev --optimize-autoloader -n" && \
     rm -rf "$COMPOSER_HOME"
 
-# Скрипт запуска
+# Скрипт запуска может быть выгружен с CRLF в рабочей копии Windows.
 COPY docker/script/run.sh /bin/arms-run.sh
-RUN chmod 555 /bin/arms-run.sh
+RUN sed -i 's/\r$//' /bin/arms-run.sh && chmod 555 /bin/arms-run.sh
 
 CMD ["arms-run.sh"]
