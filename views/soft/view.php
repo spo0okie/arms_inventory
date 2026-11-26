@@ -43,10 +43,16 @@ $tabs[]=[
 			count($model->compRescans)?
 				(\app\components\StripedAlertWidget::widget(['title'=>'Данные устарели, ожидается фоновое сканирование '.count($model->compRescans).' компьютеров']))
 			:'')
+		.$this->render('_version_filter', compact('searchModel','model'))
 		.DynaGridWidget::widget([
 		'header'=>'Установки',
 		'id' => 'soft-comps-list',
 		'columns' => array_merge(include Yii::getAlias('@app').'/views/comps/columns.php', [
+			'installedVersion'=>[
+				'label'=>'Версия пакета',
+				'filterInputOptions'=>['class'=>'form-control','placeholder'=>'Точная версия'],
+				'value'=>static fn($comp)=>$searchModel->versionLabel($comp->id),
+			],
 			'softAgreed'=>[
 				'header'=>'В паспорте',
 				//id-шники через loaderIds (один запрос на все строки): чтение `soft_ids`
@@ -62,7 +68,7 @@ $tabs[]=[
 				},
 			]
 		]),
-		'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version','softAgreed'],
+		'defaultOrder' => ['name','installedVersion','ip','mac','os','updated_at','arm_id','places_id','raw_version','softAgreed'],
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		//'panel'=>true

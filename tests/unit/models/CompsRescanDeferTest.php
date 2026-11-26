@@ -93,6 +93,7 @@ class CompsRescanDeferTest extends Unit
 		$comp->setAttributes([
 			'name' => 'rescantsthost',
 			'os' => 'Debian 13',
+			'ip' => '',
 			'domain_id' => $domain->id,
 			'raw_soft' => $rawSoft,
 		], false);
@@ -115,6 +116,36 @@ class CompsRescanDeferTest extends Unit
 		return CompsRescanQueue::find()
 			->where(['comps_id' => $comp->id, 'soft_id' => null])
 			->all();
+	}
+
+	/** Обновление пакета меняет версию на той же связи ОС и продукта. */
+	public function testPackageVersionOnRescan()
+	{
+		Yii::$app->params['soft.deferred_rescan'] = false;
+		$product = $this->makeSoft('^rescan-test-nginx$');
+		$publisher = 'Debian Nginx Maintainers <pkg-nginx-maintainers@alioth-lists.debian.net>';
+		$raw = static fn($v) => json_encode(['publisher'=>$publisher, 'name'=>'rescan-test-nginx', 'version'=>$v]);
+		$comp = $this->makeComp($raw('1.26.3-3+deb13u9'));
+		$search = new \app\models\CompsSearch();
+		$params = ['CompsSearch'=>['linkedSoft_ids'=>$product->id, 'versionFormat'=>'debian-stable',
+			'versionConditions'=>['debian-stable'=>['release'=>['op'=>'=', 'value'=>'13'],
+				'update'=>['op'=>'<', 'value'=>'11']]]]];
+		$this->assertEquals(1, $search->search($params)->totalCount);
+		$this->assertSame('1.26.3-3+deb13u9', $search->versionLabel($comp->id));
+		$params['CompsSearch']['versionConditions']['debian-stable']['release']['value'] = '12';
+		$this->assertEquals(0, $search->search($params)->totalCount);
+		$params['CompsSearch']['versionConditions']['debian-stable']['release']['value'] = '13';
+		// Обновление до порога сохраняет ту же связь, но меняет версию.
+		$comp->raw_soft = $raw('1.26.3-3+deb13u11');
+		$this->assertTrue($comp->save(false));
+		$this->assertEquals(0, $search->search($params)->totalCount);
+		$this->assertSame('1.26.3-3+deb13u11', $search->versionLabel($comp->id));
+		// Низкая версия есть только у Debian 12, а выпуск 13 — только у новой версии.
+		$comp->raw_soft = $raw('1.22.1-9+deb12u9').','.$raw('1.26.3-3+deb13u12');
+		$this->assertTrue($comp->save(false));
+		$this->assertEquals(0, $search->search($params)->totalCount);
+		$params['CompsSearch']['versionConditions']['debian-stable']['release']['value'] = '12';
+		$this->assertEquals(1, $search->search($params)->totalCount);
 	}
 
 	/** Поглощение меняет представление установки при наличии родителя на той же ОС. */

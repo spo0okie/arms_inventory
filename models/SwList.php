@@ -111,7 +111,25 @@ class SwList {
 
         //сначала выгребаем из общей кучи софт, с распознаваемым разработчиком
         foreach ($this->data as $i => $item) { //перебираем кучу
-            if (!is_null($dev = ManufacturersDict::fetchManufacturer($item['publisher']??''))) { //если производитель обнаружился
+            $publisher = $item['publisher'] ?? '';
+            $dev = ManufacturersDict::fetchManufacturer($publisher);
+            // Издатель пакета может отличаться от разработчика. Для структурированных
+            // записей разрешаем точное основное имя, если оно однозначно в справочнике.
+            if (is_string($item['version'] ?? null) && $item['version'] !== '') {
+                if (!isset($exactVendors)) {
+                    $exactVendors = [];
+                    foreach (Soft::fetchAll() as $product) {
+                        if (!$product->items) continue;
+                        foreach ($product->getItemsArray() as $rule) {
+                            $exactVendors[str_replace('\-', '-', $rule)][$product->manufacturers_id] = true;
+                        }
+                    }
+                }
+                $rule = '^'.str_replace('\-', '-', preg_quote($item['name'], '/')).'$';
+                $vendors = $exactVendors[$rule] ?? [];
+                if (count($vendors) === 1) $dev = array_key_first($vendors);
+            }
+            if (!is_null($dev)) { //если производитель обнаружился
                 $this->data[$i]['manufacturers_id'] = $dev; //добавляем его в исходные данные
 
                 //заполняем список обнаруженных производителей ПО для дальнейшего поиска программных продуктов
@@ -218,9 +236,15 @@ class SwList {
 			//чтобы исключить двойное обнаружение продуктоы
 
 	        //убираем карточку из сырых данных
-	        foreach ($this->data as $id=>$card)
-	        	if ($hit->rawCardCheck($card))
+			foreach ($this->data as $id=>$card)
+				if ($hit->rawCardCheck($card)) {
+					// Извлекаем версию только из карточки, доставшейся продукту после разрешения конфликтов.
+					$package = $hit->packageVersion($card);
+					if ($package !== null) {
+						$this->items[$hit->soft_id]['packages'][serialize($package)] = $package;
+					}
 	        	    unset ($this->data[$id]);
+				}
 
 
 	        //убираем из продуктов этого производителя

@@ -62,6 +62,7 @@ return [
 	'services.no_backup.warn'=>true,	//ругаться если у сервиса не объявлены требования на бэкап
 
 	'soft.deferred_rescan'=>false,
+	'soft.version_formats'=>require __DIR__.'/soft-version-formats.php',
 
 	//файл масок фильтра выгрузки нераспознанного софта (yii soft-raw/export):
 	//по regexp-маске на строку (семантика как у выражений продуктов, без учёта регистра),

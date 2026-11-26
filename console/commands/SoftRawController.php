@@ -28,8 +28,8 @@ use yii\console\ExitCode;
  */
 class SoftRawController extends Controller
 {
-	/** Выводит общие маски additional и продукты, в которых они используются. */
-	public function actionSharedComponents(): int
+	/** Выводит маски additional и их родителей. При минимуме 1 включает одиночные маски. */
+	public function actionSharedComponents(int $minParents = 2): int
 	{
 		$productsByMask = [];
 		foreach (Soft::find()->where(['<>', 'additional', ''])->with('manufacturer')->orderBy('id')->each() as $product) {
@@ -40,7 +40,7 @@ class SoftRawController extends Controller
 		}
 		ksort($productsByMask, SORT_STRING);
 		foreach ($productsByMask as $mask => $products) {
-			if (count($products) < 2) continue;
+			if (count($products) < $minParents) continue;
 			$this->stdout($mask . PHP_EOL);
 			foreach ($products as $id => $name) $this->stdout("  #$id $name" . PHP_EOL);
 		}

@@ -244,7 +244,7 @@ class SoftHits extends ArmsModel
 			(isset($card['manufacturers_id'])&&($this->manufacturers_id==$card['manufacturers_id']))
 			||
 			//или если производителя нет вообще
-			!strlen($card['publisher'])
+			!strlen($card['publisher'] ?? '')
 		) {
 			//по каждому из конкретных совпадений проверяем попадает ли карточка в него
 			return $this->isFound($card['name']);
@@ -252,12 +252,27 @@ class SoftHits extends ArmsModel
 		return false;
 	}
 
+	/** Возвращает переданную сборщиком версию для основной строки продукта. */
+	public function packageVersion(array $card): ?array
+	{
+		$version = $card['version'] ?? null;
+		if (!is_string($version) || trim($version) === '') return null;
+		$primary = Soft::fetchItemsArray($this->soft_id);
+		foreach ($this->hit_items as $hit) {
+			// В additional может быть указано сопутствующее ПО со своей версией.
+			if ($hit['string'] === $card['name'] && in_array($hit['mask'], $primary, true)) {
+				return ['package'=>$card['name'], 'version'=>trim($version)];
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * ищем найдена ли такая строка?
 	 * @param $test
 	 * @return bool
 	 */
-	public function isFound ($test) {
+    public function isFound ($test) {
 		foreach ($this->hit_items as $hit)
 			if (strcmp($hit['string'], $test) == 0) return true;
 		return false;

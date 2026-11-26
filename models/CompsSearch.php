@@ -6,6 +6,8 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use \app\helpers\QueryHelper;
+use app\helpers\SoftwareVersionFilter;
+use yii\db\Query;
 
 /**
  * CompsSearch represents the model behind the search form of `app\models\Comps`.
@@ -18,6 +20,51 @@ class CompsSearch extends Comps
 	public $ids;
 	public $vm_uuid;
 	public $arm_state;
+	public $versionFormat;
+	public $versionConditions = [];
+	public $installedVersion;
+	private array $packagesByHost = [];
+
+	/** Различные версии пакетов выбранного продукта на одной ОС. */
+	public function versionLabel(int $compId): string
+	{
+		$versions = array_unique(array_column($this->packagesByHost[$compId] ?? [], 'version'));
+		return $versions ? implode(', ', $versions) : 'Версия неизвестна';
+	}
+
+	/** Сначала проверяет все условия на одной версии, затем отбирает ОС до пагинации. */
+	private function filterInstallations($query): void
+	{
+		$formats = Yii::$app->params['soft.version_formats'];
+		$format = $formats[$this->versionFormat ?? ''] ?? null;
+		$conditions = $this->versionConditions[$this->versionFormat ?? ''] ?? [];
+		if ($this->versionFormat && (!$format || !is_array($conditions))) {
+			$this->addError('versionFormat', 'Неизвестный формат или неверные условия.');
+		} elseif ($format && ($error = SoftwareVersionFilter::error($format, $conditions))) {
+			$this->addError('versionFormat', $error);
+		}
+		if ($this->hasErrors()) {
+			$query->andWhere('0=1');
+			return;
+		}
+		$exact = trim((string)$this->installedVersion);
+		$matched = [];
+		$rows = (new Query())->from('soft_hits')->select(['comp_id','hits'])
+			->where(['soft_id'=>$this->linkedSoft_ids])->andWhere(['not',['hits'=>null]])->all();
+		foreach ($rows as $row) {
+			$data = json_decode($row['hits'], true);
+			$id = $row['comp_id'];
+			$this->packagesByHost[$id] = $data['packages'] ?? [];
+			foreach ($this->packagesByHost[$id] as $package) {
+				$version = $package['version'];
+				if ($exact !== '' && $exact !== $version) continue;
+				if ($format && !SoftwareVersionFilter::matches($version, $format, $conditions)) continue;
+				$matched[] = $id;
+				break;
+			}
+		}
+		if ($exact !== '' || $format) $query->andWhere(['comps.id'=>$matched]);
+	}
 
     /**
      * @inheritdoc
@@ -25,8 +72,10 @@ class CompsSearch extends Comps
     public function rules()
     {
         return [
+			['versionConditions','safe'],
 			[['ids','arm_state'],'each','rule'=>['integer']],
             [['id', 'domain_id','soft_ids','linkedSoft_ids','softHits_ids'], 'integer'],
+			[['versionFormat','installedVersion'], 'string', 'max'=>255],
             [[
 				'name',
 				'os',
@@ -136,6 +185,8 @@ class CompsSearch extends Comps
         $this->load($params);
 
         if (!$this->validate()) {
+			// Ошибочный фильтр на карточке ПО не должен раскрывать общий список ОС.
+			if ($this->linkedSoft_ids) $query->andWhere('0=1');
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             //var_dump($this->errors);
@@ -202,6 +253,7 @@ class CompsSearch extends Comps
 			$query->andWhere($macRange ? ['or',$macLike,$macRange] : $macLike);
 		}
 
+		if ($this->linkedSoft_ids) $this->filterInstallations($query);
 		$totalQuery=clone $query;
 
 		return new ActiveDataProvider([

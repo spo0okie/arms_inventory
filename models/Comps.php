@@ -155,6 +155,19 @@ class Comps extends ArmsModel
 		];
 	}
 
+	/** Сохраняет версии вместе со связью ОС и продукта в транзакции LinkerBehavior. */
+	public function getLinksSchema()
+	{
+		$schema = parent::getLinksSchema();
+		$schema['softHits_ids']['updater']['viaTableAttributesValue']['hits'] =
+			function ($updater, $softId, $row) {
+				if (!$this->rescanPerformed) return $row->isNewRecord ? null : $row->oldValue;
+				$packages = $this->swList->items[$softId]['packages'] ?? [];
+				return $packages ? json_encode(['packages'=>array_values($packages)], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) : null;
+			};
+		return $schema;
+	}
+
 	public $linksSchema=[
 		'arm_id' =>				Techs::class,
 		'domain_id' =>			Domains::class,
@@ -1122,6 +1135,8 @@ class Comps extends ArmsModel
 			if ($this->rescanNeeded
 				&& (!\Yii::$app->params['soft.deferred_rescan'] || $this->forceRescan)
 			) {
+				// На том же объекте мог остаться список от предыдущего отпечатка.
+				$this->swList_obj=null;
 				$this->softHits_ids=array_keys($this->swList->items);
 				$this->rescanPerformed=true;
 			}
