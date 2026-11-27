@@ -66,21 +66,18 @@ class UsersResignDeferTest extends Unit
 	}
 
 	/**
-	 * Все сочетания Uvolen/откладывания: [атрибуты, ожидаемый resigned]
+	 * Все сочетания Uvolen/откладывания: [атрибуты, ожидаемый resigned, относительный срок]
 	 */
 	public function casesProvider(): array
 	{
-		$yesterday = date('Y-m-d', strtotime('-1 day'));
-		$today = date('Y-m-d');
-		$tomorrow = date('Y-m-d', strtotime('+1 day'));
 		return [
 			'работает' => [['Uvolen' => 0], false],
 			'работает, откладывание выставлено заранее' => [['Uvolen' => 0, 'resign_defer' => 1], false],
 			'уволен' => [['Uvolen' => 1], true],
 			'уволен, отложено бессрочно' => [['Uvolen' => 1, 'resign_defer' => 1], false],
-			'уволен, отложено до завтра' => [['Uvolen' => 1, 'resign_defer' => 1, 'resign_defer_until' => $tomorrow], false],
-			'уволен, отложено до сегодня (включительно)' => [['Uvolen' => 1, 'resign_defer' => 1, 'resign_defer_until' => $today], false],
-			'уволен, срок откладывания истёк' => [['Uvolen' => 1, 'resign_defer' => 1, 'resign_defer_until' => $yesterday], true],
+			'уволен, отложено до завтра' => [['Uvolen' => 1, 'resign_defer' => 1], false, 'tomorrow'],
+			'уволен, отложено до сегодня (включительно)' => [['Uvolen' => 1, 'resign_defer' => 1], false, 'today'],
+			'уволен, срок откладывания истёк' => [['Uvolen' => 1, 'resign_defer' => 1], true, 'yesterday'],
 		];
 	}
 
@@ -88,8 +85,10 @@ class UsersResignDeferTest extends Unit
 	 * PHP-расчёт и SQL-выражение дают одно и то же, архивность следует за resigned
 	 * @dataProvider casesProvider
 	 */
-	public function testResignedPhpMatchesSql(array $attrs, bool $expected)
+	public function testResignedPhpMatchesSql(array $attrs, bool $expected, ?string $until = null)
 	{
+		// Провайдер вызывается раньше настройки часового пояса приложения.
+		if ($until !== null) $attrs['resign_defer_until'] = (new \DateTimeImmutable($until))->format('Y-m-d');
 		$user = $this->makeUser($attrs);
 		$user->refresh();
 
@@ -97,6 +96,26 @@ class UsersResignDeferTest extends Unit
 		$this->assertSame($expected, $this->sqlResigned($user), 'SQL resigned');
 		$this->assertSame($expected, (bool)$user->isArchived, 'архивность = resigned');
 		$this->assertSame($expected, $user->toArray()['resigned'], 'resigned отдаётся в REST');
+	}
+
+	/** PHP и SQL используют дату приложения, даже когда в соединении с БД другой день. */
+	public function testResignedUsesApplicationDateWhenDatabaseDateDiffers(): void
+	{
+		$databaseDate = Yii::$app->db->createCommand('SELECT CURDATE()')->queryScalar();
+		$previousZone = date_default_timezone_get();
+		try {
+			// В поясах UTC+14 и UTC−12 не может быть одна и та же календарная дата.
+			date_default_timezone_set('Pacific/Kiritimati');
+			if (date('Y-m-d') === $databaseDate) date_default_timezone_set('Etc/GMT+12');
+			$today = date('Y-m-d');
+			$this->assertNotSame($databaseDate, $today);
+			$until = min($today, $databaseDate);
+			$user = $this->makeUser(['Uvolen'=>1, 'resign_defer'=>1, 'resign_defer_until'=>$until]);
+			$this->assertSame($until < $today, $user->resigned);
+			$this->assertSame($user->resigned, $this->sqlResigned($user));
+		} finally {
+			date_default_timezone_set($previousZone);
+		}
 	}
 
 	/**

@@ -53,9 +53,11 @@ trait UsersModelResignTrait
 	 */
 	public static function resignedExpression(string $alias='users'): string
 	{
+		// Как и getResignDeferred(), используем календарь приложения, а не часовой пояс соединения с БД.
+		$today = date('Y-m-d');
 		return "(COALESCE($alias.Uvolen,0)=1 AND NOT ("
 			."COALESCE($alias.resign_defer,0)=1 AND "
-			."($alias.resign_defer_until IS NULL OR $alias.resign_defer_until>=CURDATE())"
+			."($alias.resign_defer_until IS NULL OR $alias.resign_defer_until>='$today')"
 			."))";
 	}
 
