@@ -4005,6 +4005,23 @@ INSERT INTO `soft_lists` VALUES (1,'soft_agreed','Согласованное П�
 UNLOCK TABLES;
 
 --
+-- Table structure for table `soft_version_tag_rules`
+-- Схема из M261126120000CreateSoftVersionTagRules; правила создают сами тесты.
+--
+
+DROP TABLE IF EXISTS `soft_version_tag_rules`;
+CREATE TABLE `soft_version_tag_rules` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `soft_id` int NOT NULL,
+  `tag_id` int NOT NULL,
+  `format` varchar(255) NOT NULL,
+  `conditions` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx-version-rule-soft` (`soft_id`),
+  KEY `idx-version-rule-tag` (`tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
 -- Table structure for table `tags`
 --
 

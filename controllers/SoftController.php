@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\llm\LlmClient;
+use app\generation\ModelFactory;
 use app\helpers\ArrayHelper;
 use app\models\CompsSearch;
 use app\models\LicGroupsSearch;
@@ -117,6 +118,38 @@ class SoftController extends ArmsBaseController
 	{
 		$this->findVersionRule($id, $ruleId)->delete();
 		return $this->redirect(['view','id'=>$id]);
+	}
+
+	/** Сценарии открытия формы и сохранения нового правила. */
+	public function testVersionRule(): array
+	{
+		$softId = $this->getTestData()['full']->id;
+		$rule = ModelFactory::create(SoftVersionTagRule::class, ['overrides'=>['soft_id'=>$softId]]);
+		return [
+			['name'=>'create-form', 'GET'=>['id'=>$softId], 'response'=>200],
+			['name'=>'edit-form', 'GET'=>['id'=>$softId, 'ruleId'=>$rule->id], 'response'=>200],
+			[
+				'name'=>'create', 'GET'=>['id'=>$softId], 'response'=>302,
+				'POST'=>[
+					'tag_id'=>$rule->tag_id,
+					'format'=>$rule->format,
+					// Форма группирует условия по формату версии.
+					'conditions'=>[$rule->format=>$rule->getConditionsArray()],
+				],
+			],
+		];
+	}
+
+	/** Проверяет, что правило можно удалить только POST-запросом. */
+	public function testDeleteVersionRule(): array
+	{
+		$softId = $this->getTestData()['empty']->id;
+		$rule = ModelFactory::create(SoftVersionTagRule::class, ['overrides'=>['soft_id'=>$softId]]);
+		$params = ['id'=>$softId, 'ruleId'=>$rule->id];
+		return [
+			['name'=>'get-not-allowed', 'GET'=>$params, 'response'=>405],
+			['name'=>'delete', 'GET'=>$params, 'POST'=>[], 'response'=>302],
+		];
 	}
 	
 	

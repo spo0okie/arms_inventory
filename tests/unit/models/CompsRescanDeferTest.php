@@ -7,6 +7,7 @@ use app\models\CompsRescanQueue;
 use app\models\Domains;
 use app\models\Manufacturers;
 use app\models\Soft;
+use app\models\SwList;
 use Codeception\Test\Unit;
 use Yii;
 
@@ -160,6 +161,60 @@ class CompsRescanDeferTest extends Unit
 		$this->assertSame([], $search->versionTags($comp->id, $rules));
 		$params['CompsSearch']['versionConditions']['debian-stable']['release']['value'] = '12';
 		$this->assertEquals(1, $search->search($params)->totalCount);
+	}
+
+	/** Старый отпечаток меняется только для подтверждённых пар с однозначной карточкой. */
+	public function testLegacyDebPackageUsesExactPairAndKeepsVersions()
+	{
+		$key = 'soft.legacy_deb_packages';
+		$saved = Yii::$app->params[$key] ?? [];
+		$package = 'rescan-test-legacy';
+		$publisher = 'Test package maintainer';
+		$versions = ['1:1.0-2+deb12u1', '2.0~rc1-3'];
+		$legacy = array_combine(
+			array_map(static fn($version) => $package.'-'.$version, $versions),
+			array_map(static fn($version) => [$package, $version], $versions),
+		);
+		Yii::$app->params[$key] = [$publisher => $legacy];
+		try {
+			$target = $this->makeSoft('^'.$package.'$');
+			[$first, $second] = array_keys($legacy);
+			$rows = [
+				['publisher'=>$publisher, 'name'=>$first],
+				['publisher'=>$publisher, 'name'=>$second],
+				['publisher'=>'Other publisher', 'name'=>$first],
+				['publisher'=>$publisher, 'name'=>$first.'.1'],
+				['publisher'=>$publisher, 'name'=>$first, 'version'=>null],
+				['publisher'=>'Other publisher', 'name'=>$package, 'version'=>'3.0-1'],
+			];
+			$fingerprint = implode(',', array_map(static fn($row) => json_encode($row, JSON_THROW_ON_ERROR), $rows));
+			$list = new SwList();
+			$this->assertTrue($list->loadRaw($fingerprint));
+			$this->assertSame([$target->id], array_keys($list->items));
+			$this->assertSame([...$versions, '3.0-1'], array_column($list->items[$target->id]['packages'], 'version'));
+			$this->assertSame(array_slice($rows, 2, 3), array_values($list->data));
+
+			// Другая карточка того же разработчика не должна перехватить старую строку.
+			$conflict = new Soft([
+				'manufacturers_id'=>$target->manufacturers_id, 'descr'=>'rescan-test-conflict',
+				'items'=>'rescan-test-legacy', 'additional'=>'',
+			]);
+			$this->assertTrue($conflict->save(false));
+			$list = new SwList();
+			$this->assertTrue($list->loadRaw(json_encode($rows[0], JSON_THROW_ON_ERROR)));
+			$this->assertSame([], $list->items);
+			$this->assertSame([$rows[0]], $list->data);
+
+			// Две точные карточки остаются неоднозначными даже у одного разработчика.
+			$conflict->items = '^'.$package.'$';
+			$this->assertTrue($conflict->save(false));
+			$list = new SwList();
+			$this->assertTrue($list->loadRaw(json_encode($rows[0], JSON_THROW_ON_ERROR)));
+			$this->assertSame([], $list->items);
+			$this->assertSame([$rows[0]], $list->data);
+		} finally {
+			Yii::$app->params[$key] = $saved;
+		}
 	}
 
 	/** Поглощение меняет представление установки при наличии родителя на той же ОС. */
