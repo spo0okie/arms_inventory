@@ -14,7 +14,10 @@ use app\models\base\ArmsModel;
 use app\models\Soft;
 use yii\console\Controller;
 use app\helpers\RestHelper;
+use yii\db\Connection;
+use yii\db\Query;
 use yii\helpers\Inflector;
+use yii\mutex\MysqlMutex;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -466,7 +469,7 @@ class SyncController extends Controller
 	}
 	
 	/**
-	 * Подтянуть ПО
+	 * Импортирует карточки ПО и добавляет связи компонентов из источника.
 	 * @param $url
 	 * @param $user
 	 * @param $pass
@@ -478,10 +481,98 @@ class SyncController extends Controller
 		$this->initRemote($url,$user,$pass);
 		$this->loadRemote('manufacturers-dict');
 		$this->loadRemote('manufacturers');
-		$this->loadRemote('soft',['expand'=>'name']);
-		//static::syncSimple('app\models\ManufacturersDict');
-		//print_r($this->loaded);
-		static::syncSimple('Soft');
+		$this->loadRemote('soft',['expand'=>'name,parents_ids']);
+
+		$remoteCards=$this->getLoadedClass('Soft');
+		$db=Soft::getDb();
+		$mutex=new MysqlMutex(['db'=>$db]);
+		// Сериализуем параллельные sync/soft от сопоставления карточек до записи связей.
+		if (!$mutex->acquire(__METHOD__,30)) {
+			throw new ConsoleException('Не удалось получить блокировку импорта справочника ПО.');
+		}
+		try {
+			// Берём локальные ID из результатов штатного импорта, включая только что созданные карточки.
+			$localIds=[];
+			foreach ($remoteCards as $remoteId=>$card) {
+				$localIds[$remoteId]=(int)$this->syncSingle('Soft',$card)->id;
+			}
+			if (array_column($remoteCards,'parents_ids')===[]) {
+				$this->stdout("Источник не передал parents_ids. Импортированы только карточки ПО.\n");
+				return;
+			}
+			$added=$db->transaction(fn(Connection $db): int => $this->addSoftComponentLinks($db,$remoteCards,$localIds));
+		} finally {
+			$mutex->release(__METHOD__);
+		}
+		$this->stdout("Добавлено связей компонентов ПО: $added.\n");
+	}
+
+	/** Добавляет допустимые связи внутри транзакции и возвращает число новых пар. */
+	private function addSoftComponentLinks(Connection $db, array $remoteCards, array $localIds): int
+	{
+		$matches=array_count_values($localIds);
+		$parents=[];
+		foreach ((new Query())->select(['component_id','parent_id'])->from('soft_components')->each(1000,$db) as $edge) {
+			$parents[$edge['component_id']][$edge['parent_id']]=true;
+		}
+
+		$added=0;
+		foreach ($remoteCards as $remoteId=>$card) {
+			$remoteParents=$card['parents_ids']??null;
+			if (!is_array($remoteParents) || !array_is_list($remoteParents)) {
+				$this->stderr("Пропущены связи карточки $remoteId: ожидается список parents_ids.\n");
+				continue;
+			}
+			$componentId=$localIds[$remoteId];
+			foreach ($remoteParents as $remoteParent) {
+				$remoteParentId=(is_int($remoteParent) || is_string($remoteParent))
+					? filter_var($remoteParent,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]])
+					: false;
+				if ($remoteParentId===false) {
+					$this->stderr("Пропущена связь карточки $remoteId: некорректный ID родителя.\n");
+					continue;
+				}
+				if (!isset($localIds[$remoteParentId])) {
+					$this->stderr("Пропущена связь $remoteId → $remoteParentId: родитель отсутствует в выгрузке.\n");
+					continue;
+				}
+				$parentId=$localIds[$remoteParentId];
+				if ($matches[$componentId]>1 || $matches[$parentId]>1) {
+					$this->stderr("Пропущена связь $remoteId → $remoteParentId: неоднозначное сопоставление карточек.\n");
+					continue;
+				}
+				if (isset($parents[$componentId][$parentId])) continue;
+				if (self::wouldCreateSoftComponentCycle($parents,$componentId,$parentId)) {
+					$this->stderr("Пропущена связь $remoteId → $remoteParentId: циклическая привязка.\n");
+					continue;
+				}
+
+				// Уникальный индекс пары защищает от дублей при параллельном добавлении.
+				$added+=$db->createCommand()->upsert('soft_components',[
+					'component_id'=>$componentId,
+					'parent_id'=>$parentId,
+				],false)->execute();
+				$parents[$componentId][$parentId]=true;
+			}
+		}
+		return $added;
+	}
+
+	/** Проверяет, достижим ли компонент по цепочке родителей, включая самоссылку. */
+	private static function wouldCreateSoftComponentCycle(array $parents, int $componentId, int $parentId): bool
+	{
+		$pending=[$parentId];
+		$visited=[];
+		while ($pending) {
+			$id=array_pop($pending);
+			if ($id===$componentId) return true;
+			if (isset($visited[$id])) continue;
+			$visited[$id]=true;
+			foreach (array_keys($parents[$id]??[]) as $nextId) {
+				$pending[]=$nextId;
+			}
+		}
+		return false;
 	}
 	
 	/**

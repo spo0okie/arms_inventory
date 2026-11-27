@@ -80,9 +80,10 @@ class Soft extends ArmsModel
         return 'soft';
     }
 	
+	/** Поля, которые REST API отдаёт по запросу expand. */
     public function extraFields()
 	{
-		return['name'];
+		return['name','parents_ids'];
 	}
 	
 	public $linksSchema=[
