@@ -48,7 +48,7 @@ if (!isset($item['manufacturers_id'])) $item['manufacturers_id']=null;
 
 /* вывод наименования ПО */
 
-echo $item['name'];
+echo Html::encode($item['name'].\app\models\SwList::versionSuffix($item));
 
 
 /*

@@ -65,16 +65,7 @@ trait CompsModelCalcFieldsTrait
 	 */
 	public function getRawSearchLines()
 	{
-		$lines=[];
-
-		$soft=json_decode('['.($this->raw_soft??'').']',true);
-		if (is_array($soft)) foreach ($soft as $item) {
-			if (!is_array($item)) continue;
-			$name=trim((string)($item['name']??''));
-			$publisher=trim((string)($item['publisher']??''));
-			if (!strlen($name) && !strlen($publisher)) continue;
-			$lines[]=$name.(strlen($publisher)?' ('.$publisher.')':'');
-		}
+		$lines=$this->getRawSoftLines();
 
 		//NULL-символы в raw_hw бывают (см. HwList::loadRaw)
 		$hw=json_decode('['.str_replace("\0",'',$this->raw_hw??'').']',true);
@@ -89,6 +80,21 @@ trait CompsModelCalcFieldsTrait
 			}
 		}
 
+		return $lines;
+	}
+
+	/** Строки ПО для колонки отпечатка и поиска в списке ОС. */
+	public function getRawSoftLines(): array
+	{
+		$lines = [];
+		$soft = json_decode('['.($this->raw_soft ?? '').']', true);
+		foreach (is_array($soft) ? $soft : [] as $item) {
+			if (!is_array($item)) continue;
+			$name = trim((string)($item['name'] ?? ''));
+			$publisher = trim((string)($item['publisher'] ?? ''));
+			if ($name === '' && $publisher === '') continue;
+			$lines[] = $name.SwList::versionSuffix($item).($publisher !== '' ? ' ('.$publisher.')' : '');
+		}
 		return $lines;
 	}
 

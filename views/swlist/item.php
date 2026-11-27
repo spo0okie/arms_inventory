@@ -1,6 +1,8 @@
 <?php
 
 use app\components\widgets\page\ModelWidget;
+use app\models\SwList;
+use yii\helpers\Html;
 /**
  * Created by PhpStorm.
  * User: Spookie
@@ -46,13 +48,13 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
         <?= ModelWidget::widget(['model'=>$dev,'options'=>['noDelete'=>true]]) ?>
     </td>
     <td class="product">
-		<?= ModelWidget::widget(['model'=>$product,'options'=>['hitlist'=>$hitlist,'noDelete'=>true]]) ?>
+		<?= ModelWidget::widget(['model'=>$product,'options'=>['hitlist'=>$hitlist,'noDelete'=>true]]).Html::encode(SwList::versionSuffix($item)) ?>
 		<?php if (!empty($item['components'])) { ?>
 			<details>
 				<summary>Компоненты (<?= count($item['components']) ?>)</summary>
 				<ul>
 				<?php foreach ($item['components'] as $component) { ?>
-					<li><?= ModelWidget::widget(['model'=>\app\models\Soft::fetchItem($component['id']), 'options'=>['noDelete'=>true]]) ?></li>
+					<li><?= ModelWidget::widget(['model'=>\app\models\Soft::fetchItem($component['id']), 'options'=>['noDelete'=>true]]).Html::encode(SwList::versionSuffix($component)) ?></li>
 				<?php } ?>
 				</ul>
 			</details>

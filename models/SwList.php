@@ -10,10 +10,14 @@
 
 namespace app\models;
 
+use Yii;
+
 /*
  * Список оборудования
  */
 class SwList {
+
+    private static ?array $catalogIndex = null;
 
     public $items=[];       //элементы списка оборудования
     public $rawData=null;   //сырые текстовые данные
@@ -117,15 +121,9 @@ class SwList {
             // записей разрешаем точное основное имя, если оно однозначно в справочнике.
             if (is_string($item['version'] ?? null) && $item['version'] !== '') {
                 if (!isset($exactVendors)) {
-                    $exactVendors = [];
-                    foreach (Soft::fetchAll() as $product) {
-                        if (!$product->items) continue;
-                        foreach ($product->getItemsArray() as $rule) {
-                            $exactVendors[str_replace('\-', '-', $rule)][$product->manufacturers_id] = true;
-                        }
-                    }
+                    $exactVendors = self::catalogIndex()['vendors'];
                 }
-                $rule = '^'.str_replace('\-', '-', preg_quote($item['name'], '/')).'$';
+                $rule = self::exactNameRule($item['name']);
                 $vendors = $exactVendors[$rule] ?? [];
                 if (count($vendors) === 1) $dev = array_key_first($vendors);
             }
@@ -162,9 +160,6 @@ class SwList {
         //подгружаем все известные продукты обнаруженных разработчиков
         $dev_products=Soft::findAll(['manufacturers_id'=>$this->manufacturers_ids]);
 
-        //а также все продукты для разгребания тех отпечатков, у которых ОС не вернула разработчика
-        $all_products=Soft::fetchAll();
-
         //перебираем все продукты с разработчиками
         if (is_array($dev_products)) foreach ($dev_products as $item) {
         	//формируем карточку "попадания"
@@ -180,8 +175,8 @@ class SwList {
 		        unset($hit);
         }
 
-        //среди всех продуктов ищем приложения без разработчика
-        if (is_array($all_products)) foreach ($all_products as $item) {
+        // Без основных строк второго прохода ни одна карточка не даст совпадения.
+        if ($this->products_by_dev['no_dev'] && is_array($all_products=Soft::fetchAll())) foreach ($all_products as $item) {
 	        $hit=new \app\models\SoftHits([
 		        'soft_id'=>$item->id,
 		        'strings'=>$this->products_by_dev['no_dev'], //ищем среди всех продуктов нераспознанных разработчиков
@@ -277,9 +272,90 @@ class SwList {
         if (!is_array($json)) return false;
         $this->data=$json;
 
+        $legacyRows = $this->normalizeLegacyDebPackages();
         $this->findDevs();
         $this->findHits();
         $this->findItems();
+        // Нераспознанные строки возвращаем в исходном виде для выгрузки остатков.
+        foreach (array_intersect_key($legacyRows, $this->data) as $index => $item) {
+            $this->data[$index] = $item;
+        }
+        return true;
+    }
+
+    /** Возвращает основную маску, которая соответствует полному имени. */
+    private static function exactNameRule(string $name): string
+    {
+        return '^'.str_replace('\-', '-', preg_quote($name, '/')).'$';
+    }
+
+    /** Индексирует маски и карточки по разработчику на время действия кэша Soft. */
+    private static function catalogIndex(): array
+    {
+        if (!Soft::$disable_cache && self::$catalogIndex !== null) return self::$catalogIndex;
+
+        $index = ['vendors'=>[], 'cards'=>[], 'by_vendor'=>[]];
+        foreach (Soft::fetchAll() as $product) {
+            $vendor = $product->manufacturers_id;
+            $index['by_vendor'][$vendor][] = $product;
+            if (!$product->items) continue;
+            foreach ($product->getItemsArray() as $mask) {
+                $mask = str_replace('\-', '-', $mask);
+                $index['vendors'][$mask][$vendor] = true;
+                $index['cards'][$mask][$product->id] = $product;
+            }
+        }
+        // В режиме обновления справочника штатный кэш Soft отключён.
+        if (!Soft::$disable_cache) self::$catalogIndex = $index;
+        return $index;
+    }
+
+    /** Отделяет версию у подтверждённых старых записей Debian и Ubuntu. */
+    private function normalizeLegacyDebPackages(): array
+    {
+        $rules = Yii::$app->params['soft.legacy_deb_packages'] ?? [];
+        if (!$rules) return [];
+
+        $originals = [];
+        $canNormalize = [];
+        foreach ($this->data as $index => $item) {
+            $publisher = $item['publisher'] ?? '';
+            $rawName = $item['name'] ?? '';
+            if ($publisher === '' || array_key_exists('version', $item)) continue;
+
+            $rule = $rules[$publisher][$rawName] ?? null;
+            if (!is_array($rule)) continue;
+            $name = $rule[0] ?? null;
+            $version = $rule[1] ?? null;
+            if (!is_string($name) || $name === '' || !is_string($version) || $version === ''
+                || $rawName !== $name.'-'.$version) continue;
+
+            // Настройка действует, пока карточка с точной маской существует и однозначна.
+            $catalog ??= self::catalogIndex();
+            $canNormalize[$name] ??= self::hasUniqueLegacyDebMatch($name, $catalog);
+            if (!$canNormalize[$name]) continue;
+
+            $originals[$index] = $item;
+            $this->data[$index]['name'] = $name;
+            $this->data[$index]['version'] = $version;
+        }
+        return $originals;
+    }
+
+    /** Проверяет единственную точную карточку и пересечения масок у её разработчика. */
+    private static function hasUniqueLegacyDebMatch(string $name, array $catalog): bool
+    {
+        $candidates = $catalog['cards'][self::exactNameRule($name)] ?? [];
+        if (count($candidates) !== 1) return false;
+        $target = reset($candidates);
+
+        // Другой продукт того же разработчика мог бы забрать строку по более широкой маске.
+        foreach ($catalog['by_vendor'][$target->manufacturers_id] as $product) {
+            if ($product->id === $target->id) continue;
+            foreach (array_merge($product->getItemsArray(), $product->getAdditionalArray()) as $mask) {
+                if (SoftHits::compare($mask, $name)) return false;
+            }
+        }
         return true;
     }
 
@@ -287,6 +363,18 @@ class SwList {
     {
         foreach ($items as $item) $this->loadItem($item);
     }
+
+	/** Суффикс названия при выводе строки отпечатка или распознанной установки. */
+	public static function versionSuffix(array $item): string
+	{
+		// У продукта может быть несколько установленных пакетов одной версии.
+		$versions = [];
+		foreach ($item['packages'] ?? [$item] as $package) {
+			$version = $package['version'] ?? null;
+			if (is_string($version) && trim($version) !== '') $versions[] = trim($version);
+		}
+		return $versions ? ' '.implode(', ', array_unique($versions)) : '';
+	}
 
     public function sortByName(){
         $manufacturers=Manufacturers::fetchNames();

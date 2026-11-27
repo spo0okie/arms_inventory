@@ -123,6 +123,13 @@ return [
 			return null;
 		},
 	],
+	'raw_soft' => [
+		'value'=>static function (Comps $comp) {
+			return ExpandableCardWidget::widget([
+				'content'=>implode('<br />', array_map([Html::class,'encode'], $comp->rawSoftLines)),
+			]);
+		},
+	],
 	'os' => [
 		'label' => 'ОС / софт',
 		'value' => function ($data) use ($osMatcher) {
